@@ -1,0 +1,2425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订阅代扣演示平台 - PayerMax</title>
+    <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        :root {
+            --primary: #2563EB;
+            --primary-light: #60A5FA;
+            --primary-dark: #1D4ED8;
+            --secondary: #4F46E5;
+            --cta: #F97316;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --surface-glass: rgba(255, 255, 255, 0.75);
+            --text: #0F172A;
+            --text-muted: #475569;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --glass-blur: blur(12px);
+            --glass-border: rgba(255, 255, 255, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.03) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.02) 0px, transparent 50%);
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Layout Grid */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 2rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Left Panel - Configuration */
+        .config-panel {
+            background: var(--surface-glass);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .config-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .config-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .config-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        /* Mode Cards */
+        .mode-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mode-card {
+            background: var(--surface-glass);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mode-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px) scale(1.01);
+            background: white;
+            box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.12);
+        }
+
+        .mode-card.active {
+            border-color: var(--primary);
+            background: #F0F7FF;
+            box-shadow: 0 0 0 1px var(--primary), 0 10px 20px -5px rgba(37, 99, 235, 0.1);
+        }
+
+        .mode-card-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .mode-card-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Radio Group */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-group.horizontal {
+            flex-direction: row;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 0.35rem 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .radio-option:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 0.5rem;
+            accent-color: var(--primary);
+        }
+
+        .radio-option label {
+            font-size: 0.8rem;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+
+        /* Right Panel - Playground */
+        .playground-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* Flow Visualization */
+        .flow-section {
+            background: var(--surface-glass);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: #F1F5F9;
+            border-radius: 12px;
+            flex-wrap: wrap;
+            border: 1px solid var(--border);
+        }
+
+        .flow-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 0.75rem 0.75rem 0.75rem;
+            border: 2px dashed var(--primary-light);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .flow-group-label {
+            position: absolute;
+            top: -0.625rem;
+            left: 1rem;
+            background: var(--surface);
+            padding: 0 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .flow-step {
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+            min-width: 110px;
+        }
+
+        .flow-arrow {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        /* Code Display */
+        .code-section {
+            background: var(--surface-glass);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .code-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: #F1F5F9;
+        }
+
+        .code-tab {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.2;
+            min-width: 160px;
+        }
+
+        .code-tab:hover {
+            color: var(--text);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .code-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: white;
+        }
+
+        .code-tab-sub {
+            font-size: 0.7rem;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-top: 2px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: #F8FAFC;
+            position: relative;
+        }
+
+        .copy-btn {
+            margin-right: 1.5rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .code-content {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            background: #0F172A;
+            color: #E2E8F0;
+            overflow-x: auto;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .code-content pre {
+            margin: 0;
+        }
+
+        .json-key {
+            color: #7DD3FC;
+        }
+
+        .json-string {
+            color: #86EFAC;
+        }
+
+        .json-number {
+            color: #FCD34D;
+        }
+
+        .json-boolean {
+            color: #f59e0b;
+        }
+
+        .json-comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Simulation Preview */
+        .simulation-section {
+            background: var(--surface-glass);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .simulation-content {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 2.5rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .params-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .param-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .param-section-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem 0.25rem;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.03) 0%, transparent 70%);
+            position: relative;
+            border-radius: 16px;
+            border: 1px dashed var(--border);
+        }
+
+        .device-frame {
+            width: 480px;
+            height: 560px;
+            background: #F1F5F9;
+            border-radius: 40px;
+            padding: 6px;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow:
+                0 0 0 1px #E2E8F0,
+                0 25px 50px -12px rgba(0, 0, 0, 0.08),
+                inset 0 0 20px rgba(255, 255, 255, 1);
+        }
+
+        .device-frame.wide-frame {
+            padding: 6px;
+            border-radius: 20px;
+            box-shadow:
+                0 0 0 1px #E2E8F0,
+                0 25px 50px -12px rgba(0, 0, 0, 0.08),
+                inset 0 0 20px rgba(255, 255, 255, 1);
+        }
+
+        .device-screen {
+            width: 100%;
+            height: 100%;
+            background: #FFFFFF;
+            border-radius: 32px;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 1.25rem;
+        }
+
+        .device-screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .subscribe-btn {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 14px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            align-self: center;
+            min-width: 240px;
+            box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscribe-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 35px -10px rgba(124, 58, 237, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .subscribe-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .subscribe-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.6s ease-in-out;
+            pointer-events: none;
+        }
+
+        .subscribe-btn:hover::after {
+            left: 100%;
+        }
+
+        .subscribe-btn:active {
+            transform: translateY(0) scale(0.96);
+        }
+
+        .init-btn {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .init-btn:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .init-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Subscription Steps */
+        .subscription-steps {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            display: none;
+            width: 100%;
+            border: 1px solid var(--border);
+        }
+
+        .subscription-steps.active {
+            display: block;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-item.processing {
+            border-color: var(--primary-light);
+            background: #F0F9FF;
+        }
+
+        .step-item.success {
+            border-color: var(--success);
+            background: #F0FDF4;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .step-item.processing .step-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .step-item.success .step-number {
+            background: var(--success);
+            color: white;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-description {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .step-result {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-family: 'Consolas', monospace;
+            color: var(--success);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        /* Parameter Form Styles */
+        .param-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .param-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .param-input {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: 'Open Sans', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .label-hint {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 1px;
+            opacity: 0.9;
+        }
+
+
+        .param-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .config-panel {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* Specifically handle simulation-content to stay parallel longer */
+        @media (max-width: 1100px) {
+            .simulation-content {
+                grid-template-columns: 500px 1fr;
+                /* Slightly smaller fixed width */
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .simulation-content {
+                display: flex;
+                /* Fallback to flex for better control if needed */
+                flex-direction: row;
+                flex-wrap: nowrap;
+                /* Prevent wrapping unless extremely small */
+                gap: 1.5rem;
+            }
+
+            .params-container {
+                flex: 1;
+                min-width: 250px;
+            }
+
+            .preview-container {
+                flex-shrink: 0;
+            }
+        }
+
+        /* Component Config Form (Modern) */
+        .component-config-form {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem;
+            background: #F8FAFC;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .component-config-form.active {
+            display: flex;
+        }
+
+        .component-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .component-input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .component-input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .component-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .init-btn {
+            background: var(--surface);
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0.5rem auto;
+            width: 100%;
+            max-width: 320px;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .init-btn:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Component Mount Points */
+        .mount-container {
+            width: 100%;
+            margin-top: 1rem;
+            display: none;
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            background: white;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+        }
+
+        .mount-container.active {
+            display: block;
+        }
+
+        .card-frame,
+        .frame-googlepay,
+        #applepay-mount {
+            min-height: 40px;
+            width: 100%;
+        }
+
+        .token-display-modern {
+            display: none;
+            margin-top: 1rem;
+            padding: 1.25rem;
+            background: #F0FDF4;
+            border-radius: 12px;
+            border: 1px solid #BBF7D0;
+        }
+
+        .token-display-modern.active {
+            display: block;
+        }
+
+        .token-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--success);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .token-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            color: var(--text);
+        }
+
+        /* Custom scrollbar for code display */
+        .code-content::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .code-content::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+
+        .code-content::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .code-content::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Main Container -->
+    <div class="container">
+        <h1 class="page-title">订阅代扣演示平台</h1>
+        <p class="page-subtitle">选择业务模式,查看流程并获取集成代码</p>
+
+        <div class="demo-grid">
+            <!-- Left Panel: Configuration -->
+            <aside class="config-panel">
+                <!-- Business Mode -->
+                <div class="config-section">
+                    <label class="config-label">业务模式</label>
+                    <div class="mode-cards">
+                        <div class="mode-card active" data-mode="payermax">
+                            <div class="mode-card-title">PayerMax托管（周期性订阅）</div>
+                            <div class="mode-card-desc">PayerMax管理订阅计划</div>
+                        </div>
+                        <div class="mode-card" data-mode="merchant">
+                            <div class="mode-card-title">商户自管（周期性订阅）</div>
+                            <div class="mode-card-desc">商户管理订阅计划</div>
+                        </div>
+                        <div class="mode-card" data-mode="nonperiodic">
+                            <div class="mode-card-title">非周期性订阅代扣</div>
+                            <div class="mode-card-desc">商户管理按业务需求发起扣款</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Method -->
+                <div class="config-section">
+                    <label class="config-label">集成方式</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="integration" id="cashier" value="cashier" checked>
+                            <label for="cashier">收银台绑定/激活</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="integration" id="api" value="api">
+                            <label for="api">API绑定/激活</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="integration" id="component" value="component">
+                            <label for="component">前置组件绑定/激活</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="config-section">
+                    <label class="config-label">支付方式</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="payment" id="card" value="card" checked>
+                            <label for="card">CARD</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="payment" id="applepay" value="applepay">
+                            <label for="applepay">APPLEPAY</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="payment" id="googlepay" value="googlepay">
+                            <label for="googlepay">GOOGLEPAY</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="payment" id="apm" value="apm">
+                            <label for="apm">APM</label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Panel: Playground -->
+            <main class="playground-panel">
+                <!-- Flow Visualization -->
+                <section class="flow-section">
+                    <h2 class="section-title">
+                        <span>📊</span>
+                        <span>业务流程</span>
+                    </h2>
+                    <div class="flow-diagram">
+                        <div class="flow-step">收集用户订阅计划</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-group">
+                            <span class="flow-group-label">发起订阅计划与绑定</span>
+                            <div class="flow-step">创建订阅计划</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">激活订阅计划</div>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">后续扣款(PM发起)</div>
+                    </div>
+                </section>
+
+                <!-- Simulation Preview -->
+                <section class="simulation-section">
+                    <h2 class="section-title">
+                        <span>📱</span>
+                        <span>交互预览</span>
+                    </h2>
+                    <div class="simulation-content">
+                        <!-- Left: Parameter Configuration -->
+                        <div class="params-container" id="params-container">
+                            <!-- Subscription Type -->
+                            <div class="param-section" id="subscription-type-section">
+                                <label class="param-section-label">订阅类型</label>
+                                <div class="radio-group horizontal">
+                                    <div class="radio-option">
+                                        <input type="radio" name="subtype" id="standard" value="standard" checked>
+                                        <label for="standard">
+                                            普通订阅
+                                            <span class="label-hint">(绑定金额>0)</span>
+                                        </label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" name="subtype" id="trial" value="trial">
+                                        <label for="trial">
+                                            N天试用
+                                            <span class="label-hint">(绑定金额=0)</span>
+                                        </label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" name="subtype" id="discount" value="discount">
+                                        <label for="discount">
+                                            前N期优惠
+                                            <span class="label-hint">(绑定金额>0)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Parameter Inputs -->
+                            <div class="param-section" id="params-section">
+                                <label class="param-section-label">参数配置</label>
+                                <div class="param-form">
+                                    <div class="form-group">
+                                        <label class="param-label">总期数</label>
+                                        <input type="number" id="totalPeriods" class="param-input" value="12" min="1">
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="param-label">扣款频率</label>
+                                            <input type="number" id="periodCount" class="param-input" value="1" min="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="param-label">扣款周期</label>
+                                            <select id="periodUnit" class="param-input">
+                                                <option value="DAY">日</option>
+                                                <option value="WEEK">周</option>
+                                                <option value="MONTH" selected>月</option>
+                                                <option value="YEAR">年</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="param-label">每期金额</label>
+                                            <input type="number" id="amount" class="param-input" value="9.99"
+                                                step="0.01" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="param-label">币种</label>
+                                            <input type="text" id="currency" class="param-input" value="USD">
+                                        </div>
+                                    </div>
+
+                                    <!-- Trial Days (Visible only for 'trial' mode) -->
+                                    <div class="form-group" id="trial-days-section" style="display: none;">
+                                        <label class="param-label">试用天数</label>
+                                        <input type="number" id="trialDays" class="param-input" value="3" min="1">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="param-label" for="firstPeriodStartDate">首期扣款时间</label>
+                                        <input type="datetime-local" id="firstPeriodStartDate" class="param-input"
+                                            title="首期扣款时间">
+                                    </div>
+
+                                    <!-- Trial/Discount Specific Parameters -->
+                                    <div id="discount-params" style="display: none;">
+                                        <div class="form-group">
+                                            <label class="param-label">优惠期数</label>
+                                            <input type="number" id="trialPeriodCount" class="param-input" value="3"
+                                                min="1">
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="param-label">优惠金额</label>
+                                                <input type="number" id="trialPeriodAmount" class="param-input"
+                                                    value="4.99" step="0.01" min="0">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="param-label">优惠币种</label>
+                                                <select id="trialCurrency" class="param-input">
+                                                    <option value="USD" selected>USD</option>
+                                                    <option value="EUR">EUR</option>
+                                                    <option value="GBP">GBP</option>
+                                                    <option value="CNY">CNY</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Device Preview -->
+                        <div class="preview-container">
+                            <div class="device-frame">
+                                <div class="device-screen" id="device-screen">
+                                    <button class="subscribe-btn" id="subscribe-btn">立即订阅</button>
+
+                                    <!-- Component Config Form -->
+                                    <div class="component-config-form" id="component-config-form">
+                                        <div class="component-input-group">
+                                            <label>Client Key</label>
+                                            <input type="text" id="clientKeyInput" class="component-input"
+                                                value="67eff2f3b29a4ecf9576321185dbf658">
+                                        </div>
+                                        <div class="component-input-group">
+                                            <label>Session Key</label>
+                                            <input type="text" id="sessionKeyInput" class="component-input"
+                                                value="02d764a032804ee5b47013795e25f07d">
+                                        </div>
+                                        <div class="component-input-group">
+                                            <label>环境 (Environment)</label>
+                                            <select id="environmentInput" class="component-input">
+                                                <option value="true" selected>Sandbox (测试环境)</option>
+                                                <option value="false">Production (生产环境)</option>
+                                            </select>
+                                        </div>
+                                        <button class="init-btn" id="initButton">初始化并渲染组件</button>
+
+
+                                        <!-- Mount Points -->
+                                        <div class="mount-container" id="mount-container">
+                                            <div class="card-frame" id="card-mount"></div>
+                                            <div id="applepay-mount"></div>
+                                            <div class="frame-googlepay" id="googlepay-mount"></div>
+                                        </div>
+
+                                        <!-- Confirm and Pay Button (Positioned between component and token) -->
+                                        <button class="init-btn" id="card-pay-btn"
+                                            style="display: none;">确认支付并获取Token</button>
+
+                                        <!-- Token Display -->
+                                        <div class="token-display-modern" id="token-display-modern">
+                                            <div class="token-label">Payment Token</div>
+                                            <div class="token-value" id="token-value-modern"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Subscription Steps -->
+                                    <div class="subscription-steps" id="subscription-steps">
+                                        <div class="step-item" id="step-1">
+                                            <div class="step-number">1</div>
+                                            <div class="step-content">
+                                                <div class="step-title">创建订阅计划 (subscriptionCreate)</div>
+                                                <div class="step-description">正在创建订阅计划...</div>
+                                            </div>
+                                        </div>
+                                        <div class="step-item" id="step-2">
+                                            <div class="step-number">2</div>
+                                            <div class="step-content">
+                                                <div class="step-title">激活订阅计划 (orderAndPay)</div>
+                                                <div class="step-description">等待创建完成...</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Code Display -->
+                <section class="code-section">
+                    <div style="padding: 1.5rem 1.5rem 0 1.5rem;">
+                        <h2 class="section-title">
+                            <span>💻</span>
+                            <span>代码示例</span>
+                        </h2>
+                    </div>
+                    <div class="code-header">
+                        <div class="code-tabs" id="code-tabs">
+                            <div class="code-tab active" data-tab="create">
+                                <span>后端创建订阅计划</span>
+                                <span class="code-tab-sub">subscriptionCreate</span>
+                            </div>
+                            <div class="code-tab" data-tab="activate">
+                                <span>后端激活订阅计划</span>
+                                <span class="code-tab-sub">orderAndPay</span>
+                            </div>
+                            <div class="code-tab" data-tab="webhook"><span>Webhook</span></div>
+                        </div>
+                        <button class="copy-btn" id="copy-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span>复制</span>
+                        </button>
+                    </div>
+                    <div class="code-content">
+                        <pre>{
+  <span class="json-key">"version"</span>: <span class="json-string">"1.5"</span>,
+  <span class="json-key">"keyVersion"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"requestTime"</span>: <span class="json-string">"2026-02-04T15:00:00+00:00"</span>, <span class="json-comment">//请求时间</span>
+  <span class="json-key">"appId"</span>: <span class="json-string">"67eff2f3bXXXXXXXXX85dbf658"</span>, <span class="json-comment">//请求appid</span>
+  <span class="json-key">"merchantNo"</span>: <span class="json-string">"SDP0XXXXX93"</span>, <span class="json-comment">//请求商户号</span>
+  <span class="json-key">"data"</span>: {
+    <span class="json-key">"subscriptionRequestId"</span>: <span class="json-string">"sub_req_1738593157000"</span>, <span class="json-comment">//必填、商户创建订阅计划的单号</span>
+    <span class="json-key">"userId"</span>: <span class="json-string">"test10001"</span>,
+    <span class="json-key">"subject"</span>: <span class="json-string">"主题描述要一致"</span>,
+    <span class="json-key">"language"</span>: <span class="json-string">"en"</span>,
+    <span class="json-key">"callbackUrl"</span>: <span class="json-string">"http://www.baidu.com"</span>, <span class="json-comment">// 必填、订阅结果和扣款结果的通知地址</span>
+    <span class="json-key">"subscriptionPlan"</span>: { <span class="json-comment">// 必填、 订阅计划信息</span>
+      <span class="json-key">"subject"</span>: <span class="json-string">"subject"</span>, <span class="json-comment">// 必填、标题</span>
+      <span class="json-key">"description"</span>: <span class="json-string">"PMMAX周期首期扣款"</span>, <span class="json-comment">// 非必填、描述</span>
+      <span class="json-key">"totalPeriods"</span>: <span class="json-number">12</span>, <span class="json-comment">//必填、总期数</span>
+      <span class="json-key">"periodRule"</span>: { <span class="json-comment">// 必填、扣款规则</span>
+        <span class="json-key">"periodUnit"</span>: <span class="json-string">"M"</span>, <span class="json-comment">// 必填、按月（M），D(日)，W（周），Y（年）扣款</span>
+        <span class="json-key">"periodCount"</span>: <span class="json-number">1</span> <span class="json-comment">// 必填、扣款周期</span>
+      },
+      <span class="json-key">"periodAmount"</span>: { <span class="json-comment">//必填、每期扣款金额</span>
+        <span class="json-key">"amount"</span>: <span class="json-number">9.99</span>, <span class="json-comment">//必填</span>
+        <span class="json-key">"currency"</span>: <span class="json-string">"USD"</span> <span class="json-comment">//必填</span>
+      },
+      <span class="json-key">"firstPeriodStartDate"</span>: <span class="json-string">"2026-02-04T15:00:00+00:00"</span>, <span class="json-comment">//必填、第一期扣款开始时间</span>
+      <span class="json-key">"advanceDays"</span>: <span class="json-number">1</span> <span class="json-comment">// 非必填、指定后续每期的提前扣款天数</span>
+    }
+  }
+}</pre>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize default datetime (24 hours from now)
+        const now = new Date();
+        now.setHours(now.getHours() + 24);
+        document.getElementById('firstPeriodStartDate').value = now.toISOString().slice(0, 16);
+
+        // Mode card selection
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', function () {
+                document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+
+                const mode = this.dataset.mode;
+                updateFlow(mode);
+                toggleParameterSections(mode);
+                updateCodeTabs(mode); // Update tabs based on mode
+
+                // Set initial tab content
+                const initialTab = (mode === 'payermax') ? 'create' : 'bind';
+                updateCodeContent(initialTab);
+
+                resetSimulator(); // Reset simulator when switching modes
+            });
+        });
+
+        // Subscription type selection
+        document.querySelectorAll('input[name="subtype"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const discountParams = document.getElementById('discount-params');
+                const trialDaysSection = document.getElementById('trial-days-section');
+                const activeMode = document.querySelector('.mode-card.active').dataset.mode;
+
+                if (this.value === 'discount') {
+                    discountParams.style.display = 'block';
+                    trialDaysSection.style.display = 'none';
+                    document.getElementById('amount').value = '10'; // Global default for other types
+                } else if (this.value === 'trial') {
+                    discountParams.style.display = 'none';
+                    // Suppress trial days for non-periodic mode
+                    if (activeMode === 'nonperiodic') {
+                        trialDaysSection.style.display = 'none';
+                    } else {
+                        trialDaysSection.style.display = 'block';
+                        updateTrialDate(); // Update date immediately when selecting trial
+                    }
+                    document.getElementById('amount').value = '0'; // Global default for trial
+                } else {
+                    discountParams.style.display = 'none';
+                    trialDaysSection.style.display = 'none';
+                    document.getElementById('amount').value = '10'; // Global default for other types
+                }
+                updateCodeContent('create');
+                resetSubscriptionSteps(); // Reset steps when switching subscription types
+            });
+        });
+
+        // trialDays input change
+        const trialDaysInput = document.getElementById('trialDays');
+        if (trialDaysInput) {
+            trialDaysInput.addEventListener('input', function () {
+                updateTrialDate();
+                updateCodeContent('create');
+            });
+        }
+
+        function updateTrialDate() {
+            const trialDays = parseInt(document.getElementById('trialDays').value) || 0;
+            const subtype = document.querySelector('input[name="subtype"]:checked').value;
+
+            if (subtype === 'trial') {
+                const baseDate = new Date();
+                baseDate.setHours(baseDate.getHours() + 24); // Original default: now + 24h
+                baseDate.setDate(baseDate.getDate() + trialDays);
+                document.getElementById('firstPeriodStartDate').value = baseDate.toISOString().slice(0, 16);
+            }
+        }
+
+        // Parameter inputs change
+        document.querySelectorAll('.param-input').forEach(input => {
+            input.addEventListener('input', () => updateCodeContent('create'));
+        });
+
+        // Subscribe button click
+        document.getElementById('subscribe-btn').addEventListener('click', function () {
+            const activeMode = document.querySelector('.mode-card.active').dataset.mode;
+
+            // Show subscription flow for PayerMax, Merchant and Non-periodic mode
+            if (activeMode === 'payermax' || activeMode === 'merchant' || activeMode === 'nonperiodic') {
+                simulateSubscriptionFlow();
+            } else {
+                console.log('Subscribe clicked in mode:', activeMode);
+            }
+        });
+
+        function simulateSubscriptionFlow() {
+            const stepsContainer = document.getElementById('subscription-steps');
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            const activeMode = document.querySelector('.mode-card.active').dataset.mode;
+
+            // Update step titles based on mode
+            if (activeMode === 'nonperiodic' || activeMode === 'merchant') {
+                if (activeMode === 'merchant') {
+                    step1.querySelector('.step-title').textContent = '首期支付/绑定支付方式（orderAndPay）';
+                    step2.querySelector('.step-title').textContent = '根据订阅计划请求后续扣款（orderAndPay）';
+                } else {
+                    step1.querySelector('.step-title').textContent = '支付/绑定支付方式（orderAndPay）';
+                    step2.querySelector('.step-title').textContent = '后续请求扣款（orderAndPay）';
+                }
+                step1.querySelector('.step-description').textContent = '正在发起支付与绑定...';
+                step2.querySelector('.step-description').textContent = '等待完成...';
+            } else {
+                step1.querySelector('.step-title').textContent = '创建订阅计划 (subscriptionCreate)';
+                step2.querySelector('.step-title').textContent = '激活订阅计划 (orderAndPay)';
+                step1.querySelector('.step-description').textContent = '正在创建订阅计划...';
+                step2.querySelector('.step-description').textContent = '等待创建完成...';
+            }
+
+            // Reset steps
+            step1.className = 'step-item';
+            step2.className = 'step-item';
+
+            // Remove previous results
+            const oldResults = stepsContainer.querySelectorAll('.step-result');
+            oldResults.forEach(r => r.remove());
+
+            // Show steps container
+            stepsContainer.classList.add('active');
+
+            // Step 1
+            step1.classList.add('processing');
+
+            setTimeout(() => {
+                step1.classList.remove('processing');
+                step1.classList.add('success');
+
+                const result1 = document.createElement('div');
+                result1.className = 'step-result';
+
+                if (activeMode === 'nonperiodic' || activeMode === 'merchant') {
+                    const token = 'PMTOKEN177XXXXXXXXXXXXX1000551';
+                    step1.querySelector('.step-description').textContent = '支付方式绑定成功';
+                    result1.textContent = `异步回调中获取 paymentTokenID：${token}`;
+                    step2.querySelector('.step-description').textContent = `正在使用 paymentTokenID ${token} 发起扣款...`;
+                } else {
+                    const subscriptionNo = 'SUB2026xxxxxxxxxxxxx212112';
+                    step1.querySelector('.step-description').textContent = '订阅计划创建成功';
+                    result1.textContent = `返回订阅计划号: ${subscriptionNo}`;
+                    step2.querySelector('.step-description').textContent = `正在激活订阅计划 ${subscriptionNo}...`;
+                }
+
+                step1.querySelector('.step-description').parentElement.appendChild(result1);
+
+                // Step 2
+                step2.classList.add('processing');
+
+                setTimeout(() => {
+                    step2.classList.remove('processing');
+                    step2.classList.add('success');
+
+                    const result2 = document.createElement('div');
+                    result2.className = 'step-result';
+
+                    if (activeMode === 'merchant' || activeMode === 'nonperiodic') {
+                        step2.querySelector('.step-description').textContent = '后续使用paymentToknenID请求扣款';
+                        result2.textContent = '后续扣款成功';
+
+                        // Specialized success info for these modes
+                        document.getElementById('sim-success-title').textContent = '支付/绑定成功';
+                        document.getElementById('sim-success-desc').textContent = '后续使用paymentToknenID请求扣款';
+                    } else {
+                        step2.querySelector('.step-description').textContent = '订阅计划激活成功';
+                        result2.textContent = '订阅已激活，可以开始扣款';
+                    }
+
+                    step2.querySelector('.step-description').parentElement.appendChild(result2);
+                }, 1500);
+            }, 1500);
+        }
+
+        function resetSubscriptionSteps() {
+            const stepsContainer = document.getElementById('subscription-steps');
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+
+            // Hide steps container
+            stepsContainer.classList.remove('active');
+
+            // Reset step states
+            step1.className = 'step-item';
+            step2.className = 'step-item';
+            step1.querySelector('.step-description').textContent = '正在创建订阅计划...';
+            step2.querySelector('.step-description').textContent = '等待创建完成...';
+
+            // Remove any result elements
+            const oldResults = stepsContainer.querySelectorAll('.step-result');
+            oldResults.forEach(r => r.remove());
+        }
+
+        function resetSimulator() {
+            resetSubscriptionSteps();
+
+            // Unmount component if exists
+            if (pmComponent) {
+                pmComponent.unmount();
+                pmComponent = null;
+            }
+
+            // Reset mount container
+            const mountContainer = document.getElementById('mount-container');
+            mountContainer.classList.remove('active');
+
+            // Reset mount points
+            const mountPoints = ['card-mount', 'applepay-mount', 'googlepay-mount'];
+            mountPoints.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = 'none';
+                    el.innerHTML = '';
+                }
+            });
+
+            // Hide card pay button
+            const cardPayBtn = document.getElementById('card-pay-btn');
+            if (cardPayBtn) cardPayBtn.style.display = 'none';
+
+            // Reset token display
+            const tokenDisplay = document.getElementById('token-display-modern');
+            const tokenValue = document.getElementById('token-value-modern');
+            if (tokenDisplay) tokenDisplay.classList.remove('active');
+            if (tokenValue) tokenValue.textContent = '';
+        }
+
+        // Tab switching
+        document.querySelectorAll('.code-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const tabType = this.dataset.tab;
+                updateCodeContent(tabType);
+            });
+        });
+
+        function toggleParameterSections(mode) {
+            const paramsContainer = document.getElementById('params-container');
+            const subscribeBtn = document.getElementById('subscribe-btn');
+            const componentConfig = document.getElementById('component-config-form');
+            const deviceFrame = document.querySelector('.device-frame');
+            const integrationRel = document.querySelector('input[name="integration"]:checked');
+            const integration = integrationRel ? integrationRel.value : 'cashier';
+
+            // Non-periodic specific UI updates
+            const subtypeLabel = document.querySelector('#subscription-type-section .param-section-label');
+            const standardOption = document.querySelector('label[for="standard"]');
+            const trialOption = document.querySelector('label[for="trial"]');
+            const discountOption = document.querySelector('input[id="discount"]').parentElement;
+
+            if (mode === 'nonperiodic') {
+                if (subtypeLabel) subtypeLabel.textContent = '首次绑定/支付';
+                if (standardOption) standardOption.innerHTML = '金额大于0';
+                if (trialOption) trialOption.innerHTML = '金额为0';
+                if (discountOption) discountOption.style.display = 'none';
+
+                // Handle default selection if discount was active
+                const activeSubtype = document.querySelector('input[name="subtype"]:checked');
+                if (activeSubtype && activeSubtype.value === 'discount') {
+                    document.getElementById('standard').checked = true;
+                    document.getElementById('amount').value = '10';
+                    // Trigger change to update hidden fields
+                    document.getElementById('standard').dispatchEvent(new Event('change'));
+                } else if (activeSubtype && activeSubtype.value === 'trial') {
+                    document.getElementById('amount').value = '0';
+                } else if (activeSubtype && activeSubtype.value === 'standard') {
+                    document.getElementById('amount').value = '10';
+                }
+            } else {
+                if (subtypeLabel) subtypeLabel.textContent = '订阅类型';
+                if (standardOption) standardOption.innerHTML = '普通订阅 <span class="label-hint">(绑定金额>0)</span>';
+                if (trialOption) trialOption.innerHTML = 'N天试用 <span class="label-hint">(绑定金额=0)</span>';
+                if (discountOption) discountOption.style.display = 'flex';
+
+                // Apply global defaults for periodic modes as well
+                const activeSubtype = document.querySelector('input[name="subtype"]:checked');
+                if (activeSubtype && activeSubtype.value === 'trial') {
+                    document.getElementById('amount').value = '0';
+                } else {
+                    document.getElementById('amount').value = '10';
+                }
+            }
+
+            // trialDaysSection visibility based on mode and subtype
+            const trialDaysSection = document.getElementById('trial-days-section');
+            const activeSubtype = document.querySelector('input[name="subtype"]:checked')?.value;
+            if (activeSubtype === 'trial' && mode !== 'nonperiodic') {
+                if (trialDaysSection) trialDaysSection.style.display = 'block';
+            } else {
+                if (trialDaysSection) trialDaysSection.style.display = 'none';
+            }
+
+            // Periodic parameter visibility updates
+            const totalPeriodsGroup = document.getElementById('totalPeriods')?.closest('.form-group');
+            const periodCountRow = document.getElementById('periodCount')?.closest('.form-row');
+
+            // Non-periodic specific label updates
+            const amountLabel = document.getElementById('amount')?.closest('.form-group')?.querySelector('.param-label');
+            const dateLabel = document.getElementById('firstPeriodStartDate')?.closest('.form-group')?.querySelector('.param-label');
+
+            if (mode === 'nonperiodic') {
+                if (totalPeriodsGroup) totalPeriodsGroup.style.display = 'none';
+                if (periodCountRow) periodCountRow.style.display = 'none';
+                if (amountLabel) amountLabel.textContent = '扣款金额';
+                if (dateLabel) dateLabel.textContent = '扣款时间';
+                if (subscribeBtn) subscribeBtn.textContent = '绑定支付';
+            } else {
+                if (totalPeriodsGroup) totalPeriodsGroup.style.display = 'block';
+                if (periodCountRow) periodCountRow.style.display = 'grid'; // Uses grid for form-row
+                if (amountLabel) amountLabel.textContent = '每期金额';
+                if (dateLabel) dateLabel.textContent = '首期扣款时间';
+                if (subscribeBtn) subscribeBtn.textContent = '立即订阅';
+            }
+
+            // Update Business Flow diagram labels
+            const flowSteps = document.querySelectorAll('.flow-step');
+            const flowGroupLabel = document.querySelector('.flow-group-label');
+
+            if (mode === 'nonperiodic') {
+                if (flowSteps[0]) flowSteps[0].textContent = '收集用户业务订单';
+                if (flowGroupLabel) flowGroupLabel.textContent = '发起业务扣款与绑定';
+                if (flowSteps[1]) flowSteps[1].textContent = '创建业务订单';
+                if (flowSteps[2]) flowSteps[2].textContent = '发起支付与绑定';
+                if (flowSteps[3]) flowSteps[3].textContent = '后续扣款(商户发起)';
+            } else if (mode === 'merchant') {
+                if (flowSteps[0]) flowSteps[0].textContent = '收集用户订阅计划（商户自管）';
+                if (flowGroupLabel) flowGroupLabel.textContent = '发起订阅计划与绑定';
+                if (flowSteps[1]) flowSteps[1].textContent = '首次绑定支付方式';
+                if (flowSteps[2]) flowSteps[2].textContent = '后续发起扣款（商户发起）';
+                if (flowSteps[3]) flowSteps[3].textContent = '后续扣款(商户发起)';
+            } else {
+                if (flowSteps[0]) flowSteps[0].textContent = '收集用户订阅计划';
+                if (flowGroupLabel) flowGroupLabel.textContent = '发起订阅计划与绑定';
+                if (flowSteps[1]) flowSteps[1].textContent = '创建订阅计划';
+                if (flowSteps[2]) flowSteps[2].textContent = '激活订阅计划';
+                if (flowSteps[3]) flowSteps[3].textContent = '后续扣款(PM发起)';
+            }
+
+            if (mode === 'payermax' || mode === 'merchant' || mode === 'nonperiodic') {
+                paramsContainer.style.display = 'flex';
+
+                if (integration === 'component') {
+                    subscribeBtn.style.display = 'none';
+                    componentConfig.classList.add('active');
+                    deviceFrame.classList.add('wide-frame');
+                } else {
+                    subscribeBtn.style.display = 'block';
+                    componentConfig.classList.remove('active');
+                    deviceFrame.classList.remove('wide-frame');
+                }
+            } else {
+                paramsContainer.style.display = 'none';
+                subscribeBtn.style.display = 'block';
+                componentConfig.classList.remove('active');
+                deviceFrame.classList.remove('wide-frame');
+            }
+        }
+
+        // Component Initialization
+        let pmComponent = null;
+        document.getElementById('initButton').addEventListener('click', function () {
+            const methodRel = document.querySelector('input[name="payment"]:checked');
+            const method = methodRel ? methodRel.value : 'card';
+            const ck = document.getElementById('clientKeyInput').value;
+            const sk = document.getElementById('sessionKeyInput').value;
+            const env = document.getElementById('environmentInput').value === 'true';
+
+            initPayerMaxComponent(method, ck, sk, env);
+        });
+
+        function initPayerMaxComponent(method, ck, sk, env) {
+            if (pmComponent) {
+                pmComponent.unmount();
+            }
+
+            const mountContainer = document.getElementById('mount-container');
+            const cardPayBtn = document.getElementById('card-pay-btn');
+            mountContainer.classList.add('active');
+            cardPayBtn.style.display = 'none';
+
+
+            // Reset and hide mount points
+            const cardMount = document.getElementById('card-mount');
+            const appleMount = document.getElementById('applepay-mount');
+            const googleMount = document.getElementById('googlepay-mount');
+
+            cardMount.style.display = 'none';
+            appleMount.style.display = 'none';
+            googleMount.style.display = 'none';
+            cardMount.innerHTML = '';
+            appleMount.innerHTML = '';
+            googleMount.innerHTML = '';
+
+            let mountId = '';
+            let componentType = '';
+            let config = {
+                clientKey: ck,
+                sessionKey: sk,
+                sandbox: env
+            };
+
+            if (method === 'card') {
+                mountId = '#card-mount';
+                componentType = 'card';
+                cardMount.style.display = 'block';
+            } else if (method === 'applepay') {
+                mountId = '#applepay-mount';
+                componentType = 'applepay';
+                appleMount.style.display = 'block';
+                if (!PMdropin.isSupportApplePay()) {
+                    alert('当前设备或浏览器不支持 Apple Pay');
+                    return;
+                }
+            } else if (method === 'googlepay') {
+                mountId = '#googlepay-mount';
+                componentType = 'googlepay';
+                googleMount.style.display = 'block';
+                config.payButtonConfig = { width: "100%", height: "40px" };
+            }
+
+            try {
+                pmComponent = PMdropin.create(componentType, config);
+                pmComponent.mount(mountId);
+
+                pmComponent.on('ready', () => console.log(`${componentType} component ready`));
+                pmComponent.on('load', (res) => {
+                    if (res && res.code === 'SUCCESS') {
+                        console.log('Component loaded successfully');
+                        if (componentType === 'card') {
+                            document.getElementById('card-pay-btn').style.display = 'block';
+                        }
+                    } else if (res) {
+                        alert('组件加载失败: ' + res.msg);
+                    }
+                });
+
+
+                const handlePayment = (res) => {
+                    pmComponent.emit('setDisabled', true);
+                    const paymentVal = document.querySelector('input[name="payment"]:checked').value;
+                    const activeMode = document.querySelector('.mode-card.active')?.dataset?.mode || 'payermax';
+                    const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+
+                    let canMakePaymentOptions = undefined;
+
+                    if (activeMode === 'nonperiodic' && (paymentVal === 'applepay' || paymentVal === 'googlepay')) {
+                        // 非周期性订阅代扣 + 前置组件 + ApplePay/GooglePay：只需传 mitManagementUrl
+                        canMakePaymentOptions = {
+                            mitManagementUrl: "http://www.xxx.com"
+                        };
+                    } else if ((activeMode === 'payermax' || activeMode === 'merchant') && (paymentVal === 'applepay' || paymentVal === 'googlepay')) {
+                        const totalPeriodsEle = document.getElementById('totalPeriods');
+                        const totalPeriodsStr = totalPeriodsEle ? totalPeriodsEle.value : '12';
+                        const totalPeriods = parseInt(totalPeriodsStr, 10) || 12;
+
+                        const periodCountEle = document.getElementById('periodCount');
+                        const periodCountStr = periodCountEle ? periodCountEle.value : '1';
+                        const periodCount = parseInt(periodCountStr, 10) || 1;
+
+                        const periodUnitEle = document.getElementById('periodUnit');
+                        const periodUnitRaw = periodUnitEle ? periodUnitEle.value : 'MONTH';
+                        const unitMap = { 'DAY': 'D', 'WEEK': 'W', 'MONTH': 'M', 'YEAR': 'Y' };
+                        const periodUnit = unitMap[periodUnitRaw] || 'M';
+
+                        const amountEle = document.getElementById('amount');
+                        const amount = amountEle ? amountEle.value : '10.00';
+
+                        const currencyEle = document.getElementById('currency');
+                        const currency = currencyEle ? currencyEle.value : 'USD';
+
+                        const firstDateEle = document.getElementById('firstPeriodStartDate');
+                        const firstPeriodStartDate = firstDateEle ? firstDateEle.value : '';
+                        const formattedDate = firstPeriodStartDate ? firstPeriodStartDate + ":00+00:00" : "";
+
+                        canMakePaymentOptions = {
+                            subscriptionPlan: {
+                                "subject": "subject",
+                                "description": "PMMAX周期首期扣款。",
+                                "totalPeriods": totalPeriods,
+                                "periodRule": {
+                                    "periodUnit": periodUnit,
+                                    "periodCount": periodCount
+                                },
+                                "periodAmount": {
+                                    "amount": amount,
+                                    "currency": currency
+                                },
+                                "firstPeriodStartDate": formattedDate,
+                            },
+                            mitManagementUrl: "http://www.xxx.com"
+                        };
+
+                        if (subtype === 'discount') {
+                            const trialCountEle = document.getElementById('trialPeriodCount');
+                            const trialPeriodCountStr = trialCountEle ? trialCountEle.value : '1';
+                            const trialPeriodCount = parseInt(trialPeriodCountStr, 10) || 1;
+
+                            const trialAmtEle = document.getElementById('trialAmount');
+                            const trialAmountStr = trialAmtEle ? trialAmtEle.value : '0';
+                            const trialAmount = parseInt(trialAmountStr, 10) || 0;
+
+                            const trialCurEle = document.getElementById('trialCurrency');
+                            const trialCurrency = trialCurEle ? trialCurEle.value : 'USD';
+
+                            canMakePaymentOptions.subscriptionPlan.trialPeriodConfig = {
+                                "trialPeriodCount": trialPeriodCount,
+                                "trialPeriodAmount": {
+                                    "amount": trialAmount,
+                                    "currency": trialCurrency
+                                }
+                            };
+                        }
+                    }
+
+                    pmComponent.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                        pmComponent.emit('setDisabled', false);
+                        if (resp.code === 'APPLY_SUCCESS') {
+                            const token = resp.data.paymentToken;
+                            const tokenDisplay = document.getElementById('token-display-modern');
+                            const tokenValue = document.getElementById('token-value-modern');
+                            tokenValue.textContent = token;
+                            tokenDisplay.classList.add('active');
+                        } else {
+                            alert('支付申请失败: ' + resp.msg);
+                        }
+                    });
+                };
+
+                if (componentType !== 'card') {
+                    pmComponent.on('payButtonClick', handlePayment);
+                } else {
+                    const cardPayBtn = document.getElementById('card-pay-btn');
+                    // Remove old listener if any and add new one
+                    const newPayBtn = cardPayBtn.cloneNode(true);
+                    cardPayBtn.parentNode.replaceChild(newPayBtn, cardPayBtn);
+                    newPayBtn.addEventListener('click', handlePayment);
+                }
+
+            } catch (e) {
+
+                console.error('Initialization error:', e);
+                alert('初始化失败: ' + e.message);
+            }
+        }
+
+        // Copy Feature
+        document.getElementById('copy-btn').addEventListener('click', function () {
+            if (!lastGeneratedJson) return;
+
+            navigator.clipboard.writeText(lastGeneratedJson).then(() => {
+                const btn = this;
+                const originalContent = btn.innerHTML;
+                btn.classList.add('copied');
+                btn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>已复制</span>
+                `;
+
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = originalContent;
+                }, 2000);
+            });
+        });
+
+        // Integration method selection
+        document.querySelectorAll('input[name="integration"]').forEach(radio => {
+            radio.addEventListener('click', function (e) {
+                const payment = document.querySelector('input[name="payment"]:checked').value;
+                if (this.value === 'component' && payment === 'apm') {
+                    e.preventDefault();
+                    alert('前置组件不支持APM支付方式');
+                    return false;
+                }
+            });
+
+            radio.addEventListener('change', function () {
+                const activeMode = document.querySelector('.mode-card.active').dataset.mode;
+                updateFlow(activeMode);
+                toggleParameterSections(activeMode);
+                updateCodeTabs(activeMode);
+
+                const tab = document.querySelector('.code-tab.active')?.dataset.tab || 'create';
+                updateCodeContent(tab);
+                resetSimulator();
+            });
+        });
+
+        // Payment method selection
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('click', function (e) {
+                const integration = document.querySelector('input[name="integration"]:checked').value;
+                if (this.value === 'apm' && integration === 'component') {
+                    e.preventDefault();
+                    alert('前置组件不支持APM支付方式');
+                    return false;
+                }
+            });
+
+            radio.addEventListener('change', function () {
+                const activeMode = document.querySelector('.mode-card.active').dataset.mode;
+                updateCodeTabs(activeMode);
+                const tab = document.querySelector('.code-tab.active')?.dataset.tab || 'create';
+                updateCodeContent(tab);
+                resetSimulator();
+            });
+        });
+
+        function updateFlow(mode) {
+            const flowDiagram = document.querySelector('.flow-diagram');
+            const integrationRel = document.querySelector('input[name="integration"]:checked');
+            const integration = integrationRel ? integrationRel.value : 'cashier';
+
+            if (mode === 'payermax') {
+                flowDiagram.innerHTML = `
+                    <div class="flow-step">收集用户订阅计划</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-group">
+                        <span class="flow-group-label">发起订阅计划与绑定</span>
+                        <div class="flow-step">创建订阅计划</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">激活订阅计划</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">后续扣款(PM发起)</div>
+                `;
+            } else if (mode === 'merchant') {
+                const step2Label = integration === 'component' ? '组件绑定支付方式' : '绑定支付方式';
+                flowDiagram.innerHTML = `
+                    <div class="flow-step">收集用户订阅计划</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">${step2Label}</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">后续扣款(商户发起)</div>
+                `;
+            } else if (mode === 'nonperiodic') {
+                const step1Label = integration === 'component' ? '组件绑定支付方式' : '绑定支付方式';
+                flowDiagram.innerHTML = `
+                    <div class="flow-step">${step1Label}</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">后续扣款(商户发起)</div>
+                `;
+            }
+        }
+
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
+                var cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        let lastGeneratedJson = '';
+
+        function updateCodeContent(tabType) {
+            const codeContent = document.querySelector('.code-content pre');
+            const activeMode = document.querySelector('.mode-card.active').dataset.mode;
+            const integrationRel = document.querySelector('input[name="integration"]:checked');
+            const integration = integrationRel ? integrationRel.value : 'cashier';
+            const paymentVal = document.querySelector('input[name="payment"]:checked').value;
+
+            if (tabType === 'session') {
+                const componentList = [];
+                if (paymentVal === 'card' || paymentVal === 'applepay' || paymentVal === 'googlepay') {
+                    componentList.push('CARD', 'APPLEPAY', 'GOOGLEPAY');
+                } else if (paymentVal === 'apm') {
+                    componentList.push('APM');
+                }
+
+                const json = {
+                    version: "1.5",
+                    keyVersion: "1",
+                    requestTime: new Date().toISOString(),
+                    appId: "67eff2f3bXXXXXXXXX85dbf658",
+                    merchantNo: "SDP0XXXXX93",
+                    data: {
+                        country: "MY",
+                        totalAmount: "3",
+                        currency: "USD",
+                        mitType: "SCHEDULED",
+                        userId: "test10001",
+                        componentList: componentList
+                    }
+                };
+                codeContent.innerHTML = syntaxHighlight(json);
+                return;
+            }
+
+            if (tabType === 'frontend') {
+                if (activeMode === 'nonperiodic' && integration === 'component' && (paymentVal === 'applepay' || paymentVal === 'googlepay')) {
+                    // 非周期性订阅代扣：只传 mitManagementUrl，无需 subscriptionPlan
+                    codeContent.innerHTML = `pmComponent.emit(<span class="json-string">'canMakePayment'</span>, {
+  <span class="json-comment">// mitManagementUrl必传</span>
+  <span class="json-key">mitManagementUrl</span>: <span class="json-string">"http://www.xxx.com"</span>
+})`;
+                } else if (activeMode === 'payermax' && integration === 'component' && (paymentVal === 'applepay' || paymentVal === 'googlepay')) {
+                    const totalPeriods = document.getElementById('totalPeriods').value;
+                    const periodCount = document.getElementById('periodCount').value;
+                    const periodUnit = document.getElementById('periodUnit').value;
+                    const amount = document.getElementById('amount').value;
+                    const currency = document.getElementById('currency').value;
+                    const firstPeriodStartDate = document.getElementById('firstPeriodStartDate').value;
+                    const formattedDate = firstPeriodStartDate ? firstPeriodStartDate + ":00+00:00" : "";
+                    const subtype = document.querySelector('input[name="subtype"]:checked').value;
+
+                    let trialConfigJson = '';
+                    if (subtype === 'discount') {
+                        const trialPeriodCount = document.getElementById('trialPeriodCount').value;
+                        const trialCurrency = document.getElementById('trialCurrency').value;
+                        trialConfigJson = `,
+            <span class="json-key">"trialPeriodConfig"</span>: { <span class="json-comment">// 优惠期规则</span>
+              <span class="json-key">"trialPeriodCount"</span>: <span class="json-number">${trialPeriodCount}</span>, <span class="json-comment">// 优惠期数</span>
+              <span class="json-key">"trialPeriodAmount"</span>: { <span class="json-comment">// 优惠期扣款金额</span>
+                <span class="json-key">"amount"</span>: <span class="json-number">0</span>,
+                <span class="json-key">"currency"</span>: <span class="json-string">"${trialCurrency}"</span>
+              }
+            }`;
+                    }
+
+                    codeContent.innerHTML = `pmComponent.emit(<span class="json-string">'canMakePayment'</span>, {
+          <span class="json-comment">// subscriptionPlan 在周期性订阅的时候必传</span>
+          <span class="json-key">subscriptionPlan</span>: {
+            <span class="json-key">"subject"</span>: <span class="json-string">"subject"</span>,
+            <span class="json-key">"description"</span>: <span class="json-string">"PMMAX周期首期扣款。"</span>,
+            <span class="json-key">"totalPeriods"</span>: <span class="json-number">${totalPeriods}</span>,
+            <span class="json-key">"periodRule"</span>: {
+              <span class="json-key">"periodUnit"</span>: <span class="json-string">"${periodUnit}"</span>,
+              <span class="json-key">"periodCount"</span>: <span class="json-number">${periodCount}</span>
+            },
+            <span class="json-key">"periodAmount"</span>: {
+              <span class="json-key">"amount"</span>: <span class="json-number">${amount}</span>,
+              <span class="json-key">"currency"</span>: <span class="json-string">"${currency}"</span>
+            },
+            <span class="json-key">"firstPeriodStartDate"</span>: <span class="json-string">"${formattedDate}"</span>${trialConfigJson}
+          },
+
+          <span class="json-key">mitManagementUrl</span>: <span class="json-string">"http://www.xxx.com"</span>
+})`;
+                } else {
+                    codeContent.innerHTML = `<div style="color: #86EFAC;">// 前端代码示例参考直达链接：\n<a href="https://docs-v2.payermax.com/doc-center/acquiring/start-integration/create-payment/frontend-component.html#_5-%E9%9B%86%E6%88%90%E6%AD%A5%E9%AA%A4" target="_blank" style="color: #7DD3FC; text-decoration: underline; font-family: 'Inter', sans-serif;">前端组件集成步骤文档</a></div>`;
+                }
+                return;
+            }
+
+            if (tabType === 'activate' && integration === 'component') {
+                const amount = document.getElementById('amount').value;
+                const currency = document.getElementById('currency').value;
+                const orderNumber = "order_" + Date.now();
+                const requestTime = new Date().toISOString();
+
+                codeContent.innerHTML = `{
+  <span class="json-key">"version"</span>: <span class="json-string">"1.5"</span>,
+  <span class="json-key">"keyVersion"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"requestTime"</span>: <span class="json-string">"${requestTime}"</span>,
+  <span class="json-key">"appId"</span>: <span class="json-string">"67eff2f3bXXXXXXXXX85dbf658"</span>,
+  <span class="json-key">"merchantNo"</span>: <span class="json-string">"SDP0XXXXX93"</span>,
+  <span class="json-key">"data"</span>: {
+    <span class="json-key">"outTradeNo"</span>: <span class="json-string">"${orderNumber}"</span>,
+    <span class="json-key">"subject"</span>: <span class="json-string">"订阅计划的标题"</span>,
+    <span class="json-key">"totalAmount"</span>: <span class="json-number">${amount}</span>,
+    <span class="json-key">"currency"</span>: <span class="json-string">"${currency}"</span>,
+    <span class="json-key">"userId"</span>: <span class="json-string">"test10001"</span>,
+    <span class="json-key">"language"</span>: <span class="json-string">"en"</span>,
+    <span class="json-key">"reference"</span>: <span class="json-string">"test subscription"</span>,
+    <span class="json-key">"frontCallbackUrl"</span>: <span class="json-string">"http://www.frontCallbackUrl.com"</span>,
+    <span class="json-key">"notifyUrl"</span>: <span class="json-string">"http://www.notifyUrl.com"</span>,
+    <span class="json-key">"integrate"</span>: <span class="json-string">"Direct_Payment"</span>,
+    <span class="json-key">"expireTime"</span>: <span class="json-string">"1800"</span>,
+    <span class="json-key">"subscriptionPlan"</span>: {
+      <span class="json-key">"subscriptionNo"</span>: <span class="json-string">"SUB2026xxxxxxxxxxxxx212112"</span>
+    },
+    <span class="json-key">"terminalType"</span>: <span class="json-string">"WEB"</span>,
+    <span class="json-key">"osType"</span>: <span class="json-string">"ANDROID"</span>,
+    <span class="json-key">"paymentDetail"</span>: {
+      <span class="json-key">"paymentToken"</span>: <span class="json-string">"CPTc843b4b63d164c2783da6ca7a7d92c52"</span>,
+      <span class="json-key">"sessionKey"</span>: <span class="json-string">"ecb8e49c210b4f92a6625189cf814565"</span>,
+      <span class="json-key">"mitType"</span>: <span class="json-string">"SCHEDULED"</span>,
+      <span class="json-key">"tokenForFutureUse"</span>: <span class="json-boolean">true</span>,
+      <span class="json-key">"merchantInitiated"</span>: <span class="json-boolean">false</span>,
+      <span class="json-key">"buyerInfo"</span>: {
+        <span class="json-key">"firstName"</span>: <span class="json-string">"Deborah"</span>,
+        <span class="json-key">"lastName"</span>: <span class="json-string">"Swinstead"</span>,
+        <span class="json-key">"email"</span>: <span class="json-string">"your@gmail.com"</span>,
+        <span class="json-key">"phoneNo"</span>: <span class="json-string">"0609 031 114"</span>,
+        <span class="json-key">"address"</span>: <span class="json-string">"Test Address"</span>,
+        <span class="json-key">"city"</span>: <span class="json-string">"Holden Hill"</span>,
+        <span class="json-key">"region"</span>: <span class="json-string">"SA"</span>,
+        <span class="json-key">"zipCode"</span>: <span class="json-string">"5088"</span>,
+        <span class="json-key">"clientIp"</span>: <span class="json-string">"211.52.321.225"</span>,
+        <span class="json-key">"userAgent"</span>: <span class="json-string">"Mozilla/5.0"</span>
+      }
+    }
+  }
+}`;
+                return;
+            }
+
+            if (tabType === 'create') {
+                const subtype = document.querySelector('input[name="subtype"]:checked').value;
+                const totalPeriods = document.getElementById('totalPeriods').value;
+                const periodCount = document.getElementById('periodCount').value;
+                const periodUnit = document.getElementById('periodUnit').value;
+                const amount = document.getElementById('amount').value;
+                const currency = document.getElementById('currency').value;
+                const firstPeriodStartDate = document.getElementById('firstPeriodStartDate').value;
+                const formattedDate = firstPeriodStartDate ? firstPeriodStartDate + ":00+00:00" : "";
+                const unitMap = { 'DAY': 'D', 'WEEK': 'W', 'MONTH': 'M', 'YEAR': 'Y' };
+                const apiUnit = unitMap[periodUnit] || 'M';
+                const subscriptionRequestId = "sub_req_" + Date.now();
+
+                let trialConfig = '';
+                if (subtype === 'discount') {
+                    const trialPeriodCount = document.getElementById('trialPeriodCount').value;
+                    const trialPeriodAmount = document.getElementById('trialPeriodAmount').value;
+                    const trialCurrency = document.getElementById('trialCurrency').value;
+                    trialConfig = `,
+      <span class="json-key">"trialPeriodConfig"</span>: { <span class="json-comment">// 非必填、优惠期配置</span>
+        <span class="json-key">"trialPeriodCount"</span>: <span class="json-number">${trialPeriodCount}</span>, <span class="json-comment">//优惠期数</span>
+        <span class="json-key">"trialPeriodAmount"</span>: { <span class="json-comment">// 优惠期扣款金额</span>
+          <span class="json-key">"amount"</span>: <span class="json-number">${trialPeriodAmount}</span>, <span class="json-comment">// 优惠期扣款金额，金额为0标识优惠期免费</span>
+          <span class="json-key">"currency"</span>: <span class="json-string">"${trialCurrency}"</span> <span class="json-comment">// 优惠期扣款币种</span>
+        }
+      }`;
+                }
+
+                codeContent.innerHTML = `{
+  <span class="json-key">"version"</span>: <span class="json-string">"1.5"</span>,
+  <span class="json-key">"keyVersion"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"requestTime"</span>: <span class="json-string">"${formattedDate}"</span>, <span class="json-comment">//请求时间</span>
+  <span class="json-key">"appId"</span>: <span class="json-string">"67eff2f3bXXXXXXXXX85dbf658"</span>, <span class="json-comment">//请求appid</span>
+  <span class="json-key">"merchantNo"</span>: <span class="json-string">"SDP0XXXXX93"</span>, <span class="json-comment">//请求商户号</span>
+  <span class="json-key">"data"</span>: {
+    <span class="json-key">"subscriptionRequestId"</span>: <span class="json-string">"${subscriptionRequestId}"</span>, <span class="json-comment">//必填、商户创建订阅计划的单号</span>
+    <span class="json-key">"userId"</span>: <span class="json-string">"test10001"</span>,
+    <span class="json-key">"subject"</span>: <span class="json-string">"主题描述要一致"</span>,
+    <span class="json-key">"language"</span>: <span class="json-string">"en"</span>,
+    <span class="json-key">"callbackUrl"</span>: <span class="json-string">"http://www.baidu.com"</span>, <span class="json-comment">// 必填、通知地址</span>
+    <span class="json-key">"subscriptionPlan"</span>: { <span class="json-comment">// 必填、 订阅计划信息</span>
+      <span class="json-key">"subject"</span>: <span class="json-string">"subject"</span>, <span class="json-comment">// 必填、标题</span>
+      <span class="json-key">"description"</span>: <span class="json-string">"PMMAX周期首期扣款"</span>, <span class="json-comment">// 非必填、描述</span>
+      <span class="json-key">"totalPeriods"</span>: <span class="json-number">${totalPeriods}</span>, <span class="json-comment">//必填、总期数</span>
+      <span class="json-key">"periodRule"</span>: { <span class="json-comment">// 必填、扣款规则</span>
+        <span class="json-key">"periodUnit"</span>: <span class="json-string">"${apiUnit}"</span>, <span class="json-comment">// 必填、按月（M），D(日)，W（周），Y（年）扣款</span>
+        <span class="json-key">"periodCount"</span>: <span class="json-number">${periodCount}</span> <span class="json-comment">// 必填、扣款频率</span>
+      },
+      <span class="json-key">"periodAmount"</span>: { <span class="json-comment">//必填、${activeMode === 'nonperiodic' ? '扣款金额' : '每期扣款金额'}</span>
+        <span class="json-key">"amount"</span>: <span class="json-number">${amount}</span>, <span class="json-comment">//必填</span>
+        <span class="json-key">"currency"</span>: <span class="json-string">"${currency}"</span> <span class="json-comment">//必填</span>
+      },
+      <span class="json-key">"firstPeriodStartDate"</span>: <span class="json-string">"${formattedDate}"</span>, <span class="json-comment">//必填、${activeMode === 'nonperiodic' ? '扣款时间' : '第一期扣款开始时间'}</span>${trialConfig},
+      <span class="json-key">"advanceDays"</span>: <span class="json-number">1</span> <span class="json-comment">// 非必填、指定后续每期的提前扣款天数</span>
+    }
+  }
+}`;
+            } else if (tabType === 'activate') {
+                const amount = document.getElementById('amount').value;
+                const currency = document.getElementById('currency').value;
+                const firstPeriodStartDate = document.getElementById('firstPeriodStartDate').value;
+                const formattedDate = firstPeriodStartDate ? firstPeriodStartDate + ":00+00:00" : "";
+                const orderNumber = "ord_" + Date.now();
+                const integrate = integration === 'cashier' ? 'Hosted_Checkout' : 'Direct_Payment';
+                const paymentMethodTypeMap = { 'card': 'CARD', 'applepay': 'APPLEPAY', 'googlepay': 'GOOGLEPAY', 'apm': 'ONE_TOUCH' };
+                const paymentMethodType = paymentMethodTypeMap[paymentVal] || 'CARD';
+
+                codeContent.innerHTML = `{
+  <span class="json-key">"version"</span>: <span class="json-string">"1.5"</span>,
+  <span class="json-key">"keyVersion"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"requestTime"</span>: <span class="json-string">"${formattedDate}"</span>, <span class="json-comment">//请求时间</span>
+  <span class="json-key">"appId"</span>: <span class="json-string">"67eff2f3bXXXXXXXXX85dbf658"</span>,
+  <span class="json-key">"merchantNo"</span>: <span class="json-string">"SDP0XXXXX93"</span>,
+  <span class="json-key">"data"</span>: {
+    <span class="json-key">"outTradeNo"</span>: <span class="json-string">"${orderNumber}"</span>, <span class="json-comment">//唯一商户订单号</span>
+    <span class="json-key">"subject"</span>: <span class="json-string">"主题描述要一致"</span>, <span class="json-comment">//保持和订阅计划的subject一致</span>
+    <span class="json-key">"totalAmount"</span>: <span class="json-number">${amount}</span>, <span class="json-comment">// 保持和订阅金额一致单位为最小分单位</span>
+    <span class="json-key">"currency"</span>: <span class="json-string">"${currency}"</span>, <span class="json-comment">// 保持和订阅币种一致</span>
+    <span class="json-key">"userId"</span>: <span class="json-string">"test10001"</span>, <span class="json-comment">// 保持和订阅计划的用户号一致</span>
+    <span class="json-key">"language"</span>: <span class="json-string">"en"</span>,
+    <span class="json-key">"country"</span>: <span class="json-string">"KR"</span>,
+    <span class="json-key">"reference"</span>: <span class="json-string">"test subscription"</span>,
+    <span class="json-key">"frontCallbackUrl"</span>: <span class="json-string">"http://www.frontCallbackUrl.com"</span>,
+    <span class="json-key">"notifyUrl"</span>: <span class="json-string">"http://www.notifyUrl.com"</span>,
+    <span class="json-key">"integrate"</span>: <span class="json-string">"${integrate}"</span>, <span class="json-comment">//收银台激活时为固定值：Hosted_Checkout，API与前置组件激活时为固定值：Direct_Payment</span>
+    <span class="json-key">"expireTime"</span>: <span class="json-string">"1800"</span>,
+    <span class="json-key">"subscriptionPlan"</span>: {
+      <span class="json-key">"subscriptionNo"</span>: <span class="json-string">"SUB2026xxxxxxxxxxxxx212112"</span> <span class="json-comment">//需要激活的订阅单号，由创建订阅时返回</span>
+    },
+    <span class="json-key">"paymentDetail"</span>: {
+      <span class="json-key">"paymentMethodType"</span>: <span class="json-string">"${paymentMethodType}"</span>, <span class="json-comment">//CARD/APPLEPAY/GOOGLEPAY/ONE_TOUCH</span>
+      <span class="json-key">"mitType"</span>: <span class="json-string">"${activeMode === 'nonperiodic' ? "UNSCHEDULED" : "SCHEDULED"}"</span>, <span class="json-comment">//代扣类型</span>
+      <span class="json-key">"tokenForFutureUse"</span>: <span class="json-boolean">true</span>, <span class="json-comment">// 必传，值为true，生成paymentTokenID，用于后续代扣</span>
+      <span class="json-key">"merchantInitiated"</span>: <span class="json-boolean">false</span> <span class="json-comment">// 必传，false标识不是商户主动发起，有用户参与</span>
+    }
+  }
+}`;
+            } else if (tabType === 'bind') {
+                const amount = document.getElementById('amount').value;
+                const currency = document.getElementById('currency').value;
+                const integrate = integration === 'api' ? 'Direct_Payment' : 'Hosted_Checkout';
+                const paymentMethodTypeMap = { 'card': 'CARD', 'applepay': 'APPLEPAY', 'googlepay': 'GOOGLEPAY', 'apm': 'ONE_TOUCH' };
+                const paymentMethodType = paymentMethodTypeMap[paymentVal] || 'CARD';
+                const mitType = activeMode === 'nonperiodic' ? "UNSCHEDULED" : "SCHEDULED";
+
+                let paymentDetailHtml = `
+      <span class="json-key">"paymentMethodType"</span>: <span class="json-string">"${paymentMethodType}"</span>, <span class="json-comment">//CARD/APPLEPAY/GOOGLEPAY/ONE_TOUCH</span>
+      <span class="json-key">"mitType"</span>: <span class="json-string">"${mitType}"</span>, <span class="json-comment">//代扣类型</span>
+      <span class="json-key">"tokenForFutureUse"</span>: <span class="json-boolean">true</span>, <span class="json-comment">// 必传，值为true，生成paymentTokenID，用于后续代扣</span>
+      <span class="json-key">"merchantInitiated"</span>: <span class="json-boolean">false</span> <span class="json-comment">// 必传，false标识不是商户主动发起</span>`;
+
+                if (paymentVal === 'apm') {
+                    paymentDetailHtml += `,
+      <span class="json-key">"targetOrg"</span>: <span class="json-string">"NAVERPAY"</span> <span class="json-comment">// 目标机构</span>`;
+                }
+
+                let extraFields = '';
+                if (integrate === 'Direct_Payment') {
+                    extraFields = `,
+    <span class="json-key">"terminalType"</span>: <span class="json-string">"WEB"</span>,
+    <span class="json-key">"osType"</span>: <span class="json-string">"ANDROID"</span>`;
+
+                    if (paymentVal !== 'apm') {
+                        paymentDetailHtml += `,
+      <span class="json-key">"cardInfo"</span>: {
+        <span class="json-key">"cardIdentifierNo"</span>: <span class="json-string">"4444333322221111"</span>,
+        <span class="json-key">"cardHolderFullName"</span>: <span class="json-string">"James Smith"</span>,
+        <span class="json-key">"cardExpirationMonth"</span>: <span class="json-string">"03"</span>,
+        <span class="json-key">"cardExpirationYear"</span>: <span class="json-string">"30"</span>,
+        <span class="json-key">"cvv"</span>: <span class="json-string">"123"</span>
+      },
+      <span class="json-key">"buyerInfo"</span>: {
+        <span class="json-key">"firstName"</span>: <span class="json-string">"Deborah"</span>,
+        <span class="json-key">"lastName"</span>: <span class="json-string">"Swinstead"</span>,
+        <span class="json-key">"email"</span>: <span class="json-string">"your@gmail.com"</span>,
+        <span class="json-key">"phoneNo"</span>: <span class="json-string">"0609 031 114"</span>,
+        <span class="json-key">"address"</span>: <span class="json-string">"Test Address"</span>,
+        <span class="json-key">"city"</span>: <span class="json-string">"Holden Hill"</span>,
+        <span class="json-key">"region"</span>: <span class="json-string">"SA"</span>,
+        <span class="json-key">"zipCode"</span>: <span class="json-string">"5088"</span>,
+        <span class="json-key">"clientIp"</span>: <span class="json-string">"211.52.321.225"</span>,
+        <span class="json-key">"userAgent"</span>: <span class="json-string">"Mozilla/5.0"</span>
+      }`;
+                    }
+                }
+
+                codeContent.innerHTML = `{
+  <span class="json-key">"version"</span>: <span class="json-string">"1.5"</span>,
+  <span class="json-key">"keyVersion"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"requestTime"</span>: <span class="json-string">"${new Date().toISOString()}"</span>,
+  <span class="json-key">"appId"</span>: <span class="json-string">"67eff2f3bXXXXXXXXX85dbf658"</span>,
+  <span class="json-key">"merchantNo"</span>: <span class="json-string">"SDP0XXXXX93"</span>,
+  <span class="json-key">"data"</span>: {
+    <span class="json-key">"outTradeNo"</span>: <span class="json-string">"bind_${Date.now()}"</span>,
+    <span class="json-key">"subject"</span>: <span class="json-string">"代扣标题"</span>,
+    <span class="json-key">"totalAmount"</span>: <span class="json-number">${amount}</span>,
+    <span class="json-key">"currency"</span>: <span class="json-string">"${currency}"</span>,
+    <span class="json-key">"userId"</span>: <span class="json-string">"test1111111"</span>,
+    <span class="json-key">"language"</span>: <span class="json-string">"en"</span>,
+    <span class="json-key">"reference"</span>: <span class="json-string">"test subscription"</span>,
+    <span class="json-key">"frontCallbackUrl"</span>: <span class="json-string">"http://www.frontCallbackUrl.com"</span>,
+    <span class="json-key">"notifyUrl"</span>: <span class="json-string">"http://www.notifyUrl.com"</span>,
+    <span class="json-key">"integrate"</span>: <span class="json-string">"${integrate}"</span>,
+    <span class="json-key">"expireTime"</span>: <span class="json-string">"1800"</span>${extraFields},
+    <span class="json-key">"paymentDetail"</span>: {${paymentDetailHtml}
+    }
+  }
+}`;
+            } else if (tabType === 'deduct') {
+                const amount = document.getElementById('amount').value;
+                const currency = document.getElementById('currency').value;
+                const totalPeriods = document.getElementById('totalPeriods').value;
+                const paymentMethodTypeMap = { 'card': 'CARD', 'applepay': 'APPLEPAY', 'googlepay': 'GOOGLEPAY', 'apm': 'ONE_TOUCH' };
+                const paymentMethodType = paymentMethodTypeMap[paymentVal] || 'CARD';
+                const mitType = activeMode === 'nonperiodic' ? "UNSCHEDULED" : "SCHEDULED";
+                const mockToken = activeMode === 'nonperiodic' ? 'PMTOKEN177XXXXXXXXXXXXX1000551' : `PMTOKEN${Date.now()}048184341000551`;
+
+                let paymentDetailHtml = `
+      <span class="json-key">"paymentMethodType"</span>: <span class="json-string">"${paymentMethodType}"</span>, <span class="json-comment">//必传，支付方式类型</span>`;
+
+                if (paymentVal === 'apm') {
+                    paymentDetailHtml += `
+      <span class="json-key">"targetOrg"</span>: <span class="json-string">"NAVERPAY"</span>, <span class="json-comment">// 目标机构</span>`;
+                }
+
+                paymentDetailHtml += `
+      <span class="json-key">"mitType"</span>: <span class="json-string">"${mitType}"</span>, <span class="json-comment">//代扣类型</span>
+      <span class="json-key">"tokenForFutureUse"</span>: <span class="json-boolean">false</span>,
+      <span class="json-key">"merchantInitiated"</span>: <span class="json-boolean">true</span>, <span class="json-comment">// 商户主动发起的交易 (MIT)</span>
+      <span class="json-key">"paymentTokenID"</span>: <span class="json-string">"${mockToken}"</span>, <span class="json-comment">// 绑定成功后返回的Token</span>
+      <span class="json-key">"buyerInfo"</span>: {
+        <span class="json-key">"firstName"</span>: <span class="json-string">"Deborah"</span>,
+        <span class="json-key">"lastName"</span>: <span class="json-string">"Swinstead"</span>,
+        <span class="json-key">"email"</span>: <span class="json-string">"your@gmail.com"</span>,
+        <span class="json-key">"phoneNo"</span>: <span class="json-string">"0609 031 114"</span>,
+        <span class="json-key">"address"</span>: <span class="json-string">"Test Address"</span>,
+        <span class="json-key">"city"</span>: <span class="json-string">"Holden Hill"</span>,
+        <span class="json-key">"region"</span>: <span class="json-string">"SA"</span>,
+        <span class="json-key">"zipCode"</span>: <span class="json-string">"5088"</span>,
+        <span class="json-key">"clientIp"</span>: <span class="json-string">"211.52.321.225"</span>,
+        <span class="json-key">"userAgent"</span>: <span class="json-string">"${navigator.userAgent}"</span>
+      }`;
+
+                let subscriptionPlanJson = `
+    <span class="json-key">"subscriptionPlan"</span>: {
+      <span class="json-key">"currentPeriod"</span>: <span class="json-number">1</span>,
+      <span class="json-key">"totalPeriods"</span>: <span class="json-number">${totalPeriods}</span>,
+      <span class="json-key">"subject"</span>: <span class="json-string">"subject"</span>
+    },`;
+
+                // Non-periodic (Unscheduled MIT) usually doesn't include subscriptionPlan
+                if (activeMode === 'nonperiodic') {
+                    subscriptionPlanJson = '';
+                }
+
+                codeContent.innerHTML = `{
+  <span class="json-key">"version"</span>: <span class="json-string">"1.5"</span>,
+  <span class="json-key">"keyVersion"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"requestTime"</span>: <span class="json-string">"${new Date().toISOString()}"</span>,
+  <span class="json-key">"appId"</span>: <span class="json-string">"67eff2f3bXXXXXXXXX85dbf658"</span>,
+  <span class="json-key">"merchantNo"</span>: <span class="json-string">"SDP0XXXXX93"</span>,
+  <span class="json-key">"data"</span>: {
+    <span class="json-key">"outTradeNo"</span>: <span class="json-string">"deduct_${Date.now()}"</span>,
+    <span class="json-key">"subject"</span>: <span class="json-string">"代扣标题"</span>,
+    <span class="json-key">"totalAmount"</span>: <span class="json-number">${amount}</span>,
+    <span class="json-key">"currency"</span>: <span class="json-string">"${currency}"</span>,
+    <span class="json-key">"country"</span>: <span class="json-string">"UN"</span>,
+    <span class="json-key">"userId"</span>: <span class="json-string">"test1111111"</span>,
+    <span class="json-key">"language"</span>: <span class="json-string">"en"</span>,
+    <span class="json-key">"reference"</span>: <span class="json-string">"test subscription"</span>,
+    <span class="json-key">"frontCallbackUrl"</span>: <span class="json-string">"http://www.frontCallbackUrl.com"</span>,
+    <span class="json-key">"notifyUrl"</span>: <span class="json-string">"http://www.notifyUrl.com"</span>,
+    <span class="json-key">"integrate"</span>: <span class="json-string">"Direct_Payment"</span>,
+    <span class="json-key">"expireTime"</span>: <span class="json-string">"1800"</span>,
+    <span class="json-key">"terminalType"</span>: <span class="json-string">"WEB"</span>,
+    <span class="json-key">"osType"</span>: <span class="json-string">"ANDROID"</span>,${subscriptionPlanJson}
+    <span class="json-key">"paymentDetail"</span>: {${paymentDetailHtml}
+    }
+  }
+}`;
+            }
+        }
+
+        function updateCodeTabs(mode) {
+            const codeTabsContainer = document.getElementById('code-tabs');
+            const integration = document.querySelector('input[name="integration"]:checked').value;
+
+            let tabsHtml = '';
+
+            if (integration === 'component') {
+                if (mode === 'payermax') {
+                    tabsHtml = `
+                <div class="code-tab active" data-tab="create">
+                    <span>创建订阅计划</span>
+                    <span class="code-tab-sub">subscriptionCreate</span>
+                </div>
+                <div class="code-tab" data-tab="session">
+                    <span>请求Sessionkey</span>
+                    <span class="code-tab-sub">applyDropinSession</span>
+                </div>
+                <div class="code-tab" data-tab="frontend"><span>前端组件渲染</span></div>
+                <div class="code-tab" data-tab="activate">
+                    <span>激活订阅计划</span>
+                    <span class="code-tab-sub">orderAndPay</span>
+                </div>
+            `;
+                } else {
+                    tabsHtml = `
+                <div class="code-tab active" data-tab="session">
+                    <span>请求Sessionkey</span>
+                    <span class="code-tab-sub">applyDropinSession</span>
+                </div>
+                <div class="code-tab" data-tab="frontend"><span>前端组件渲染</span></div>
+                <div class="code-tab" data-tab="bind">
+                    <span>绑定支付方式</span>
+                    <span class="code-tab-sub">orderAndPay</span>
+                </div>
+                <div class="code-tab" data-tab="deduct">
+                    <span>请求后续扣款</span>
+                    <span class="code-tab-sub">orderAndPay</span>
+                </div>
+            `;
+                }
+            } else {
+                if (mode === 'payermax') {
+                    tabsHtml = `
+                        <div class="code-tab active" data-tab="create">
+                            <span>创建订阅计划</span>
+                            <span class="code-tab-sub">subscriptionCreate</span>
+                        </div>
+                        <div class="code-tab" data-tab="activate">
+                            <span>激活订阅计划</span>
+                            <span class="code-tab-sub">orderAndPay</span>
+                        </div>
+                    `;
+                } else {
+                    tabsHtml = `
+                        <div class="code-tab active" data-tab="bind">
+                            <span>绑定支付方式</span>
+                            <span class="code-tab-sub">orderAndPay</span>
+                        </div>
+                        <div class="code-tab" data-tab="deduct">
+                            <span>请求后续扣款</span>
+                            <span class="code-tab-sub">orderAndPay</span>
+                        </div>
+                    `;
+                }
+            }
+
+            codeTabsContainer.innerHTML = tabsHtml;
+
+            // Re-attach listeners to new tabs
+            document.querySelectorAll('.code-tab').forEach(tab => {
+                tab.addEventListener('click', function () {
+                    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    updateCodeContent(this.dataset.tab);
+                });
+            });
+        }
+        // Global input/select change listeners
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('param-input') ||
+                e.target.name === 'subtype' ||
+                e.target.name === 'integration' ||
+                e.target.name === 'payment') {
+                const activeTab = document.querySelector('.code-tab.active').dataset.tab;
+                updateCodeContent(activeTab);
+            }
+        });
+    </script>
+</body>
+
+</html>
