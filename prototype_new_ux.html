@@ -1,0 +1,3774 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订阅代扣演示Demo - 原型稿</title>
+    <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563EB;
+            --primary-light: #DBEAFE;
+            --primary-dark: #1D4ED8;
+            --secondary: #4F46E5;
+            --bg: #F1F5F9;
+            --surface: #FFFFFF;
+            --surface-glass: rgba(255, 255, 255, 0.88);
+            --text: #0F172A;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --success-bg: #F0FDF4;
+            --success-border: #6EE7B7;
+            --warning: #F59E0B;
+            --code-bg: #0F172A;
+            --code-text: #E2E8F0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* ─── LAYOUT ─── */
+        .app-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+
+        /* ─── TOPBAR ─── */
+        .topbar {
+            grid-column: 1 / -1;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .topbar-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .topbar-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 99px;
+        }
+
+        /* ─── LEFT PANEL ─── */
+        .left-panel {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+            overflow-y: auto;
+        }
+
+        .config-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Mode Cards */
+        .mode-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mode-card {
+            padding: 0.875rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .mode-card:hover {
+            border-color: #93C5FD;
+            background: #F8FBFF;
+        }
+
+        .mode-card.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .mode-card.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 3px 0 0 3px;
+            background: var(--primary);
+        }
+
+        .mode-name {
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+        }
+
+        .mode-desc {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .mode-card.active .mode-name {
+            color: var(--primary);
+        }
+
+        /* Radio groups */
+        .radio-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .radio-item:hover {
+            background: #F8FAFC;
+        }
+
+        .radio-item input[type="radio"] {
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .radio-item label {
+            font-size: 0.8rem;
+            color: var(--text);
+            cursor: pointer;
+            line-height: 1.3;
+        }
+
+        /* ─── RIGHT PANEL ─── */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ─── PROGRESS HEADER ─── */
+        .progress-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .prog-step {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            flex: 1;
+            position: relative;
+        }
+
+        .prog-step:not(:last-child)::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            margin: 0 0.5rem;
+            border-radius: 2px;
+            transition: background 0.4s;
+        }
+
+        .prog-step.completed:not(:last-child)::after {
+            background: var(--success);
+        }
+
+        .prog-step.active:not(:last-child)::after {
+            background: linear-gradient(to right, var(--primary), var(--border));
+        }
+
+        .prog-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .prog-step.active .prog-dot {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .prog-step.completed .prog-dot {
+            background: var(--success);
+            color: white;
+        }
+
+        .prog-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .prog-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .prog-step.active .prog-label {
+            color: var(--primary);
+        }
+
+        .prog-step.completed .prog-label {
+            color: var(--success);
+        }
+
+        .prog-title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        /* ─── STEP CONTENT AREA ─── */
+        .step-content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 2rem;
+        }
+
+        .step-panel {
+            display: none;
+            flex-direction: column;
+            gap: 1.25rem;
+            animation: fadeSlideIn 0.35s ease;
+        }
+
+        .step-panel.active {
+            display: flex;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Cards inside step panels */
+        .step-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            background: var(--primary-light);
+        }
+
+        /* Parameter form inside step 1 */
+        .param-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 0.6rem 0.875rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: #FAFBFC;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Radio pill group */
+        .pill-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pill-option {
+            position: relative;
+        }
+
+        .pill-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .pill-label {
+            display: block;
+            padding: 0.4rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .pill-option input[type="radio"]:checked+.pill-label {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Code display */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1E293B;
+        }
+
+        .code-block-header {
+            background: #1E293B;
+            padding: 0.625rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .code-block-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #EF4444;
+        }
+
+        .dot-yellow {
+            background: #F59E0B;
+        }
+
+        .dot-green {
+            background: #10B981;
+        }
+
+        .copy-mini-btn {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border: 1px solid #334155;
+            border-radius: 5px;
+            color: #94A3B8;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .copy-mini-btn:hover {
+            background: #334155;
+            color: #E2E8F0;
+        }
+
+        .code-body {
+            padding: 1.25rem 1.5rem;
+            font-family: 'Consolas', 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            color: var(--code-text);
+            overflow-x: auto;
+        }
+
+        .jk {
+            color: #7DD3FC;
+        }
+
+        /* json key */
+        .js {
+            color: #86EFAC;
+        }
+
+        /* json string */
+        .jn {
+            color: #FCD34D;
+        }
+
+        /* json number */
+        .jc {
+            color: #475569;
+            font-style: italic;
+        }
+
+        /* comment */
+        .jv {
+            color: #F9A8D4;
+        }
+
+        /* variable/dynamic */
+
+        /* Result card */
+        .result-card {
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .result-card.success {
+            background: var(--success-bg);
+            border: 1.5px solid var(--success-border);
+        }
+
+        .result-card.info {
+            background: #EFF6FF;
+            border: 1.5px solid #BFDBFE;
+        }
+
+        .result-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .result-card.success .result-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .result-card.info .result-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .result-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-card.success .result-label {
+            color: #065F46;
+        }
+
+        .result-card.info .result-label {
+            color: var(--primary-dark);
+        }
+
+        .result-value {
+            font-size: 0.8rem;
+            font-family: monospace;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        /* Dual-view (request + response) */
+        .dual-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dual-view {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Bottom action bar */
+        .action-bar {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hint-icon {
+            color: var(--warning);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #059669, #10B981);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Completion / last step special display */
+        .completion-banner {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+            border-radius: var(--radius);
+            border: 2px solid var(--success-border);
+        }
+
+        .check-big {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.75rem;
+            color: white;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .completion-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #065F46;
+            margin-bottom: 0.5rem;
+        }
+
+        .completion-desc {
+            font-size: 0.875rem;
+            color: #047857;
+            line-height: 1.6;
+        }
+
+        .final-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .final-info-item {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid var(--success-border);
+            padding: 0.875rem 1rem;
+            text-align: left;
+        }
+
+        .final-info-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        .final-info-value {
+            font-size: 0.82rem;
+            font-family: monospace;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        /* Nav pills for sub-tabs */
+        .sub-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+            gap: 0;
+        }
+
+        .sub-tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .sub-tab:hover {
+            color: var(--text);
+        }
+
+        .sub-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Inline data pill */
+        .data-pill {
+            display: inline-block;
+            background: #FEF3C7;
+            border: 1px solid #FDE68A;
+            color: #92400E;
+            font-size: 0.7rem;
+            font-family: monospace;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        /* Component loading styles */
+        .component-area {
+            background: #F8FAFC;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .component-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .component-input-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.3rem;
+        }
+
+        .component-mount-container {
+            min-height: 120px;
+            padding: 1.5rem;
+            background: white;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            margin: 1.5rem 0;
+            display: none;
+            position: relative;
+        }
+
+        .component-mount-container.active {
+            display: block;
+            border-color: var(--primary);
+            background: #FAFBFC;
+        }
+
+        .component-mount-container::before {
+            content: '组件加载区域';
+            position: absolute;
+            top: -0.625rem;
+            left: 1rem;
+            background: white;
+            padding: 0 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .component-mount-container.active::before {
+            color: var(--primary);
+        }
+
+        .component-mount {
+            min-height: 60px;
+            display: none;
+        }
+
+        .component-mount.active {
+            display: block;
+        }
+
+        .token-display {
+            margin-top: 1.5rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--success-bg);
+            border: 1.5px solid var(--success-border);
+            border-radius: var(--radius-sm);
+            display: none;
+            position: relative;
+        }
+
+        .token-display.active {
+            display: block;
+        }
+
+        .token-display::before {
+            content: 'Payment Token';
+            position: absolute;
+            top: -0.625rem;
+            left: 1rem;
+            background: var(--success-bg);
+            padding: 0 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #065F46;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .token-display-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #065F46;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .token-display-value {
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: var(--text);
+            word-break: break-all;
+            line-height: 1.6;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--success-border);
+        }
+
+        .btn-component {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-component:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-component:active {
+            transform: translateY(0);
+        }
+
+        .btn-component:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-layout">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-logo">PayerMax</div>
+            <span class="topbar-badge">订阅代扣演示 Demo</span>
+            <span style="font-size:0.75rem;color:var(--text-muted);margin-left:auto;">🎨 原型稿 — 仅供设计审阅</span>
+        </header>
+
+        <!-- LEFT: Config -->
+        <aside class="left-panel">
+            <!-- Business Mode -->
+            <div>
+                <div class="config-section-title">业务模式</div>
+                <div class="mode-list">
+                    <div class="mode-card active" onclick="switchMode(this,'payermax')">
+                        <div class="mode-name">PayerMax托管（周期性订阅）</div>
+                        <div class="mode-desc">PayerMax管理订阅计划与扣款周期</div>
+                    </div>
+                    <div class="mode-card" onclick="switchMode(this,'merchant')">
+                        <div class="mode-name">商户自管（周期性订阅）</div>
+                        <div class="mode-desc">商户自主管理订阅计划与扣款时机</div>
+                    </div>
+                    <div class="mode-card" onclick="switchMode(this,'nonperiodic')">
+                        <div class="mode-name">非周期性订阅代扣</div>
+                        <div class="mode-desc">商户按业务需求灵活发起扣款</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration Method -->
+            <div>
+                <div class="config-section-title">集成方式</div>
+                <div class="radio-list">
+                    <div class="radio-item">
+                        <input type="radio" name="integration" id="int-cashier" value="cashier" checked>
+                        <label for="int-cashier">收银台绑定 / 激活</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" name="integration" id="int-api" value="api">
+                        <label for="int-api">API 绑定 / 激活</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" name="integration" id="int-component" value="component">
+                        <label for="int-component">前置组件绑定 / 激活</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div>
+                <div class="config-section-title">支付方式</div>
+                <div class="radio-list">
+                    <div class="radio-item"><input type="radio" name="payment" id="pay-card" value="card" checked><label
+                            for="pay-card">CARD</label></div>
+                    <div class="radio-item"><input type="radio" name="payment" id="pay-applepay" value="applepay"><label
+                            for="pay-applepay">APPLEPAY</label></div>
+                    <div class="radio-item"><input type="radio" name="payment" id="pay-googlepay"
+                            value="googlepay"><label for="pay-googlepay">GOOGLEPAY</label></div>
+                    <div class="radio-item"><input type="radio" name="payment" id="pay-apm" value="apm"><label
+                            for="pay-apm">APM</label></div>
+                </div>
+            </div>
+
+            <!-- Reset -->
+            <div style="margin-top:auto; padding-top: 1rem; border-top: 1px solid var(--border);">
+                <button class="btn btn-ghost" style="width:100%; justify-content:center;" onclick="resetAll()">↺
+                    重置所有步骤</button>
+            </div>
+        </aside>
+
+        <!-- RIGHT: Step area -->
+        <div class="right-panel">
+
+            <!-- Progress header -->
+            <div class="progress-header" id="progress-header">
+                <!-- Rendered by JS -->
+            </div>
+
+            <!-- Step content -->
+            <div class="step-content-area" id="step-content-area">
+
+                <!-- STEP 1: Collect Params (PayerMax mode) -->
+                <div class="step-panel active" id="panel-pm-1">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">📋</div>
+                            订阅类型
+                        </div>
+                        <div class="pill-group">
+                            <div class="pill-option">
+                                <input type="radio" name="subtype" id="sub-standard" value="standard" checked
+                                    onchange="updateDynamic()">
+                                <label class="pill-label" for="sub-standard">普通订阅 <span
+                                        style="opacity:.6;font-size:.7rem">(绑定金额&gt;0)</span></label>
+                            </div>
+                            <div class="pill-option">
+                                <input type="radio" name="subtype" id="sub-trial" value="trial"
+                                    onchange="updateDynamic()">
+                                <label class="pill-label" for="sub-trial">N天试用 <span
+                                        style="opacity:.6;font-size:.7rem">(绑定金额=0)</span></label>
+                            </div>
+                            <div class="pill-option">
+                                <input type="radio" name="subtype" id="sub-discount" value="discount"
+                                    onchange="updateDynamic()">
+                                <label class="pill-label" for="sub-discount">前N期优惠 <span
+                                        style="opacity:.6;font-size:.7rem">(绑定金额&gt;0)</span></label>
+                            </div>
+                            <div class="pill-option">
+                                <input type="radio" name="subtype" id="sub-trial-discount" value="trial-discount"
+                                    onchange="updateDynamic()">
+                                <label class="pill-label" for="sub-trial-discount">N天试用+前N期优惠 <span
+                                        style="opacity:.6;font-size:.7rem">(组合优惠)</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 订阅类型说明卡片 -->
+                    <div class="step-card" style="background:#FEF3C7;border-color:#FDE68A;">
+                        <div class="step-card-title" style="color:#92400E;font-size:.85rem;">
+                            <div class="card-icon" style="background:#FEF9C3;">💡</div>
+                            订阅类型说明
+                        </div>
+                        <div style="font-size:0.8rem;color:#92400E;line-height:1.8;">
+                            • <strong>普通订阅</strong>：直接按周期扣款，无优惠<br>
+                            • <strong>N天试用</strong>：试用期结束后按周期扣款<br>
+                            • <strong>前N期优惠</strong>：前几期优惠价，之后恢复原价<br>
+                            • <strong>试用+优惠</strong>：试用期 → 优惠期 → 正式期（三阶段组合）
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">⚙️</div>
+                            参数配置
+                        </div>
+                        <div class="param-form">
+                            <div class="form-group">
+                                <label class="form-label" for="p-totalPeriods">总期数</label>
+                                <input type="number" id="p-totalPeriods" class="form-input" value="12" min="1"
+                                    title="总期数" placeholder="输入总期数" oninput="updateDynamic()">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="p-periodCount">扣款频率</label>
+                                    <input type="number" id="p-periodCount" class="form-input" value="1" min="1"
+                                        title="扣款频率" oninput="updateDynamic()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="p-periodUnit">扣款周期</label>
+                                    <select id="p-periodUnit" class="form-select" title="扣款周期"
+                                        onchange="updateDynamic()">
+                                        <option value="D">日</option>
+                                        <option value="W">周</option>
+                                        <option value="M" selected>月</option>
+                                        <option value="Y">年</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="p-amount">每期金额</label>
+                                    <input type="number" id="p-amount" class="form-input" value="9.99" step="0.01"
+                                        min="0" title="每期金额" oninput="updateDynamic()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="p-currency">币种</label>
+                                    <input type="text" id="p-currency" class="form-input" value="USD" title="币种"
+                                        oninput="updateDynamic()">
+                                </div>
+                            </div>
+                            <div class="form-group" id="trialDaysRow" style="display:none;">
+                                <label class="form-label" for="p-trialDays">试用天数</label>
+                                <input type="number" id="p-trialDays" class="form-input" value="7" min="1" title="试用天数"
+                                    oninput="updateDynamic()">
+                            </div>
+                            <div id="discountParamsRow" style="display:none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">优惠期数</label>
+                                        <input type="number" id="p-trialPeriodCount" class="form-input" value="3"
+                                            min="1" title="优惠期数" oninput="updateDynamic()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">优惠金额</label>
+                                        <input type="number" id="p-trialAmount" class="form-input" value="4.99"
+                                            step="0.01" oninput="updateDynamic()">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 组合优惠参数配置区域 -->
+                            <div id="trialDiscountParamsRow" style="display:none;">
+                                <div class="step-card" style="background:#FEF3C7;border-color:#FDE68A;padding:1rem;margin-top:0.5rem;">
+                                    <div class="step-card-title" style="color:#92400E;font-size:.85rem;margin-bottom:0.75rem;">
+                                        <div class="card-icon" style="background:#FEF9C3;">🎁</div>
+                                        组合优惠参数配置
+                                    </div>
+                                    <div class="param-form">
+                                        <div style="font-size:0.75rem;font-weight:600;color:#92400E;margin-bottom:0.5rem;">
+                                            📅 试用期参数
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">试用天数</label>
+                                                <input type="number" id="p-trialDays-combo" class="form-input" value="7" min="1" 
+                                                    title="试用天数" oninput="updateDynamic()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">试用期金额</label>
+                                                <input type="number" id="p-trialAmount-combo" class="form-input" value="0.99" 
+                                                    step="0.01" min="0" title="试用期金额" oninput="updateDynamic()">
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="font-size:0.75rem;font-weight:600;color:#92400E;margin:0.75rem 0 0.5rem;">
+                                            💰 优惠期参数
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">优惠期数</label>
+                                                <input type="number" id="p-trialPeriodCount-combo" class="form-input" value="2" 
+                                                    min="1" title="优惠期数" oninput="updateDynamic()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">优惠期金额</label>
+                                                <input type="number" id="p-trialPeriodAmount-combo" class="form-input" value="3.00" 
+                                                    step="0.01" min="0" title="优惠期金额" oninput="updateDynamic()">
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="font-size:0.7rem;color:#92400E;margin-top:0.75rem;padding:0.5rem;background:rgba(254,243,199,0.5);border-radius:6px;">
+                                            💡 示例：0.99USD试用7天 → 前2期每期3USD → 剩余期数每期正常金额
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="p-startDate">首期扣款时间</label>
+                                <input type="datetime-local" id="p-startDate" class="form-input" title="首期扣款时间"
+                                    oninput="updateDynamic()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Create Subscription Plan (PayerMax) -->
+                <div class="step-panel" id="panel-pm-2">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🚀</div>
+                            后端创建订阅计划 — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">subscriptionCreate</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            使用第一步填写的参数，调用 <strong>subscriptionCreate</strong> API 创建订阅计划，获取 <code
+                                class="data-pill">subscriptionNo</code> 用于后续激活。支持4种订阅类型，点击下方标签查看不同类型的请求示例。
+                        </p>
+                        
+                        <!-- 订阅类型切换 tabs -->
+                        <div class="sub-tabs" style="margin-bottom:1rem;">
+                            <div class="sub-tab active" onclick="switchCreateTab('standard')">普通订阅</div>
+                            <div class="sub-tab" onclick="switchCreateTab('trial')">N天试用</div>
+                            <div class="sub-tab" onclick="switchCreateTab('discount')">前N期优惠</div>
+                            <div class="sub-tab" onclick="switchCreateTab('trial-discount')">试用+优惠</div>
+                        </div>
+                        
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求</div>
+                                </div>
+                                
+                                <!-- 普通订阅请求 -->
+                                <div class="code-block create-code-standard">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            subscriptionCreate Request - 普通订阅
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-create-standard')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-create-standard">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_<span id="c-reqId">req_1741490400000</span>"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"callbackUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subject"</span>: <span class="js">"订阅计划标题"</span>,
+      <span class="jk">"totalPeriods"</span>: <span class="jv" id="c-totalPeriods">12</span>,
+      <span class="jk">"periodRule"</span>: {
+        <span class="jk">"periodUnit"</span>: <span class="jv">"<span id="c-periodUnit">M</span>"</span>,
+        <span class="jk">"periodCount"</span>: <span class="jv" id="c-periodCount">1</span>
+      },
+      <span class="jk">"periodAmount"</span>: {
+        <span class="jk">"amount"</span>: <span class="jv" id="c-amount">9.99</span>,
+        <span class="jk">"currency"</span>: <span class="jv">"<span id="c-currency">USD</span>"</span>
+      },
+      <span class="jk">"firstPeriodStartDate"</span>: <span class="jv">"<span id="c-startDate">2026-03-10T12:00:00+08:00</span>"</span>
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- N天试用请求 -->
+                                <div class="code-block create-code-trial" style="display:none;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            subscriptionCreate Request - N天试用
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-create-trial')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-create-trial">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_req_1741490400000"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"callbackUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subject"</span>: <span class="js">"订阅计划标题"</span>,
+      <span class="jk">"totalPeriods"</span>: <span class="jv">12</span>,
+      <span class="jk">"periodRule"</span>: {
+        <span class="jk">"periodUnit"</span>: <span class="jv">"M"</span>,
+        <span class="jk">"periodCount"</span>: <span class="jv">1</span>
+      },
+      <span class="jk">"periodAmount"</span>: {
+        <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+        <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+      },
+      <span class="jk">"firstPeriodStartDate"</span>: <span class="jv">"2026-03-10T12:00:00+08:00"</span>,
+      <span class="jk">"trialConfig"</span>: { <span class="jc">// 试用期配置</span>
+        <span class="jk">"trialAmount"</span>: {
+          <span class="jk">"amount"</span>: <span class="jv">0</span>, <span class="jc">// 0表示免费试用</span>
+          <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+        },
+        <span class="jk">"trialDays"</span>: <span class="jv">7</span> <span class="jc">// 试用天数</span>
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- 前N期优惠请求 -->
+                                <div class="code-block create-code-discount" style="display:none;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            subscriptionCreate Request - 前N期优惠
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-create-discount')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-create-discount">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_req_1741490400000"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"callbackUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subject"</span>: <span class="js">"订阅计划标题"</span>,
+      <span class="jk">"totalPeriods"</span>: <span class="jv">12</span>,
+      <span class="jk">"periodRule"</span>: {
+        <span class="jk">"periodUnit"</span>: <span class="jv">"M"</span>,
+        <span class="jk">"periodCount"</span>: <span class="jv">1</span>
+      },
+      <span class="jk">"periodAmount"</span>: { <span class="jc">// 正式期金额</span>
+        <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+        <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+      },
+      <span class="jk">"firstPeriodStartDate"</span>: <span class="jv">"2026-03-10T12:00:00+08:00"</span>,
+      <span class="jk">"trialPeriodConfig"</span>: { <span class="jc">// 优惠期配置</span>
+        <span class="jk">"trialPeriodCount"</span>: <span class="jv">3</span>, <span class="jc">// 优惠期数</span>
+        <span class="jk">"trialPeriodAmount"</span>: {
+          <span class="jk">"amount"</span>: <span class="jv">4.99</span>, <span class="jc">// 优惠期金额</span>
+          <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+        }
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- 试用+优惠请求 -->
+                                <div class="code-block create-code-trial-discount" style="display:none;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            subscriptionCreate Request - 试用+优惠
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-create-trial-discount')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-create-trial-discount">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_req_1741490400000"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"callbackUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subject"</span>: <span class="js">"订阅计划标题"</span>,
+      <span class="jk">"totalPeriods"</span>: <span class="jv">12</span>,
+      <span class="jk">"periodRule"</span>: {
+        <span class="jk">"periodUnit"</span>: <span class="jv">"M"</span>,
+        <span class="jk">"periodCount"</span>: <span class="jv">1</span>
+      },
+      <span class="jk">"periodAmount"</span>: { <span class="jc">// 正式期金额</span>
+        <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+        <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+      },
+      <span class="jk">"firstPeriodStartDate"</span>: <span class="jv">"2026-03-10T12:00:00+08:00"</span>,
+      <span class="jk">"trialConfig"</span>: { <span class="jc">// 试用期配置</span>
+        <span class="jk">"trialAmount"</span>: {
+          <span class="jk">"amount"</span>: <span class="jv">0.99</span>, <span class="jc">// 试用期金额</span>
+          <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+        },
+        <span class="jk">"trialDays"</span>: <span class="jv">7</span> <span class="jc">// 试用天数</span>
+      },
+      <span class="jk">"trialPeriodConfig"</span>: { <span class="jc">// 优惠期配置</span>
+        <span class="jk">"trialPeriodCount"</span>: <span class="jv">2</span>, <span class="jc">// 优惠期数</span>
+        <span class="jk">"trialPeriodAmount"</span>: {
+          <span class="jk">"amount"</span>: <span class="jv">3.00</span>, <span class="jc">// 优惠期金额</span>
+          <span class="jk">"currency"</span>: <span class="jv">"USD"</span>
+        }
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 返回示例</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            subscriptionCreate Response
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionNo"</span>:
+      <span class="js">"SUB2026XXXxxxxxx2112"</span>,
+    <span class="jk">"subscriptionRequestId"</span>:
+      <span class="js">"sub_req_17414904..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"CREATED"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-card success" style="margin-top:1rem;">
+                            <div class="result-icon">✓</div>
+                            <div>
+                                <div class="result-label">创建成功 — 返回订阅计划号</div>
+                                <div class="result-value">subscriptionNo: <strong>SUB2026XXXxxxxxx2112</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Load Component (PayerMax + Component Integration) -->
+                <div class="step-panel" id="panel-pm-3-component">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🔌</div>
+                            加载前置组件
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            使用 <strong>applyDropinSession</strong> 接口获取 Session Key，然后初始化前端组件完成支付绑定。
+                        </p>
+
+                        <!-- 左右布局 -->
+                        <div class="dual-view">
+                            <!-- 左侧：请求 SessionKey -->
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 SessionKey</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            applyDropinSession Request
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-session')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-session">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-10T12:00:00+08:00"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"country"</span>: <span class="js">"MY"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="s-amount">9.99</span>, <span class="jc">// 激活金额：trial时为0，trial-discount时为试用期金额</span>
+    <span class="jk">"currency"</span>: <span class="jv">"<span id="s-currency">USD</span>"</span>,
+    <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 周期性订阅固定值</span>
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"componentList"</span>: [<span class="js" id="s-componentList">"CARD", "APPLEPAY", "GOOGLEPAY"</span>] <span class="jc">// 根据支付方式选择</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+
+                                <div class="result-card success" style="margin-top:1rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">返回 Session 信息</div>
+                                        <div class="result-value">
+                                            sessionKey: <strong>02d764a032804ee5...</strong><br>
+                                            clientKey: <strong>67eff2f3b29a4ecf...</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 右侧：前端组件加载 -->
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">🎨 前端组件加载</div>
+                                </div>
+                                <div class="component-area" style="margin-top:0;">
+                                    <div class="component-form">
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-clientKey">Client Key</label>
+                                            <input type="text" id="comp-clientKey" class="form-input" 
+                                                value="67eff2f3b29a4ecf9576321185dbf658" 
+                                                placeholder="输入 Client Key">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-sessionKey">Session Key</label>
+                                            <input type="text" id="comp-sessionKey" class="form-input" 
+                                                value="02d764a032804ee5b47013795e25f07d" 
+                                                placeholder="输入 Session Key">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-environment">环境</label>
+                                            <select id="comp-environment" class="form-select">
+                                                <option value="true" selected>Sandbox (测试)</option>
+                                                <option value="false">Production (生产)</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn-component" id="init-component-btn" onclick="initComponent()">
+                                            初始化并加载组件
+                                        </button>
+                                    </div>
+
+                                    <!-- Component Mount Container -->
+                                    <div class="component-mount-container" id="component-mount-container">
+                                        <div class="component-mount" id="card-mount-area"></div>
+                                        <div class="component-mount" id="applepay-mount-area"></div>
+                                        <div class="component-mount" id="googlepay-mount-area"></div>
+                                    </div>
+
+                                    <!-- Confirm Payment Button (for CARD) -->
+                                    <button class="btn-component" id="card-pay-btn" style="display:none;" onclick="handleCardPayment()">
+                                        确认支付并获取 Token
+                                    </button>
+
+                                    <!-- Token Display -->
+                                    <div class="token-display" id="token-display-area">
+                                        <div class="token-display-value" id="token-value-display">等待获取...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3/4: Activate Subscription Plan (PayerMax) -->
+                <div class="step-panel" id="panel-pm-3">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">⚡</div>
+                            激活订阅计划 — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            使用第二步返回的 <code class="data-pill">subscriptionNo</code> 发起 <strong>orderAndPay</strong>
+                            请求，引导用户完成首次支付并绑定支付方式，激活订阅计划。
+                        </p>
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request
+                                        </div>
+                                        <button class="copy-mini-btn">复制</button>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"ORD_20260310_001"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"订阅计划标题"</span>, <span class="jc">// 保持和订阅计划的subject一致</span>
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="a-amount">9.99</span>, <span class="jc">// 激活金额：trial时为0，trial-discount时为试用期金额</span>
+    <span class="jk">"currency"</span>: <span class="jv">"<span id="a-currency">USD</span>"</span>, <span class="jc">// 保持和订阅币种一致</span>
+    <span class="jk">"country"</span>: <span class="js">"US"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>, <span class="jc">// 保持和订阅计划的用户号一致</span>
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test subscription"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://your.app/return"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Hosted_Checkout"</span>, <span class="jc">// 收银台: Hosted_Checkout; API直连: Direct_Payment</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span> <span class="jc">// 需要激活的订阅单号</span>
+    },
+    <span class="jk">"mitManagementUrl"</span>: <span class="js">"https://your.domain/subscription-management"</span>,
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="a-paymentMethodType">CARD</span>"</span>, <span class="jc">// CARD/APPLEPAY/GOOGLEPAY时必传；APM全量收银台时可不传</span>
+      <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 必传，周期性订阅固定值</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传true，生成paymentTokenID用于后续代扣</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span> <span class="jc">// 必传false，用户参与发起</span>
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 返回示例</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
+    <span class="jk">"cashierUrl"</span>: <span class="js">"https://checkout..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="result-card info" style="margin-top:0.75rem;">
+                                    <div class="result-icon">→</div>
+                                    <div>
+                                        <div class="result-label">跳转收银台 / 前置组件</div>
+                                        <div class="result-value">用户完成支付后，通过Webhook回调确认激活状态</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- APM 特殊说明 -->
+                        <div class="step-card" style="background:#FEF3C7;border-color:#FDE68A;margin-top:1rem;">
+                            <div class="step-card-title" style="color:#92400E;font-size:.85rem;">
+                                <div class="card-icon" style="background:#FEF9C3;">💡</div>
+                                APM 支付方式特殊说明
+                            </div>
+                            <div style="font-size:0.8rem;color:#92400E;line-height:1.8;">
+                                • <strong>paymentMethodType</strong>：APM 指定支付方式时传 <code style="background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">ONE_TOUCH</code>，全量收银台时可不传<br>
+                                • <strong>country</strong>：APM 激活时必传（如 KR、MY、BR）<br>
+                                • <strong>targetOrg</strong>：可选，用于指定具体钱包（如 NAVERPAY、KAKAOPAY 等）<br>
+                                • <strong>前置组件</strong>：APM 不支持前置组件集成方式，仅支持收银台和 API 模式
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4/5: PMX Auto Charge (Final) -->
+                <div class="step-panel" id="panel-pm-4">
+                    <div class="step-card">
+                        <div class="completion-banner">
+                            <div class="check-big">✓</div>
+                            <div class="completion-title">订阅计划已成功激活！</div>
+                            <div class="completion-desc">
+                                后续扣款由 PayerMax 根据订阅计划自动发起，<br>
+                                每期扣款结果将通过 Webhook 回调通知您的服务器。
+                            </div>
+                            <div class="final-info-grid">
+                                <div class="final-info-item">
+                                    <div class="final-info-label">订阅计划号</div>
+                                    <div class="final-info-value">SUB2026XXXxxxxxx2112</div>
+                                </div>
+                                <div class="final-info-item">
+                                    <div class="final-info-label">扣款周期</div>
+                                    <div class="final-info-value" id="f-cycle">每 1 月 · 共 12 期</div>
+                                </div>
+                                <div class="final-info-item">
+                                    <div class="final-info-label">每期金额</div>
+                                    <div class="final-info-value" id="f-amount">USD 9.99</div>
+                                </div>
+                                <div class="final-info-item">
+                                    <div class="final-info-label">首期扣款时间</div>
+                                    <div class="final-info-value" id="f-startDate">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-card" style="margin-top:0; background:#FFFBEB; border-color:#FDE68A;">
+                            <div class="step-card-title" style="color:#92400E;">
+                                <div class="card-icon" style="background:#FEF3C7;">📬</div>
+                                后续扣款 Webhook 通知
+                            </div>
+                            <div class="code-block">
+                                <div class="code-block-header">
+                                    <div class="code-block-title">
+                                        <div class="code-dot dot-red"></div>
+                                        <div class="code-dot dot-yellow"></div>
+                                        <div class="code-dot dot-green"></div>
+                                        Webhook Notification (PMX Auto Charge)
+                                    </div>
+                                </div>
+                                <div class="code-body">
+                                    <pre>{
+  <span class="jk">"type"</span>: <span class="js">"SUBSCRIPTION_PAYMENT"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span>,
+    <span class="jk">"periodNo"</span>: <span class="jn">1</span>,     <span class="jc">// 第几期</span>
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_PMX_P1_20260410"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"chargeAmount"</span>: {
+      <span class="jk">"amount"</span>: <span class="jv" id="w-amount">9.99</span>,
+      <span class="jk">"currency"</span>: <span class="jv">"<span id="w-currency">USD</span>"</span>
+    }
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MERCHANT STEP 2: Load Component (Merchant + Component Integration) -->
+                <div class="step-panel" id="panel-m-2-component">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🔌</div>
+                            加载前置组件
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            使用 <strong>applyDropinSession</strong> 接口获取 Session Key，然后初始化前端组件完成支付绑定。
+                        </p>
+
+                        <!-- 左右布局 -->
+                        <div class="dual-view">
+                            <!-- 左侧：请求 SessionKey -->
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 SessionKey</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            applyDropinSession Request
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-session-m')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-session-m">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-10T12:00:00+08:00"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"country"</span>: <span class="js">"MY"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="sm-amount">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="jv">"<span id="sm-currency">USD</span>"</span>,
+    <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 周期性订阅固定值</span>
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"componentList"</span>: [<span class="js" id="sm-componentList">"CARD", "APPLEPAY", "GOOGLEPAY"</span>] <span class="jc">// 根据支付方式选择</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+
+                                <div class="result-card success" style="margin-top:1rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">返回 Session 信息</div>
+                                        <div class="result-value">
+                                            sessionKey: <strong>02d764a032804ee5...</strong><br>
+                                            clientKey: <strong>67eff2f3b29a4ecf...</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 右侧：前端组件加载 -->
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">🎨 前端组件加载</div>
+                                </div>
+                                <div class="component-area" style="margin-top:0;">
+                                    <div class="component-form">
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-clientKey-m">Client Key</label>
+                                            <input type="text" id="comp-clientKey-m" class="form-input" 
+                                                value="67eff2f3b29a4ecf9576321185dbf658" 
+                                                placeholder="输入 Client Key">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-sessionKey-m">Session Key</label>
+                                            <input type="text" id="comp-sessionKey-m" class="form-input" 
+                                                value="02d764a032804ee5b47013795e25f07d" 
+                                                placeholder="输入 Session Key">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-environment-m">环境</label>
+                                            <select id="comp-environment-m" class="form-select">
+                                                <option value="true" selected>Sandbox (测试)</option>
+                                                <option value="false">Production (生产)</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn-component" id="init-component-btn-m" onclick="initComponentMerchant()">
+                                            初始化并加载组件
+                                        </button>
+                                    </div>
+
+                                    <!-- Component Mount Container -->
+                                    <div class="component-mount-container" id="component-mount-container-m">
+                                        <div class="component-mount" id="card-mount-area-m"></div>
+                                        <div class="component-mount" id="applepay-mount-area-m"></div>
+                                        <div class="component-mount" id="googlepay-mount-area-m"></div>
+                                    </div>
+
+                                    <!-- Confirm Payment Button (for CARD) -->
+                                    <button class="btn-component" id="card-pay-btn-m" style="display:none;" onclick="handleCardPaymentMerchant()">
+                                        确认支付并获取 Token
+                                    </button>
+
+                                    <!-- Token Display -->
+                                    <div class="token-display" id="token-display-area-m">
+                                        <div class="token-display-value" id="token-value-display-m">等待获取...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                                <!-- MERCHANT STEP 2/3: 首次绑定支付方式 (panel-m-2) -->
+                <div class="step-panel" id="panel-m-2">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🔗</div>
+                            首次绑定支付方式 — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            商户自管模式下，<strong>无需</strong>调用 subscriptionCreate。直接使用 <strong>orderAndPay</strong>
+                            引导用户首次支付并绑定支付方式，
+                            绑定成功后通过异步 Webhook 回调获取 <code class="data-pill">paymentTokenID</code>，用于后续商户主动发起扣款。
+                        </p>
+                        
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 (绑定)</div>
+                                </div>
+                                
+                                <!-- 首次绑定请求 -->
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Bind
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-m-bind')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-m-bind">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_<span id="m-tradeNo">1741490400000</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"<span id="m-subject">代扣标题</span>"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="m-amount">9.99</span>, <span class="jc">// 金额 > 0: 首次绑定时需要支付; 金额 = 0: 只授权（类似试用）</span>
+    <span class="jk">"currency"</span>: <span class="js">"<span id="m-currency">USD</span>"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"<span id="m-userId">test1111111</span>"</span>,
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test subscription"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://your.app/return"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Hosted_Checkout"</span>, <span class="jc">// 收银台: Hosted_Checkout; API直连: Direct_Payment</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="m-bind-paymentMethodType">CARD</span>"</span>, <span class="jc">// CARD/APPLEPAY/GOOGLEPAY/ONE_TOUCH</span>
+      <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 周期性代扣</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传true，生成paymentTokenID</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span> <span class="jc">// 必传false，用户参与发起</span>
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 Webhook 异步回调</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Bind Success
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentTokenID"</span>:
+      <span class="js">"PMTOKEN177XXXXX1000551"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test1111111"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="result-card success" style="margin-top:0.75rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">绑定成功 — 获取 paymentTokenID</div>
+                                        <div class="result-value"><strong>paymentTokenID</strong>:
+                                            PMTOKEN177XXXXX1000551<br>
+                                            <span
+                                                style="color:var(--text-muted);font-size:.75rem">保存此token，用于后续商户主动发起扣款</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- MERCHANT STEP 3/4: 后续发起扣款 (panel-m-3) -->
+                <div class="step-panel" id="panel-m-3">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">💳</div>
+                            后续发起扣款 — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            商户根据自己管理的订阅计划，在需要扣款时，使用第二步绑定成功后返回的
+                            <code class="data-pill">paymentTokenID</code> 调用 <strong>orderAndPay</strong> 主动发起后续扣款，
+                            <code class="data-pill">merchantInitiated: true</code> 表示商户主动发起。
+                        </p>
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 (后续扣款)</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Deduct
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-m-deduct')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-m-deduct">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_<span id="m-dedTradeNo">1741490400000</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"代扣标题"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="m-dedAmount">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"<span id="m-dedCurrency">USD</span>"</span>,
+    <span class="jk">"country"</span>: <span class="js">"UN"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test1111111"</span>,
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>,
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>,
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"currentPeriod"</span>: <span class="jn">2</span>, <span class="jc">// 商户自行记录当前扣款期数</span>
+      <span class="jk">"totalPeriods"</span>: <span class="jv" id="m-dedTotalPeriods">12</span>,
+      <span class="jk">"subject"</span>: <span class="js">"subject"</span>
+    },
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
+      <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>,
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">false</span>,
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">true</span>, <span class="jc">// 商户主动发起 (MIT)</span>
+      <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN177XXXXX1000551"</span> <span class="jc">// 来自Step2 Webhook回调</span>
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 扣款结果</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response — Deduct
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_MCH_P2_2026"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"chargeAmount"</span>: {
+      <span class="jk">"amount"</span>: <span class="jv" id="m-dedResAmt">9.99</span>,
+      <span class="jk">"currency"</span>: <span class="jv">"<span id="m-dedResCur">USD</span>"</span>
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="completion-banner" style="margin-top:0.75rem;padding:1.25rem;">
+                                    <div class="check-big"
+                                        style="width:40px;height:40px;font-size:1.1rem;margin-bottom:.75rem;">✓</div>
+                                    <div class="completion-title" style="font-size:1rem;">扣款成功！</div>
+                                    <div class="completion-desc" style="font-size:0.78rem;">
+                                        商户自主管理扣款周期，<br>每次扣款均使用相同 paymentTokenID 发起
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NON-PERIODIC STEP 1: 收集用户业务数据 (panel-np-1) -->
+                <div class="step-panel" id="panel-np-1">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">📋</div>
+                            收集用户业务数据
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            非周期性订阅代扣无需提前建立订阅计划，商户根据业务需求灵活发起扣款。
+                            首先收集本次绑定/支付的订单参数，用于向 PayerMax 发起首次绑定支付。
+                        </p>
+                    </div>
+                    
+                    <div class="step-card" style="background:#F0FDF4;border-color:#6EE7B7;">
+                        <div class="step-card-title" style="color:#065F46;font-size:.85rem;">
+                            <div class="card-icon" style="background:#D1FAE5;">ℹ️</div>
+                            与周期性代扣的区别
+                        </div>
+                        <div style="font-size:0.8rem;color:#065F46;line-height:1.8;">
+                            • <strong>mitType = UNSCHEDULED</strong>：非固定周期扣款，由商户按需发起<br>
+                            • <strong>无 subscriptionPlan</strong>：不传订阅计划，商户自行管理业务逻辑<br>
+                            • <strong>paymentTokenID</strong>：绑定成功后获取，用于后续所有扣款
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">⚙️</div>
+                            订单参数配置
+                        </div>
+                        <div class="param-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="np-amount">订单金额</label>
+                                    <input type="number" id="np-amount" class="form-input" value="9.99" step="0.01" min="0"
+                                        title="订单金额" placeholder="输入金额" oninput="updateDynamic()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="np-currency">币种</label>
+                                    <input type="text" id="np-currency" class="form-input" value="USD" title="币种"
+                                        placeholder="如 USD" oninput="updateDynamic()">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="np-subject">订单标题</label>
+                                <input type="text" id="np-subject" class="form-input" value="代扣标题" title="订单标题"
+                                    placeholder="输入订单标题" oninput="updateDynamic()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="np-userId">用户ID</label>
+                                <input type="text" id="np-userId" class="form-input" value="test1111111" title="用户ID"
+                                    oninput="updateDynamic()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NON-PERIODIC STEP 2: Load Component (NonPeriodic + Component Integration) -->
+                <div class="step-panel" id="panel-np-2-component">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🔌</div>
+                            加载前置组件
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            使用 <strong>applyDropinSession</strong> 接口获取 Session Key，然后初始化前端组件完成支付绑定。
+                        </p>
+
+                        <!-- 左右布局 -->
+                        <div class="dual-view">
+                            <!-- 左侧：请求 SessionKey -->
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 SessionKey</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            applyDropinSession Request
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-session-np')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-session-np">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-10T12:00:00+08:00"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"country"</span>: <span class="js">"MY"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="snp-amount">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="jv">"<span id="snp-currency">USD</span>"</span>,
+    <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 非周期性固定值</span>
+    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
+    <span class="jk">"componentList"</span>: [<span class="js" id="snp-componentList">"CARD", "APPLEPAY", "GOOGLEPAY"</span>] <span class="jc">// 根据支付方式选择</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+
+                                <div class="result-card success" style="margin-top:1rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">返回 Session 信息</div>
+                                        <div class="result-value">
+                                            sessionKey: <strong>02d764a032804ee5...</strong><br>
+                                            clientKey: <strong>67eff2f3b29a4ecf...</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 右侧：前端组件加载 -->
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">🎨 前端组件加载</div>
+                                </div>
+                                <div class="component-area" style="margin-top:0;">
+                                    <div class="component-form">
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-clientKey-np">Client Key</label>
+                                            <input type="text" id="comp-clientKey-np" class="form-input" 
+                                                value="67eff2f3b29a4ecf9576321185dbf658" 
+                                                placeholder="输入 Client Key">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-sessionKey-np">Session Key</label>
+                                            <input type="text" id="comp-sessionKey-np" class="form-input" 
+                                                value="02d764a032804ee5b47013795e25f07d" 
+                                                placeholder="输入 Session Key">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="component-input-label" for="comp-environment-np">环境</label>
+                                            <select id="comp-environment-np" class="form-select">
+                                                <option value="true" selected>Sandbox (测试)</option>
+                                                <option value="false">Production (生产)</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn-component" id="init-component-btn-np" onclick="initComponentNonPeriodic()">
+                                            初始化并加载组件
+                                        </button>
+                                    </div>
+
+                                    <!-- Component Mount Container -->
+                                    <div class="component-mount-container" id="component-mount-container-np">
+                                        <div class="component-mount" id="card-mount-area-np"></div>
+                                        <div class="component-mount" id="applepay-mount-area-np"></div>
+                                        <div class="component-mount" id="googlepay-mount-area-np"></div>
+                                    </div>
+
+                                    <!-- Confirm Payment Button (for CARD) -->
+                                    <button class="btn-component" id="card-pay-btn-np" style="display:none;" onclick="handleCardPaymentNonPeriodic()">
+                                        确认支付并获取 Token
+                                    </button>
+
+                                    <!-- Token Display -->
+                                    <div class="token-display" id="token-display-area-np">
+                                        <div class="token-display-value" id="token-value-display-np">等待获取...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NON-PERIODIC STEP 2/3: 首次创建绑定/支付订单 (panel-np-2) -->
+            <div class="step-panel" id="panel-np-2">
+                <div class="step-card">
+                    <div class="step-card-title">
+                        <div class="card-icon">🔗</div>
+                        首次创建绑定/支付订单 — <code
+                            style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                    </div>
+                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                        调用 <strong>orderAndPay</strong> 引导用户首次支付并绑定支付方式，
+                        <code class="data-pill">mitType: UNSCHEDULED</code> 表示非周期性代扣。
+                        绑定/支付成功后通过 Webhook 异步回调返回 <code class="data-pill">paymentTokenID</code>，用于后续商户按需发起扣款。
+                    </p>
+                    <div class="dual-view">
+                        <div>
+                            <div class="sub-tabs">
+                                <div class="sub-tab active">📤 请求 (绑定/支付)</div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-block-header">
+                                    <div class="code-block-title">
+                                        <div class="code-dot dot-red"></div>
+                                        <div class="code-dot dot-yellow"></div>
+                                        <div class="code-dot dot-green"></div>
+                                        orderAndPay Request — Non-periodic Bind
+                                    </div>
+                                    <button class="copy-mini-btn" onclick="copyCode('req-np-bind')">复制</button>
+                                </div>
+                                <div class="code-body" id="req-np-bind">
+                                    <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_<span id="np-tradeNo">1741490400000</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"<span id="np-req-subject">代扣标题</span>"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="np-req-amount">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"<span id="np-req-currency">USD</span>"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"<span id="np-req-userId">test1111111</span>"</span>,
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test unscheduled mit"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://your.app/return"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Hosted_Checkout"</span>, <span class="jc">// 收银台: Hosted_Checkout; API直连: Direct_Payment</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>, <span class="jc">// CARD/APPLEPAY/GOOGLEPAY/ONE_TOUCH</span>
+      <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 非周期性代扣，固定值</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传true，生成paymentTokenID</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span> <span class="jc">// 必传false，用户参与发起</span>
+    }
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="sub-tabs">
+                                <div class="sub-tab active">📥 Webhook 异步回调</div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-block-header">
+                                    <div class="code-block-title">
+                                        <div class="code-dot dot-red"></div>
+                                        <div class="code-dot dot-yellow"></div>
+                                        <div class="code-dot dot-green"></div>
+                                        Webhook — Bind/Pay Success
+                                    </div>
+                                </div>
+                                <div class="code-body">
+                                    <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentTokenID"</span>:
+      <span class="js">"PMTOKEN177XXXXX1000551"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test1111111"</span>,
+    <span class="jk">"amount"</span>: <span class="jv" id="np-resp-amount">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="jv">"<span id="np-resp-currency">USD</span>"</span>
+  }
+}</pre>
+                                </div>
+                            </div>
+                            <div class="result-card success" style="margin-top:0.75rem;">
+                                <div class="result-icon">✓</div>
+                                <div>
+                                    <div class="result-label">绑定/支付成功 — 获取 paymentTokenID</div>
+                                    <div class="result-value"><strong>paymentTokenID</strong>:
+                                        PMTOKEN177XXXXX1000551<br>
+                                        <span
+                                            style="color:var(--text-muted);font-size:.75rem">保存此token，商户可随时按业务需求发起后续扣款</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <!-- NON-PERIODIC STEP 3: 后续发起扣款 (panel-np-3) -->
+            <div class="step-panel" id="panel-np-3">
+                <div class="step-card">
+                    <div class="step-card-title">
+                        <div class="card-icon">💳</div>
+                        后续发起扣款（商户发起） — <code
+                            style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                    </div>
+                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                        商户根据业务需求（如会员到期、消费达到阈值等），使用步骤二返回的
+                        <code class="data-pill">paymentTokenID</code> 主动调用 <strong>orderAndPay</strong> 发起后续扣款。
+                        <strong>无需传 subscriptionPlan</strong>，<code class="data-pill">merchantInitiated: true</code>
+                        表示商户主动发起。
+                    </p>
+                    <div class="dual-view">
+                        <div>
+                            <div class="sub-tabs">
+                                <div class="sub-tab active">📤 请求 (后续扣款)</div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-block-header">
+                                    <div class="code-block-title">
+                                        <div class="code-dot dot-red"></div>
+                                        <div class="code-dot dot-yellow"></div>
+                                        <div class="code-dot dot-green"></div>
+                                        orderAndPay Request — Subsequent Deduct
+                                    </div>
+                                    <button class="copy-mini-btn" onclick="copyCode('req-np-deduct')">复制</button>
+                                </div>
+                                <div class="code-body" id="req-np-deduct">
+                                    <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_<span id="np-ded-tradeNo">1741490400000</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"<span id="np-ded-subject">代扣标题</span>"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="np-ded-amount">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"<span id="np-ded-currency">USD</span>"</span>,
+    <span class="jk">"country"</span>: <span class="js">"UN"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"<span id="np-ded-userId">test1111111</span>"</span>,
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>,
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>,
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>,
+    <span class="jc">// ⚠️ 非周期性代扣无需传 subscriptionPlan</span>
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
+      <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 固定值，非周期性</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">false</span>,
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">true</span>, <span class="jc">// 商户主动发起 (MIT)</span>
+      <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN177XXXXX1000551"</span> <span class="jc">// Step2 Webhook返回的Token</span>
+    }
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="sub-tabs">
+                                <div class="sub-tab active">📥 扣款结果</div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-block-header">
+                                    <div class="code-block-title">
+                                        <div class="code-dot dot-red"></div>
+                                        <div class="code-dot dot-yellow"></div>
+                                        <div class="code-dot dot-green"></div>
+                                        orderAndPay Response — Deduct
+                                    </div>
+                                </div>
+                                <div class="code-body">
+                                    <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_NP_20260315"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"chargeAmount"</span>: {
+      <span class="jk">"amount"</span>: <span class="jv" id="np-ded-resAmt">9.99</span>,
+      <span class="jk">"currency"</span>: <span class="jv">"<span id="np-ded-resCur">USD</span>"</span>
+    }
+  }
+}</pre>
+                                </div>
+                            </div>
+                            <div class="completion-banner" style="margin-top:0.75rem;padding:1.5rem;">
+                                <div class="check-big"
+                                    style="width:48px;height:48px;font-size:1.2rem;margin-bottom:.75rem;">✓</div>
+                                <div class="completion-title" style="font-size:1rem;">扣款成功！</div>
+                                <div class="completion-desc" style="font-size:0.8rem;">
+                                    非周期性代扣完成，<br>
+                                    商户可随时根据业务需求再次使用<br>
+                                    <code
+                                        style="background:rgba(255,255,255,.7);padding:2px 6px;border-radius:4px;font-size:.75rem;">paymentTokenID</code>
+                                    发起新的扣款
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div><!-- /step-content-area -->
+
+            <!-- Bottom action bar -->
+            <div class="action-bar">
+                <div class="action-hint" id="action-hint"></div>
+                <div style="display:flex;gap:.75rem;align-items:center;">
+                    <button class="btn btn-ghost" id="btn-back" onclick="goPrev()" style="display:none;">← 上一步</button>
+                    <button class="btn btn-primary" id="btn-next" onclick="goNext()">确认参数，下一步 →</button>
+                </div>
+            </div>
+
+        </div><!-- /right-panel -->
+    </div><!-- /app-layout -->
+
+    <script>
+        // ─── State & Config ───
+        // 获取当前集成方式
+        function getCurrentIntegration() {
+            const integrationRadio = document.querySelector('input[name="integration"]:checked');
+            return integrationRadio ? integrationRadio.value : 'cashier';
+        }
+
+        // 获取当前支付方式
+        function getCurrentPayment() {
+            const paymentRadio = document.querySelector('input[name="payment"]:checked');
+            return paymentRadio ? paymentRadio.value : 'card';
+        }
+
+        // 检查 APM 与前置组件的兼容性
+        function checkAPMComponentCompatibility() {
+            const integration = getCurrentIntegration();
+            const payment = getCurrentPayment();
+            
+            if (integration === 'component' && payment === 'apm') {
+                alert('⚠️ APM 不支持前置组件集成方式\n\n请选择其他支付方式（CARD、APPLEPAY、GOOGLEPAY）或切换到其他集成方式。');
+                return false;
+            }
+            return true;
+        }
+
+        // 动态获取步骤配置
+        function getStepsForMode(mode) {
+            const integration = getCurrentIntegration();
+            
+            if (mode === 'payermax') {
+                if (integration === 'component') {
+                    return [
+                        { id: 'pm-1', label: 'Step 1', title: '收集用户订阅参数' },
+                        { id: 'pm-2', label: 'Step 2', title: '创建订阅计划' },
+                        { id: 'pm-3-component', label: 'Step 3', title: '加载前置组件' },
+                        { id: 'pm-3', label: 'Step 4', title: '激活订阅计划' },
+                        { id: 'pm-4', label: 'Step 5', title: 'PMX自动代扣' }
+                    ];
+                } else {
+                    return [
+                        { id: 'pm-1', label: 'Step 1', title: '收集用户订阅参数' },
+                        { id: 'pm-2', label: 'Step 2', title: '创建订阅计划' },
+                        { id: 'pm-3', label: 'Step 3', title: '激活订阅计划' },
+                        { id: 'pm-4', label: 'Step 4', title: 'PMX自动代扣' }
+                    ];
+                }
+            } else if (mode === 'merchant') {
+                if (integration === 'component') {
+                    return [
+                        { id: 'pm-1', label: 'Step 1', title: '收集用户订阅参数' },
+                        { id: 'm-2-component', label: 'Step 2', title: '加载前置组件' },
+                        { id: 'm-2', label: 'Step 3', title: '首次绑定支付方式' },
+                        { id: 'm-3', label: 'Step 4', title: '后续发起扣款' }
+                    ];
+                } else {
+                    return [
+                        { id: 'pm-1', label: 'Step 1', title: '收集用户订阅参数' },
+                        { id: 'm-2', label: 'Step 2', title: '首次绑定支付方式' },
+                        { id: 'm-3', label: 'Step 3', title: '后续发起扣款' }
+                    ];
+                }
+            } else if (mode === 'nonperiodic') {
+                if (integration === 'component') {
+                    return [
+                        { id: 'np-1', label: 'Step 1', title: '收集用户业务数据' },
+                        { id: 'np-2-component', label: 'Step 2', title: '加载前置组件' },
+                        { id: 'np-2', label: 'Step 3', title: '首次创建绑定/支付' },
+                        { id: 'np-3', label: 'Step 4', title: '后续发起扣款' }
+                    ];
+                } else {
+                    return [
+                        { id: 'np-1', label: 'Step 1', title: '收集用户业务数据' },
+                        { id: 'np-2', label: 'Step 2', title: '首次创建绑定/支付' },
+                        { id: 'np-3', label: 'Step 3', title: '后续发起扣款' }
+                    ];
+                }
+            }
+            return [];
+        }
+
+        // 动态获取按钮标签
+        function getBtnLabelsForMode(mode) {
+            const integration = getCurrentIntegration();
+            
+            if (mode === 'payermax') {
+                if (integration === 'component') {
+                    return ['确认参数，下一步 →', '调用创建，下一步 →', '加载组件，下一步 →', '激活成功，查看最终状态 →', ''];
+                } else {
+                    return ['确认参数，下一步 →', '调用创建，下一步 →', '激活成功，查看最终状态 →', ''];
+                }
+            } else if (mode === 'merchant') {
+                if (integration === 'component') {
+                    return ['确认参数，下一步 →', '加载组件，下一步 →', '绑定成功，查看后续扣款 →', ''];
+                } else {
+                    return ['确认参数，进入绑定 →', '绑定成功，查看后续扣款 →', ''];
+                }
+            } else if (mode === 'nonperiodic') {
+                if (integration === 'component') {
+                    return ['确认参数，下一步 →', '加载组件，下一步 →', '绑定成功，查看后续扣款 →', ''];
+                } else {
+                    return ['确认参数，进入绑定/支付 →', '绑定成功，查看后续扣款 →', ''];
+                }
+            }
+            return [];
+        }
+
+        // 动态获取提示信息
+        function getHintsForMode(mode) {
+            const integration = getCurrentIntegration();
+            
+            if (mode === 'payermax') {
+                if (integration === 'component') {
+                    return [
+                        '💡 填写订阅参数后点击下一步，参数将自动填入后端请求示例',
+                        '💡 查看后端请求和返回示例，了解 subscriptionCreate API',
+                        '💡 输入 sessionKey 和 clientKey，初始化并加载前置组件',
+                        '💡 查看后端请求和返回示例，了解 orderAndPay 激活流程',
+                        '🎉 流程演示完成！PayerMax 将按计划自动发起后续扣款'
+                    ];
+                } else {
+                    return [
+                        '💡 填写订阅参数后点击下一步，参数将自动填入后端请求示例',
+                        '💡 查看后端请求和返回示例，了解 subscriptionCreate API',
+                        '💡 查看后端请求和返回示例，了解 orderAndPay 激活流程',
+                        '🎉 流程演示完成！PayerMax 将按计划自动发起后续扣款'
+                    ];
+                }
+            } else if (mode === 'merchant') {
+                if (integration === 'component') {
+                    return [
+                        '💡 填写参数后点击下一步，参数将自动代入请求示例',
+                        '💡 输入 sessionKey 和 clientKey，初始化并加载前置组件',
+                        '💡 查看 orderAndPay 绑定请求代码，绑定成功后 Webhook 返回 paymentTokenID',
+                        '🎉 流程演示完成！商户可使用 paymentTokenID 自主发起后续扣款'
+                    ];
+                } else {
+                    return [
+                        '💡 填写参数后点击下一步，参数将自动代入绑定请求示例',
+                        '💡 查看 orderAndPay 绑定请求代码，绑定成功后 Webhook 返回 paymentTokenID',
+                        '🎉 流程演示完成！商户可使用 paymentTokenID 自主发起后续扣款'
+                    ];
+                }
+            } else if (mode === 'nonperiodic') {
+                if (integration === 'component') {
+                    return [
+                        '💡 填写首次订单参数，参数将自动代入请求示例',
+                        '💡 输入 sessionKey 和 clientKey，初始化并加载前置组件',
+                        '💡 查看 orderAndPay 绑定/支付请求，支付成功后 Webhook 返回 paymentTokenID',
+                        '🎉 流程演示完成！商户可随时根据业务需求使用 paymentTokenID 发起扣款'
+                    ];
+                } else {
+                    return [
+                        '💡 填写首次订单参数，参数将自动代入绑定/支付请求示例',
+                        '💡 查看 orderAndPay 绑定/支付请求，支付成功后 Webhook 返回 paymentTokenID',
+                        '🎉 流程演示完成！商户可随时根据业务需求使用 paymentTokenID 发起扣款'
+                    ];
+                }
+            }
+            return [];
+        }
+
+        let currentMode = 'payermax';
+        let currentStep = 0;
+        let pmComponent = null; // 存储 PayerMax 模式组件实例
+        let pmComponentMerchant = null; // 存储 Merchant 模式组件实例
+        let pmComponentNonPeriodic = null; // 存储 NonPeriodic 模式组件实例
+
+        // ─── Init ───
+        const startDate = new Date(); startDate.setDate(startDate.getDate() + 1);
+        document.getElementById('p-startDate').value = startDate.toISOString().slice(0, 16);
+
+        function init() {
+            renderProgress();
+            showPanel();
+            renderActionBar();
+            updateDynamic();
+        }
+
+        // ─── Mode Switch ───
+        function switchMode(el, mode) {
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            currentMode = mode;
+            currentStep = 0;
+            
+            // 清理 PayerMax 模式组件
+            if (pmComponent) {
+                try {
+                    pmComponent.unmount();
+                } catch (e) {
+                    console.log('Component unmount error:', e);
+                }
+                pmComponent = null;
+            }
+            
+            // 清理 Merchant 模式组件
+            if (pmComponentMerchant) {
+                try {
+                    pmComponentMerchant.unmount();
+                } catch (e) {
+                    console.log('Merchant component unmount error:', e);
+                }
+                pmComponentMerchant = null;
+            }
+            
+            // 清理 NonPeriodic 模式组件
+            if (pmComponentNonPeriodic) {
+                try {
+                    pmComponentNonPeriodic.unmount();
+                } catch (e) {
+                    console.log('NonPeriodic component unmount error:', e);
+                }
+                pmComponentNonPeriodic = null;
+            }
+            
+            init();
+        }
+
+        // 监听集成方式变化
+        document.querySelectorAll('input[name="integration"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // 检查 APM 与前置组件的兼容性
+                if (!checkAPMComponentCompatibility()) {
+                    // 如果不兼容，恢复到之前的选择
+                    const previousIntegration = this.value === 'component' ? 'cashier' : this.value;
+                    document.querySelector(`input[name="integration"][value="${previousIntegration}"]`).checked = true;
+                    return;
+                }
+                
+                currentStep = 0;
+                
+                // 清理 PayerMax 模式组件
+                if (pmComponent) {
+                    try {
+                        pmComponent.unmount();
+                    } catch (e) {
+                        console.log('Component unmount error:', e);
+                    }
+                    pmComponent = null;
+                }
+                
+                // 清理 Merchant 模式组件
+                if (pmComponentMerchant) {
+                    try {
+                        pmComponentMerchant.unmount();
+                    } catch (e) {
+                        console.log('Merchant component unmount error:', e);
+                    }
+                    pmComponentMerchant = null;
+                }
+                
+                // 清理 NonPeriodic 模式组件
+                if (pmComponentNonPeriodic) {
+                    try {
+                        pmComponentNonPeriodic.unmount();
+                    } catch (e) {
+                        console.log('NonPeriodic component unmount error:', e);
+                    }
+                    pmComponentNonPeriodic = null;
+                }
+                
+                init();
+            });
+        });
+
+        // 监听支付方式变化
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // 检查 APM 与前置组件的兼容性
+                if (!checkAPMComponentCompatibility()) {
+                    // 如果不兼容，恢复到之前的选择
+                    const previousPayment = this.value === 'apm' ? 'card' : this.value;
+                    document.querySelector(`input[name="payment"][value="${previousPayment}"]`).checked = true;
+                    return;
+                }
+                
+                updateDynamic();
+            });
+        });
+
+        // ─── Progress Header ───
+        function renderProgress() {
+            const steps = getStepsForMode(currentMode);
+            const ph = document.getElementById('progress-header');
+            ph.innerHTML = steps.map((s, i) => {
+                const state = i < currentStep ? 'completed' : i === currentStep ? 'active' : '';
+                const dotContent = i < currentStep ? '✓' : (i + 1);
+                return `
+        <div class="prog-step ${state}">
+          <div class="prog-dot">${dotContent}</div>
+          <div class="prog-info">
+            <div class="prog-label">${s.label}</div>
+            <div class="prog-title">${s.title}</div>
+          </div>
+        </div>`;
+            }).join('');
+        }
+
+        // ─── Panel Show ───
+        function showPanel() {
+            const steps = getStepsForMode(currentMode);
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            const panelId = 'panel-' + steps[currentStep].id;
+            const panel = document.getElementById(panelId);
+            if (panel) panel.classList.add('active');
+        }
+
+        // ─── Action Bar ───
+        function renderActionBar() {
+            const steps = getStepsForMode(currentMode);
+            const hints = getHintsForMode(currentMode);
+            const btnLabels = getBtnLabelsForMode(currentMode);
+            const isLast = currentStep === steps.length - 1;
+
+            document.getElementById('action-hint').textContent = hints[currentStep] || '';
+            document.getElementById('btn-back').style.display = currentStep > 0 ? 'inline-flex' : 'none';
+
+            const btnNext = document.getElementById('btn-next');
+            if (isLast) {
+                btnNext.style.display = 'none';
+            } else {
+                btnNext.style.display = 'inline-flex';
+                btnNext.textContent = btnLabels[currentStep] || '下一步 →';
+                btnNext.className = 'btn ' + (currentStep >= 1 ? 'btn-success' : 'btn-primary');
+            }
+        }
+
+        // ─── Navigation ───
+        function goNext() {
+            const steps = getStepsForMode(currentMode);
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderProgress();
+                showPanel();
+                renderActionBar();
+                updateDynamic();
+                
+                // 如果是 PayerMax 模式且进入第二步（创建订阅计划），自动切换到对应的订阅类型代码块
+                if (currentMode === 'payermax' && steps[currentStep].id === 'pm-2') {
+                    const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+                    // 延迟执行，确保 DOM 已更新
+                    setTimeout(() => {
+                        switchCreateTab(subtype, true);
+                    }, 50);
+                }
+                
+                // 如果是商户自管模式且进入第二步（首次绑定支付方式），自动切换到对应的订阅类型代码块
+                if (currentMode === 'merchant' && steps[currentStep].id === 'm-2') {
+                    const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+                    // 延迟执行，确保 DOM 已更新
+                    setTimeout(() => {
+                        switchMerchantBindTab(subtype, true);
+                    }, 50);
+                }
+            }
+        }
+
+        function goPrev() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderProgress();
+                showPanel();
+                renderActionBar();
+            }
+        }
+
+        function resetAll() {
+            currentStep = 0;
+            
+            // 清理 PayerMax 模式组件
+            if (pmComponent) {
+                try {
+                    pmComponent.unmount();
+                } catch (e) {
+                    console.log('Component unmount error:', e);
+                }
+                pmComponent = null;
+            }
+            
+            // 清理 Merchant 模式组件
+            if (pmComponentMerchant) {
+                try {
+                    pmComponentMerchant.unmount();
+                } catch (e) {
+                    console.log('Merchant component unmount error:', e);
+                }
+                pmComponentMerchant = null;
+            }
+            
+            // 清理 NonPeriodic 模式组件
+            if (pmComponentNonPeriodic) {
+                try {
+                    pmComponentNonPeriodic.unmount();
+                } catch (e) {
+                    console.log('NonPeriodic component unmount error:', e);
+                }
+                pmComponentNonPeriodic = null;
+            }
+            
+            // 重置 PayerMax 模式组件显示状态
+            const mountContainer = document.getElementById('component-mount-container');
+            if (mountContainer) {
+                mountContainer.classList.remove('active');
+            }
+            
+            document.querySelectorAll('.component-mount').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            
+            const tokenDisplay = document.getElementById('token-display-area');
+            if (tokenDisplay) {
+                tokenDisplay.classList.remove('active');
+            }
+            
+            const cardPayBtn = document.getElementById('card-pay-btn');
+            if (cardPayBtn) {
+                cardPayBtn.style.display = 'none';
+            }
+
+            // 重置 Merchant 模式组件显示状态
+            const mountContainerM = document.getElementById('component-mount-container-m');
+            if (mountContainerM) {
+                mountContainerM.classList.remove('active');
+            }
+            
+            document.querySelectorAll('#card-mount-area-m, #applepay-mount-area-m, #googlepay-mount-area-m').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            
+            const tokenDisplayM = document.getElementById('token-display-area-m');
+            if (tokenDisplayM) {
+                tokenDisplayM.classList.remove('active');
+            }
+            
+            const cardPayBtnM = document.getElementById('card-pay-btn-m');
+            if (cardPayBtnM) {
+                cardPayBtnM.style.display = 'none';
+            }
+
+            // 重置 NonPeriodic 模式组件显示状态
+            const mountContainerNP = document.getElementById('component-mount-container-np');
+            if (mountContainerNP) {
+                mountContainerNP.classList.remove('active');
+            }
+            
+            document.querySelectorAll('#card-mount-area-np, #applepay-mount-area-np, #googlepay-mount-area-np').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            
+            const tokenDisplayNP = document.getElementById('token-display-area-np');
+            if (tokenDisplayNP) {
+                tokenDisplayNP.classList.remove('active');
+            }
+            
+            const cardPayBtnNP = document.getElementById('card-pay-btn-np');
+            if (cardPayBtnNP) {
+                cardPayBtnNP.style.display = 'none';
+            }
+            
+            init();
+        }
+
+        // ─── Switch Create Tab ───
+        function switchCreateTab(type, autoSwitch = false) {
+            // 更新 tab 激活状态
+            const tabsContainer = document.querySelector('#panel-pm-2 .sub-tabs');
+            if (tabsContainer) {
+                const tabs = tabsContainer.querySelectorAll('.sub-tab');
+                tabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // 如果是自动切换，根据 type 找到对应的 tab
+                if (autoSwitch) {
+                    tabs.forEach(tab => {
+                        const tabText = tab.textContent.trim();
+                        if ((type === 'standard' && tabText.includes('普通订阅')) ||
+                            (type === 'trial' && tabText.includes('N天试用')) ||
+                            (type === 'discount' && tabText.includes('前N期优惠')) ||
+                            (type === 'trial-discount' && tabText.includes('试用+优惠'))) {
+                            tab.classList.add('active');
+                        }
+                    });
+                } else if (event && event.target) {
+                    // 手动点击时，激活点击的 tab
+                    event.target.classList.add('active');
+                }
+            }
+            
+            // 隐藏所有代码块
+            document.querySelectorAll('.create-code-standard, .create-code-trial, .create-code-discount, .create-code-trial-discount').forEach(block => {
+                block.style.display = 'none';
+            });
+            
+            // 显示对应的代码块
+            const targetBlock = document.querySelector(`.create-code-${type}`);
+            if (targetBlock) {
+                targetBlock.style.display = 'block';
+            }
+        }
+
+        // ─── Switch Merchant Bind Tab ───
+        function switchMerchantBindTab(type, autoSwitch = false) {
+            // 更新 tab 激活状态
+            const tabsContainer = document.querySelector('#panel-m-2 .sub-tabs');
+            if (tabsContainer) {
+                const tabs = tabsContainer.querySelectorAll('.sub-tab');
+                tabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // 如果是自动切换，根据 type 找到对应的 tab
+                if (autoSwitch) {
+                    tabs.forEach(tab => {
+                        const tabText = tab.textContent.trim();
+                        if ((type === 'standard' && tabText.includes('普通订阅')) ||
+                            (type === 'trial' && tabText.includes('N天试用')) ||
+                            (type === 'discount' && tabText.includes('前N期优惠')) ||
+                            (type === 'trial-discount' && tabText.includes('试用+优惠'))) {
+                            tab.classList.add('active');
+                        }
+                    });
+                } else if (event && event.target) {
+                    // 手动点击时，激活点击的 tab
+                    event.target.classList.add('active');
+                }
+            }
+            
+            // 隐藏所有代码块
+            document.querySelectorAll('.merchant-bind-code-standard, .merchant-bind-code-trial, .merchant-bind-code-discount, .merchant-bind-code-trial-discount').forEach(block => {
+                block.style.display = 'none';
+            });
+            
+            // 显示对应的代码块
+            const targetBlock = document.querySelector(`.merchant-bind-code-${type}`);
+            if (targetBlock) {
+                targetBlock.style.display = 'block';
+            }
+        }
+
+        // ─── Dynamic value injection ───
+        function updateDynamic() {
+            const totalPeriods = document.getElementById('p-totalPeriods')?.value || 12;
+            const periodCount = document.getElementById('p-periodCount')?.value || 1;
+            const periodUnit = document.getElementById('p-periodUnit')?.value || 'M';
+            const amount = document.getElementById('p-amount')?.value || '9.99';
+            const currency = document.getElementById('p-currency')?.value || 'USD';
+            const startDate = document.getElementById('p-startDate')?.value || '';
+            const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+            const payment = getCurrentPayment(); // 获取当前支付方式
+
+            // Show/hide conditional rows
+            document.getElementById('trialDaysRow').style.display = subtype === 'trial' ? 'flex' : 'none';
+            document.getElementById('discountParamsRow').style.display = subtype === 'discount' ? 'block' : 'none';
+            document.getElementById('trialDiscountParamsRow').style.display = subtype === 'trial-discount' ? 'block' : 'none';
+
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+            // PayerMax step 2 — subscriptionCreate
+            setTxt('c-totalPeriods', totalPeriods);
+            setTxt('c-periodUnit', periodUnit);
+            setTxt('c-periodCount', periodCount);
+            setTxt('c-amount', amount);
+            setTxt('c-currency', currency);
+            setTxt('c-startDate', startDate ? new Date(startDate).toISOString().replace('Z', '+08:00') : '—');
+
+            // PayerMax step 3 — orderAndPay activate
+            // 根据订阅类型计算激活金额
+            let activateAmount = amount;
+            if (subtype === 'trial') {
+                // N天试用：激活金额为0（免费试用）
+                activateAmount = '0';
+            } else if (subtype === 'trial-discount') {
+                // 试用+优惠：激活金额为试用期金额
+                const trialAmountCombo = document.getElementById('p-trialAmount-combo')?.value || '0.99';
+                activateAmount = trialAmountCombo;
+            }
+            setTxt('a-amount', activateAmount); 
+            setTxt('a-currency', currency);
+            
+            // 根据支付方式更新 paymentMethodType
+            const paymentMethodTypeMap = {
+                'card': 'CARD',
+                'applepay': 'APPLEPAY',
+                'googlepay': 'GOOGLEPAY',
+                'apm': 'ONE_TOUCH' // APM 指定支付方式时使用 ONE_TOUCH，全量收银台时可不传
+            };
+            setTxt('a-paymentMethodType', paymentMethodTypeMap[payment] || 'CARD');
+
+            // PayerMax step 4 — Webhook
+            setTxt('w-amount', amount); setTxt('w-currency', currency);
+
+            // PMX completion summary
+            const unitMap = { D: '日', W: '周', M: '月', Y: '年' };
+            setTxt('f-cycle', `每 ${periodCount} ${unitMap[periodUnit] || periodUnit} · 共 ${totalPeriods} 期`);
+            setTxt('f-amount', `${currency} ${amount}`);
+            setTxt('f-startDate', startDate ? startDate.replace('T', ' ') : '—');
+
+            // Merchant step 2 — bind orderAndPay
+            setTxt('m-amount', amount);
+            setTxt('m-currency', currency);
+            setTxt('m-tradeNo', Date.now());
+            // 添加 subscriptionPlan 动态更新
+            setTxt('m-bindSubNo', Date.now());
+            setTxt('m-bindDeductNo', Date.now() + 1);
+            setTxt('m-bindTotalPeriods', totalPeriods);
+
+            // Merchant step 3 — deduct orderAndPay
+            setTxt('m-dedAmount', amount);
+            setTxt('m-dedCurrency', currency);
+            setTxt('m-dedTotalPeriods', totalPeriods);
+            setTxt('m-dedTradeNo', Date.now());
+            setTxt('m-dedResAmt', amount);
+            setTxt('m-dedResCur', currency);
+
+            // Component session request — update componentList based on payment method
+            let componentListText = '';
+            if (payment === 'card') {
+                componentListText = '"CARD", "APPLEPAY", "GOOGLEPAY"';
+            } else if (payment === 'applepay') {
+                componentListText = '"APPLEPAY"';
+            } else if (payment === 'googlepay') {
+                componentListText = '"GOOGLEPAY"';
+            }
+            setTxt('s-componentList', componentListText);
+            // Session 金额与激活金额保持一致
+            setTxt('s-amount', activateAmount);
+            setTxt('s-currency', currency);
+
+            // Merchant mode session request — update componentList
+            setTxt('sm-componentList', componentListText);
+            // Merchant 模式的 session 金额也与激活金额保持一致
+            setTxt('sm-amount', activateAmount);
+            setTxt('sm-currency', currency);
+
+            // Non-periodic mode — update parameters from np- fields
+            const npAmount = document.getElementById('np-amount')?.value || '9.99';
+            const npCurrency = document.getElementById('np-currency')?.value || 'USD';
+            
+            // Non-periodic mode session request — update componentList
+            setTxt('snp-componentList', componentListText);
+            setTxt('snp-amount', npAmount);
+            setTxt('snp-currency', npCurrency);
+            
+            // 如果当前在 PayerMax 模式的第二步（创建订阅计划），自动切换代码块显示
+            const steps = getStepsForMode(currentMode);
+            if (currentMode === 'payermax' && steps[currentStep]?.id === 'pm-2') {
+                switchCreateTab(subtype, true);
+            }
+            
+            // 如果当前在商户自管模式的第二步（首次绑定支付方式），自动切换代码块显示
+            if (currentMode === 'merchant' && steps[currentStep]?.id === 'm-2') {
+                switchMerchantBindTab(subtype, true);
+            }
+        }
+
+        // ─── Component Functions ───
+        function initComponent() {
+            const clientKey = document.getElementById('comp-clientKey').value;
+            const sessionKey = document.getElementById('comp-sessionKey').value;
+            const environment = document.getElementById('comp-environment').value === 'true';
+            const payment = getCurrentPayment();
+
+            if (!clientKey || !sessionKey) {
+                alert('请输入 Client Key 和 Session Key');
+                return;
+            }
+
+            // 清理之前的组件
+            if (pmComponent) {
+                try {
+                    pmComponent.unmount();
+                } catch (e) {
+                    console.log('Unmount error:', e);
+                }
+                pmComponent = null;
+            }
+
+            // 重置显示状态
+            const mountContainer = document.getElementById('component-mount-container');
+            mountContainer.classList.remove('active');
+            
+            document.querySelectorAll('.component-mount').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            document.getElementById('token-display-area').classList.remove('active');
+            document.getElementById('card-pay-btn').style.display = 'none';
+
+            try {
+                // 配置对象
+                let config = {
+                    clientKey: clientKey,
+                    sessionKey: sessionKey,
+                    sandbox: environment
+                };
+
+                // 根据支付方式加载不同组件
+                let componentType = '';
+                let mountId = '';
+                let mountElement = null;
+
+                if (payment === 'card') {
+                    componentType = 'card';
+                    mountId = '#card-mount-area';
+                    mountElement = document.getElementById('card-mount-area');
+                } else if (payment === 'applepay') {
+                    componentType = 'applepay';
+                    mountId = '#applepay-mount-area';
+                    mountElement = document.getElementById('applepay-mount-area');
+                    
+                    // 检查是否支持 ApplePay
+                    if (typeof PMdropin !== 'undefined' && !PMdropin.isSupportApplePay()) {
+                        alert('当前设备或浏览器不支持 Apple Pay');
+                        return;
+                    }
+                } else if (payment === 'googlepay') {
+                    componentType = 'googlepay';
+                    mountId = '#googlepay-mount-area';
+                    mountElement = document.getElementById('googlepay-mount-area');
+                    config.payButtonConfig = { width: "100%", height: "40px" };
+                }
+
+                // 显示挂载容器和对应的挂载点
+                mountContainer.classList.add('active');
+                if (mountElement) {
+                    mountElement.classList.add('active');
+                    mountElement.style.display = 'block';
+                }
+
+                // 创建并挂载组件
+                pmComponent = PMdropin.create(componentType, config);
+                pmComponent.mount(mountId);
+
+                // 监听组件就绪事件
+                pmComponent.on('ready', () => {
+                    console.log(`${componentType} component ready`);
+                });
+
+                // 监听组件加载事件
+                pmComponent.on('load', (res) => {
+                    if (res && res.code === 'SUCCESS') {
+                        console.log('Component loaded successfully');
+                        if (componentType === 'card') {
+                            document.getElementById('card-pay-btn').style.display = 'block';
+                        }
+                    } else if (res) {
+                        alert('组件加载失败: ' + res.msg);
+                    }
+                });
+
+                // 设置支付处理函数
+                if (componentType !== 'card') {
+                    pmComponent.on('payButtonClick', handleAppleGooglePayment);
+                } else {
+                    // CARD 支付通过按钮触发
+                    const cardPayBtn = document.getElementById('card-pay-btn');
+                    const newPayBtn = cardPayBtn.cloneNode(true);
+                    cardPayBtn.parentNode.replaceChild(newPayBtn, cardPayBtn);
+                    newPayBtn.addEventListener('click', handleCardPayment);
+                }
+
+                console.log('Component initialized:', componentType);
+            } catch (e) {
+                console.error('Component initialization error:', e);
+                alert('组件初始化失败: ' + e.message);
+            }
+        }
+
+        function handleCardPayment() {
+            if (!pmComponent) {
+                alert('请先初始化组件');
+                return;
+            }
+
+            pmComponent.emit('setDisabled', true);
+
+            // 获取订阅类型
+            const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+            
+            // 获取参数
+            const totalPeriods = document.getElementById('p-totalPeriods').value;
+            const periodCount = document.getElementById('p-periodCount').value;
+            const periodUnit = document.getElementById('p-periodUnit').value; // 已经是 D/W/M/Y 格式
+            const amount = document.getElementById('p-amount').value;
+            const currency = document.getElementById('p-currency').value;
+            const startDate = document.getElementById('p-startDate').value;
+            const formattedDate = startDate ? startDate + ":00+00:00" : "";
+
+            // CARD 支付不需要传 subscriptionPlan，只传 mitManagementUrl
+            const canMakePaymentOptions = {
+                mitManagementUrl: "http://www.xxx.com"
+            };
+
+            pmComponent.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                pmComponent.emit('setDisabled', false);
+                if (resp.code === 'APPLY_SUCCESS') {
+                    const token = resp.data.paymentToken;
+                    document.getElementById('token-value-display').textContent = token;
+                    document.getElementById('token-display-area').classList.add('active');
+                } else {
+                    alert('支付申请失败: ' + resp.msg);
+                }
+            }).catch(err => {
+                pmComponent.emit('setDisabled', false);
+                console.error('Payment error:', err);
+                alert('支付处理失败: ' + err.message);
+            });
+        }
+
+        function handleAppleGooglePayment() {
+            if (!pmComponent) {
+                alert('请先初始化组件');
+                return;
+            }
+
+            pmComponent.emit('setDisabled', true);
+
+            // 获取订阅类型
+            const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+            
+            // 获取参数
+            const totalPeriods = parseInt(document.getElementById('p-totalPeriods').value) || 12;
+            const periodCount = parseInt(document.getElementById('p-periodCount').value) || 1;
+            const periodUnit = document.getElementById('p-periodUnit').value; // 已经是 D/W/M/Y 格式
+            const amount = document.getElementById('p-amount').value;
+            const currency = document.getElementById('p-currency').value;
+            const startDate = document.getElementById('p-startDate').value;
+            const formattedDate = startDate ? startDate + ":00+00:00" : "";
+
+            // ApplePay/GooglePay 需要传 subscriptionPlan
+            const canMakePaymentOptions = {
+                subscriptionPlan: {
+                    subject: "订阅计划标题",
+                    description: "PMMAX周期首期扣款",
+                    totalPeriods: totalPeriods,
+                    periodRule: {
+                        periodUnit: periodUnit, // 直接使用 D/W/M/Y
+                        periodCount: periodCount
+                    },
+                    periodAmount: {
+                        amount: amount,
+                        currency: currency
+                    },
+                    firstPeriodStartDate: formattedDate
+                },
+                mitManagementUrl: "http://www.xxx.com"
+            };
+
+            // 根据订阅类型添加额外参数
+            if (subtype === 'discount') {
+                const trialPeriodCount = parseInt(document.getElementById('p-trialPeriodCount')?.value) || 3;
+                const trialAmount = document.getElementById('p-trialAmount')?.value || '4.99';
+
+                canMakePaymentOptions.subscriptionPlan.trialPeriodConfig = {
+                    trialPeriodCount: trialPeriodCount,
+                    trialPeriodAmount: {
+                        amount: trialAmount,
+                        currency: currency // 使用主币种
+                    }
+                };
+            } else if (subtype === 'trial-discount') {
+                // 组合型订阅：同时添加 trialConfig 和 trialPeriodConfig
+                const trialDays = parseInt(document.getElementById('p-trialDays-combo')?.value) || 7;
+                const trialAmount = document.getElementById('p-trialAmount-combo')?.value || '0.99';
+                const trialPeriodCount = parseInt(document.getElementById('p-trialPeriodCount-combo')?.value) || 2;
+                const trialPeriodAmount = document.getElementById('p-trialPeriodAmount-combo')?.value || '3.00';
+
+                canMakePaymentOptions.subscriptionPlan.trialConfig = {
+                    trialDays: trialDays,
+                    trialAmount: {
+                        amount: trialAmount,
+                        currency: currency
+                    }
+                };
+
+                canMakePaymentOptions.subscriptionPlan.trialPeriodConfig = {
+                    trialPeriodCount: trialPeriodCount,
+                    trialPeriodAmount: {
+                        amount: trialPeriodAmount,
+                        currency: currency
+                    }
+                };
+            }
+
+            pmComponent.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                pmComponent.emit('setDisabled', false);
+                if (resp.code === 'APPLY_SUCCESS') {
+                    const token = resp.data.paymentToken;
+                    document.getElementById('token-value-display').textContent = token;
+                    document.getElementById('token-display-area').classList.add('active');
+                } else {
+                    alert('支付申请失败: ' + resp.msg);
+                }
+            }).catch(err => {
+                pmComponent.emit('setDisabled', false);
+                console.error('Payment error:', err);
+                alert('支付处理失败: ' + err.message);
+            });
+        }
+
+        // ─── Merchant Component Functions ───
+        function initComponentMerchant() {
+            const clientKey = document.getElementById('comp-clientKey-m').value;
+            const sessionKey = document.getElementById('comp-sessionKey-m').value;
+            const environment = document.getElementById('comp-environment-m').value === 'true';
+            const payment = getCurrentPayment();
+
+            if (!clientKey || !sessionKey) {
+                alert('请输入 Client Key 和 Session Key');
+                return;
+            }
+
+            // 清理之前的组件
+            if (pmComponentMerchant) {
+                try {
+                    pmComponentMerchant.unmount();
+                } catch (e) {
+                    console.log('Unmount error:', e);
+                }
+                pmComponentMerchant = null;
+            }
+
+            // 重置显示状态
+            const mountContainer = document.getElementById('component-mount-container-m');
+            mountContainer.classList.remove('active');
+            
+            document.querySelectorAll('#card-mount-area-m, #applepay-mount-area-m, #googlepay-mount-area-m').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            document.getElementById('token-display-area-m').classList.remove('active');
+            document.getElementById('card-pay-btn-m').style.display = 'none';
+
+            try {
+                // 配置对象
+                let config = {
+                    clientKey: clientKey,
+                    sessionKey: sessionKey,
+                    sandbox: environment
+                };
+
+                // 根据支付方式加载不同组件
+                let componentType = '';
+                let mountId = '';
+                let mountElement = null;
+
+                if (payment === 'card') {
+                    componentType = 'card';
+                    mountId = '#card-mount-area-m';
+                    mountElement = document.getElementById('card-mount-area-m');
+                } else if (payment === 'applepay') {
+                    componentType = 'applepay';
+                    mountId = '#applepay-mount-area-m';
+                    mountElement = document.getElementById('applepay-mount-area-m');
+                    
+                    // 检查是否支持 ApplePay
+                    if (typeof PMdropin !== 'undefined' && !PMdropin.isSupportApplePay()) {
+                        alert('当前设备或浏览器不支持 Apple Pay');
+                        return;
+                    }
+                } else if (payment === 'googlepay') {
+                    componentType = 'googlepay';
+                    mountId = '#googlepay-mount-area-m';
+                    mountElement = document.getElementById('googlepay-mount-area-m');
+                    config.payButtonConfig = { width: "100%", height: "40px" };
+                }
+
+                // 显示挂载容器和对应的挂载点
+                mountContainer.classList.add('active');
+                if (mountElement) {
+                    mountElement.classList.add('active');
+                    mountElement.style.display = 'block';
+                }
+
+                // 创建并挂载组件
+                pmComponentMerchant = PMdropin.create(componentType, config);
+                pmComponentMerchant.mount(mountId);
+
+                // 监听组件就绪事件
+                pmComponentMerchant.on('ready', () => {
+                    console.log(`${componentType} component ready (Merchant mode)`);
+                });
+
+                // 监听组件加载事件
+                pmComponentMerchant.on('load', (res) => {
+                    if (res && res.code === 'SUCCESS') {
+                        console.log('Component loaded successfully (Merchant mode)');
+                        if (componentType === 'card') {
+                            document.getElementById('card-pay-btn-m').style.display = 'block';
+                        }
+                    } else if (res) {
+                        alert('组件加载失败: ' + res.msg);
+                    }
+                });
+
+                // 设置支付处理函数
+                if (componentType !== 'card') {
+                    pmComponentMerchant.on('payButtonClick', handleAppleGooglePaymentMerchant);
+                } else {
+                    // CARD 支付通过按钮触发
+                    const cardPayBtn = document.getElementById('card-pay-btn-m');
+                    const newPayBtn = cardPayBtn.cloneNode(true);
+                    cardPayBtn.parentNode.replaceChild(newPayBtn, cardPayBtn);
+                    newPayBtn.addEventListener('click', handleCardPaymentMerchant);
+                }
+
+                console.log('Component initialized (Merchant mode):', componentType);
+            } catch (e) {
+                console.error('Component initialization error (Merchant mode):', e);
+                alert('组件初始化失败: ' + e.message);
+            }
+        }
+
+        function handleCardPaymentMerchant() {
+            if (!pmComponentMerchant) {
+                alert('请先初始化组件');
+                return;
+            }
+
+            pmComponentMerchant.emit('setDisabled', true);
+
+            // 获取订阅类型
+            const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+            
+            // 获取参数
+            const totalPeriods = document.getElementById('p-totalPeriods').value;
+            const periodCount = document.getElementById('p-periodCount').value;
+            const periodUnit = document.getElementById('p-periodUnit').value; // 已经是 D/W/M/Y 格式
+            const amount = document.getElementById('p-amount').value;
+            const currency = document.getElementById('p-currency').value;
+            const startDate = document.getElementById('p-startDate').value;
+            const formattedDate = startDate ? startDate + ":00+00:00" : "";
+
+            // CARD 支付不需要传 subscriptionPlan，只传 mitManagementUrl
+            const canMakePaymentOptions = {
+                mitManagementUrl: "http://www.xxx.com"
+            };
+
+            pmComponentMerchant.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                pmComponentMerchant.emit('setDisabled', false);
+                if (resp.code === 'APPLY_SUCCESS') {
+                    const token = resp.data.paymentToken;
+                    document.getElementById('token-value-display-m').textContent = token;
+                    document.getElementById('token-display-area-m').classList.add('active');
+                } else {
+                    alert('支付申请失败: ' + resp.msg);
+                }
+            }).catch(err => {
+                pmComponentMerchant.emit('setDisabled', false);
+                console.error('Payment error (Merchant mode):', err);
+                alert('支付处理失败: ' + err.message);
+            });
+        }
+
+        function handleAppleGooglePaymentMerchant() {
+            if (!pmComponentMerchant) {
+                alert('请先初始化组件');
+                return;
+            }
+
+            pmComponentMerchant.emit('setDisabled', true);
+
+            // 获取订阅类型
+            const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
+            
+            // 获取参数
+            const totalPeriods = parseInt(document.getElementById('p-totalPeriods').value) || 12;
+            const periodCount = parseInt(document.getElementById('p-periodCount').value) || 1;
+            const periodUnit = document.getElementById('p-periodUnit').value; // 已经是 D/W/M/Y 格式
+            const amount = document.getElementById('p-amount').value;
+            const currency = document.getElementById('p-currency').value;
+            const startDate = document.getElementById('p-startDate').value;
+            const formattedDate = startDate ? startDate + ":00+00:00" : "";
+
+            // ApplePay/GooglePay 需要传 subscriptionPlan
+            const canMakePaymentOptions = {
+                subscriptionPlan: {
+                    subject: "订阅计划标题",
+                    description: "PMMAX周期首期扣款",
+                    totalPeriods: totalPeriods,
+                    periodRule: {
+                        periodUnit: periodUnit, // 直接使用 D/W/M/Y
+                        periodCount: periodCount
+                    },
+                    periodAmount: {
+                        amount: amount,
+                        currency: currency
+                    },
+                    firstPeriodStartDate: formattedDate
+                },
+                mitManagementUrl: "http://www.xxx.com"
+            };
+
+            // 根据订阅类型添加额外参数
+            if (subtype === 'discount') {
+                const trialPeriodCount = parseInt(document.getElementById('p-trialPeriodCount')?.value) || 3;
+                const trialAmount = document.getElementById('p-trialAmount')?.value || '4.99';
+
+                canMakePaymentOptions.subscriptionPlan.trialPeriodConfig = {
+                    trialPeriodCount: trialPeriodCount,
+                    trialPeriodAmount: {
+                        amount: trialAmount,
+                        currency: currency // 使用主币种
+                    }
+                };
+            } else if (subtype === 'trial-discount') {
+                // 组合型订阅：同时添加 trialConfig 和 trialPeriodConfig
+                const trialDays = parseInt(document.getElementById('p-trialDays-combo')?.value) || 7;
+                const trialAmount = document.getElementById('p-trialAmount-combo')?.value || '0.99';
+                const trialPeriodCount = parseInt(document.getElementById('p-trialPeriodCount-combo')?.value) || 2;
+                const trialPeriodAmount = document.getElementById('p-trialPeriodAmount-combo')?.value || '3.00';
+
+                canMakePaymentOptions.subscriptionPlan.trialConfig = {
+                    trialDays: trialDays,
+                    trialAmount: {
+                        amount: trialAmount,
+                        currency: currency
+                    }
+                };
+
+                canMakePaymentOptions.subscriptionPlan.trialPeriodConfig = {
+                    trialPeriodCount: trialPeriodCount,
+                    trialPeriodAmount: {
+                        amount: trialPeriodAmount,
+                        currency: currency
+                    }
+                };
+            }
+
+            pmComponentMerchant.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                pmComponentMerchant.emit('setDisabled', false);
+                if (resp.code === 'APPLY_SUCCESS') {
+                    const token = resp.data.paymentToken;
+                    document.getElementById('token-value-display-m').textContent = token;
+                    document.getElementById('token-display-area-m').classList.add('active');
+                } else {
+                    alert('支付申请失败: ' + resp.msg);
+                }
+            }).catch(err => {
+                pmComponentMerchant.emit('setDisabled', false);
+                console.error('Payment error (Merchant mode):', err);
+                alert('支付处理失败: ' + err.message);
+            });
+        }
+
+        // ─── NonPeriodic Component Functions ───
+        function initComponentNonPeriodic() {
+            const clientKey = document.getElementById('comp-clientKey-np').value;
+            const sessionKey = document.getElementById('comp-sessionKey-np').value;
+            const environment = document.getElementById('comp-environment-np').value === 'true';
+            const payment = getCurrentPayment();
+
+            if (!clientKey || !sessionKey) {
+                alert('请输入 Client Key 和 Session Key');
+                return;
+            }
+
+            // 清理之前的组件
+            if (pmComponentNonPeriodic) {
+                try {
+                    pmComponentNonPeriodic.unmount();
+                } catch (e) {
+                    console.log('Unmount error:', e);
+                }
+                pmComponentNonPeriodic = null;
+            }
+
+            // 重置显示状态
+            const mountContainer = document.getElementById('component-mount-container-np');
+            mountContainer.classList.remove('active');
+            
+            document.querySelectorAll('#card-mount-area-np, #applepay-mount-area-np, #googlepay-mount-area-np').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            document.getElementById('token-display-area-np').classList.remove('active');
+            document.getElementById('card-pay-btn-np').style.display = 'none';
+
+            try {
+                // 配置对象
+                let config = {
+                    clientKey: clientKey,
+                    sessionKey: sessionKey,
+                    sandbox: environment
+                };
+
+                // 根据支付方式加载不同组件
+                let componentType = '';
+                let mountId = '';
+                let mountElement = null;
+
+                if (payment === 'card') {
+                    componentType = 'card';
+                    mountId = '#card-mount-area-np';
+                    mountElement = document.getElementById('card-mount-area-np');
+                } else if (payment === 'applepay') {
+                    componentType = 'applepay';
+                    mountId = '#applepay-mount-area-np';
+                    mountElement = document.getElementById('applepay-mount-area-np');
+                    
+                    // 检查是否支持 ApplePay
+                    if (typeof PMdropin !== 'undefined' && !PMdropin.isSupportApplePay()) {
+                        alert('当前设备或浏览器不支持 Apple Pay');
+                        return;
+                    }
+                } else if (payment === 'googlepay') {
+                    componentType = 'googlepay';
+                    mountId = '#googlepay-mount-area-np';
+                    mountElement = document.getElementById('googlepay-mount-area-np');
+                    config.payButtonConfig = { width: "100%", height: "40px" };
+                }
+
+                // 显示挂载容器和对应的挂载点
+                mountContainer.classList.add('active');
+                if (mountElement) {
+                    mountElement.classList.add('active');
+                    mountElement.style.display = 'block';
+                }
+
+                // 创建并挂载组件
+                pmComponentNonPeriodic = PMdropin.create(componentType, config);
+                pmComponentNonPeriodic.mount(mountId);
+
+                // 监听组件就绪事件
+                pmComponentNonPeriodic.on('ready', () => {
+                    console.log(`${componentType} component ready (NonPeriodic mode)`);
+                });
+
+                // 监听组件加载事件
+                pmComponentNonPeriodic.on('load', (res) => {
+                    if (res && res.code === 'SUCCESS') {
+                        console.log('Component loaded successfully (NonPeriodic mode)');
+                        if (componentType === 'card') {
+                            document.getElementById('card-pay-btn-np').style.display = 'block';
+                        }
+                    } else if (res) {
+                        alert('组件加载失败: ' + res.msg);
+                    }
+                });
+
+                // 设置支付处理函数
+                if (componentType !== 'card') {
+                    pmComponentNonPeriodic.on('payButtonClick', handleAppleGooglePaymentNonPeriodic);
+                } else {
+                    // CARD 支付通过按钮触发
+                    const cardPayBtn = document.getElementById('card-pay-btn-np');
+                    const newPayBtn = cardPayBtn.cloneNode(true);
+                    cardPayBtn.parentNode.replaceChild(newPayBtn, cardPayBtn);
+                    newPayBtn.addEventListener('click', handleCardPaymentNonPeriodic);
+                }
+
+                console.log('Component initialized (NonPeriodic mode):', componentType);
+            } catch (e) {
+                console.error('Component initialization error (NonPeriodic mode):', e);
+                alert('组件初始化失败: ' + e.message);
+            }
+        }
+
+        function handleCardPaymentNonPeriodic() {
+            if (!pmComponentNonPeriodic) {
+                alert('请先初始化组件');
+                return;
+            }
+
+            pmComponentNonPeriodic.emit('setDisabled', true);
+
+            // 非周期性订阅代扣：CARD 支付不需要传 subscriptionPlan，只传 mitManagementUrl
+            const canMakePaymentOptions = {
+                mitManagementUrl: "http://www.xxx.com"
+            };
+
+            pmComponentNonPeriodic.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                pmComponentNonPeriodic.emit('setDisabled', false);
+                if (resp.code === 'APPLY_SUCCESS') {
+                    const token = resp.data.paymentToken;
+                    document.getElementById('token-value-display-np').textContent = token;
+                    document.getElementById('token-display-area-np').classList.add('active');
+                } else {
+                    alert('支付申请失败: ' + resp.msg);
+                }
+            }).catch(err => {
+                pmComponentNonPeriodic.emit('setDisabled', false);
+                console.error('Payment error (NonPeriodic mode):', err);
+                alert('支付处理失败: ' + err.message);
+            });
+        }
+
+        function handleAppleGooglePaymentNonPeriodic() {
+            if (!pmComponentNonPeriodic) {
+                alert('请先初始化组件');
+                return;
+            }
+
+            pmComponentNonPeriodic.emit('setDisabled', true);
+
+            // 非周期性订阅代扣：ApplePay/GooglePay 也不需要传 subscriptionPlan，只传 mitManagementUrl
+            const canMakePaymentOptions = {
+                mitManagementUrl: "http://www.xxx.com"
+            };
+
+            pmComponentNonPeriodic.emit('canMakePayment', canMakePaymentOptions).then(resp => {
+                pmComponentNonPeriodic.emit('setDisabled', false);
+                if (resp.code === 'APPLY_SUCCESS') {
+                    const token = resp.data.paymentToken;
+                    document.getElementById('token-value-display-np').textContent = token;
+                    document.getElementById('token-display-area-np').classList.add('active');
+                } else {
+                    alert('支付申请失败: ' + resp.msg);
+                }
+            }).catch(err => {
+                pmComponentNonPeriodic.emit('setDisabled', false);
+                console.error('Payment error (NonPeriodic mode):', err);
+                alert('支付处理失败: ' + err.message);
+            });
+        }
+
+        // ─── Copy ───
+        function copyCode(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const raw = el.innerText || el.textContent;
+            navigator.clipboard.writeText(raw).then(() => {
+                const btn = el.closest('.code-block').querySelector('.copy-mini-btn');
+                if (btn) { btn.textContent = '✓ 已复制'; setTimeout(() => btn.textContent = '复制', 2000); }
+            });
+        }
+
+        // ─── Boot ───
+        init();
+    </script>
+</body>
+
+</html>
