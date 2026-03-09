@@ -1189,6 +1189,75 @@
                     </div>
                 </div>
 
+                <!-- STEP 1: Collect Params (Merchant mode) -->
+                <div class="step-panel" id="panel-m-1">
+                    <!-- 商户自管模式说明卡片 -->
+                    <div class="step-card" style="background:#E0F2FE;border-color:#BAE6FD;">
+                        <div class="step-card-title" style="color:#075985;font-size:.85rem;">
+                            <div class="card-icon" style="background:#F0F9FF;">🏪</div>
+                            商户自管模式说明
+                        </div>
+                        <div style="font-size:0.8rem;color:#075985;line-height:1.8;">
+                            • 商户自主管理订阅计划，<strong>无需调用 subscriptionCreate API</strong><br>
+                            • 只区分<strong>绑定类型</strong>：0元绑定（只授权）或 >0元绑定支付（绑定+支付）<br>
+                            • 商户自主决定后续扣款时机和金额<br>
+                            • 绑定成功后通过 Webhook 获取 <code class="data-pill">paymentTokenID</code>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">📋</div>
+                            绑定类型
+                        </div>
+                        <div class="pill-group">
+                            <div class="pill-option">
+                                <input type="radio" name="m-bindtype" id="m-bind-zero" value="zero" checked
+                                    onchange="updateMerchantBindType()">
+                                <label class="pill-label" for="m-bind-zero">0元绑定 <span
+                                        style="opacity:.6;font-size:.7rem">(只授权)</span></label>
+                            </div>
+                            <div class="pill-option">
+                                <input type="radio" name="m-bindtype" id="m-bind-paid" value="paid"
+                                    onchange="updateMerchantBindType()">
+                                <label class="pill-label" for="m-bind-paid">&gt;0元绑定支付 <span
+                                        style="opacity:.6;font-size:.7rem">(绑定+支付)</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">⚙️</div>
+                            首次绑定参数配置
+                        </div>
+                        <div class="param-form">
+                            <div class="form-row" id="m-amount-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="m-amount">首次订单金额</label>
+                                    <input type="number" id="m-amount" class="form-input" value="0" step="0.01"
+                                        min="0" title="首次订单金额" placeholder="0元绑定" oninput="updateDynamic()" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="m-currency">币种</label>
+                                    <input type="text" id="m-currency" class="form-input" value="USD" title="币种"
+                                        oninput="updateDynamic()">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="m-subject">订单标题</label>
+                                <input type="text" id="m-subject" class="form-input" value="代扣标题" title="订单标题"
+                                    placeholder="输入订单标题" oninput="updateDynamic()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="m-userId">用户ID</label>
+                                <input type="text" id="m-userId" class="form-input" value="test1111111" title="用户ID"
+                                    placeholder="输入用户ID" oninput="updateDynamic()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- STEP 2: Create Subscription Plan (PayerMax) -->
                 <div class="step-panel" id="panel-pm-2">
                     <div class="step-card">
@@ -1855,44 +1924,117 @@
                                     <div class="sub-tab active">📤 请求 (绑定)</div>
                                 </div>
                                 
-                                <!-- 首次绑定请求 -->
-                                <div class="code-block">
+                                <!-- 收银台模式：首次绑定请求 -->
+                                <div class="code-block m-bind-code-cashier">
                                     <div class="code-block-header">
                                         <div class="code-block-title">
                                             <div class="code-dot dot-red"></div>
                                             <div class="code-dot dot-yellow"></div>
                                             <div class="code-dot dot-green"></div>
-                                            orderAndPay Request — Bind
+                                            orderAndPay Request — Bind (收银台模式)
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-m-bind')">复制</button>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-m-bind-cashier')">复制</button>
                                     </div>
-                                    <div class="code-body" id="req-m-bind">
+                                    <div class="code-body" id="req-m-bind-cashier">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
     <span class="jk">"outTradeNo"</span>: <span class="js">"bind_<span id="m-tradeNo">1741490400000</span>"</span>,
-    <span class="jk">"subject"</span>: <span class="js">"<span id="m-subject">代扣标题</span>"</span>,
-    <span class="jk">"totalAmount"</span>: <span class="jv" id="m-amount">9.99</span>, <span class="jc">// 金额 > 0: 首次绑定时需要支付; 金额 = 0: 只授权（类似试用）</span>
-    <span class="jk">"currency"</span>: <span class="js">"<span id="m-currency">USD</span>"</span>,
-    <span class="jk">"userId"</span>: <span class="js">"<span id="m-userId">test1111111</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"<span id="m-bind-subject">代扣标题</span>"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="m-bind-amount">9.99</span>, <span class="jc">// 金额 > 0: 首次绑定时需要支付; 金额 = 0: 只授权</span>
+    <span class="jk">"currency"</span>: <span class="js">"<span id="m-bind-currency">USD</span>"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"<span id="m-bind-userId">test1111111</span>"</span>,
     <span class="jk">"language"</span>: <span class="js">"en"</span>,
     <span class="jk">"reference"</span>: <span class="js">"test subscription"</span>,
     <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://your.app/return"</span>,
     <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
-    <span class="jk">"integrate"</span>: <span class="js">"Hosted_Checkout"</span>, <span class="jc">// 收银台: Hosted_Checkout; API直连: Direct_Payment</span>
+    <span class="jk">"integrate"</span>: <span class="js">"Hosted_Checkout"</span>, <span class="jc">// 收银台模式固定值</span>
     <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
     <span class="jk">"paymentDetail"</span>: {
       <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="m-bind-paymentMethodType">CARD</span>"</span>, <span class="jc">// CARD/APPLEPAY/GOOGLEPAY/ONE_TOUCH</span>
       <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 周期性代扣</span>
       <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传true，生成paymentTokenID</span>
-      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span> <span class="jc">// 必传false，用户参与发起</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span>, <span class="jc">// 必传false，用户参与发起</span>
+      <span class="jk">"buyerInfo"</span>: {
+        <span class="jk">"firstName"</span>: <span class="js">"Deborah"</span>,
+        <span class="jk">"lastName"</span>: <span class="js">"Swinstead"</span>,
+        <span class="jk">"email"</span>: <span class="js">"your@gmail.com"</span>,
+        <span class="jk">"phoneNo"</span>: <span class="js">"0609 031 114"</span>,
+        <span class="jk">"address"</span>: <span class="js">"Test Address"</span>,
+        <span class="jk">"city"</span>: <span class="js">"Holden Hill"</span>,
+        <span class="jk">"region"</span>: <span class="js">"SA"</span>,
+        <span class="jk">"zipCode"</span>: <span class="js">"5088"</span>,
+        <span class="jk">"clientIp"</span>: <span class="js">"211.52.321.225"</span>,
+        <span class="jk">"userAgent"</span>: <span class="js">"Mozilla/5.0..."</span>
+      }
     }
   }
 }</pre>
                                     </div>
                                 </div>
+                                
+                                <!-- API模式：首次绑定请求 -->
+                                <div class="code-block m-bind-code-api" style="display:none;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Bind (API模式)
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-m-bind-api')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-m-bind-api">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_<span id="m-tradeNo-api">1741490400000</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"<span id="m-bind-subject-api">代扣标题</span>"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="m-bind-amount-api">9.99</span>, <span class="jc">// 金额 > 0: 首次绑定时需要支付; 金额 = 0: 只授权</span>
+    <span class="jk">"currency"</span>: <span class="js">"<span id="m-bind-currency-api">USD</span>"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"<span id="m-bind-userId-api">test1111111</span>"</span>,
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test subscription"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://your.app/return"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>, <span class="jc">// API模式固定值</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>, <span class="jc">// 终端类型：WEB、WAP 或 APP</span>
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>, <span class="jc">// 操作系统类型：ANDROID 或 IOS</span>
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="m-bind-paymentMethodType-api">CARD</span>"</span>, <span class="jc">// 必传，值为CARD</span>
+      <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 周期性代扣</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传true，生成paymentTokenID</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span>, <span class="jc">// 必传false，用户参与发起</span>
+      <span class="jk">"cardInfo"</span>: { <span class="jc">// API模式必传：卡信息</span>
+        <span class="jk">"cardIdentifierNo"</span>: <span class="js">"4001563861135570"</span>,
+        <span class="jk">"cardHolderFullName"</span>: <span class="js">"James Smith"</span>,
+        <span class="jk">"cardExpirationMonth"</span>: <span class="js">"05"</span>,
+        <span class="jk">"cardExpirationYear"</span>: <span class="js">"25"</span>,
+        <span class="jk">"cvv"</span>: <span class="js">"123"</span>
+      },
+      <span class="jk">"buyerInfo"</span>: {
+        <span class="jk">"firstName"</span>: <span class="js">"Deborah"</span>,
+        <span class="jk">"lastName"</span>: <span class="js">"Swinstead"</span>,
+        <span class="jk">"email"</span>: <span class="js">"your@gmail.com"</span>,
+        <span class="jk">"phoneNo"</span>: <span class="js">"0609 031 114"</span>,
+        <span class="jk">"address"</span>: <span class="js">"Test Address"</span>,
+        <span class="jk">"city"</span>: <span class="js">"Holden Hill"</span>,
+        <span class="jk">"region"</span>: <span class="js">"SA"</span>,
+        <span class="jk">"zipCode"</span>: <span class="js">"5088"</span>,
+        <span class="jk">"clientIp"</span>: <span class="js">"211.52.321.225"</span>,
+        <span class="jk">"userAgent"</span>: <span class="js">"Mozilla/5.0..."</span>
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                
                             </div>
                             <div>
                                 <div class="sub-tabs">
@@ -1981,16 +2123,31 @@
     <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>,
     <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>,
     <span class="jk">"subscriptionPlan"</span>: {
-      <span class="jk">"currentPeriod"</span>: <span class="jn">2</span>, <span class="jc">// 商户自行记录当前扣款期数</span>
-      <span class="jk">"totalPeriods"</span>: <span class="jv" id="m-dedTotalPeriods">12</span>,
-      <span class="jk">"subject"</span>: <span class="js">"subject"</span>
+      <span class="jk">"merchantSubscriptionNo"</span>: <span class="js">"SUB_<span id="m-dedSubNo">1741490400000</span>"</span>, <span class="jc">// 商户的订阅计划ID</span>
+      <span class="jk">"deductNo"</span>: <span class="js">"DEDUCT_<span id="m-dedDeductNo">1741490400002</span>"</span>, <span class="jc">// 本期扣款唯一单号</span>
+      <span class="jk">"currentPeriod"</span>: <span class="jn">2</span>, <span class="jc">// 当前期数（第2期）</span>
+      <span class="jk">"totalPeriods"</span>: <span class="jv" id="m-dedTotalPeriods">12</span>, <span class="jc">// 总期数</span>
+      <span class="jk">"startTime"</span>: <span class="js">"2026-04-10"</span>, <span class="jc">// 本期开始时间</span>
+      <span class="jk">"endTime"</span>: <span class="js">"2026-05-10"</span> <span class="jc">// 本期结束时间</span>
     },
     <span class="jk">"paymentDetail"</span>: {
-      <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="m-deduct-paymentMethodType">CARD</span>"</span>,
       <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>,
       <span class="jk">"tokenForFutureUse"</span>: <span class="jn">false</span>,
       <span class="jk">"merchantInitiated"</span>: <span class="jn">true</span>, <span class="jc">// 商户主动发起 (MIT)</span>
-      <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN177XXXXX1000551"</span> <span class="jc">// 来自Step2 Webhook回调</span>
+      <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN177XXXXX1000551"</span>, <span class="jc">// 来自Step2 Webhook回调</span>
+      <span class="jk">"buyerInfo"</span>: {
+        <span class="jk">"firstName"</span>: <span class="js">"Deborah"</span>,
+        <span class="jk">"lastName"</span>: <span class="js">"Swinstead"</span>,
+        <span class="jk">"email"</span>: <span class="js">"your@gmail.com"</span>,
+        <span class="jk">"phoneNo"</span>: <span class="js">"0609 031 114"</span>,
+        <span class="jk">"address"</span>: <span class="js">"Test Address"</span>,
+        <span class="jk">"city"</span>: <span class="js">"Holden Hill"</span>,
+        <span class="jk">"region"</span>: <span class="js">"SA"</span>,
+        <span class="jk">"zipCode"</span>: <span class="js">"5088"</span>,
+        <span class="jk">"clientIp"</span>: <span class="js">"211.52.321.225"</span>,
+        <span class="jk">"userAgent"</span>: <span class="js">"Mozilla/5.0..."</span>
+      }
     }
   }
 }</pre>
@@ -2478,14 +2635,14 @@
             } else if (mode === 'merchant') {
                 if (integration === 'component') {
                     return [
-                        { id: 'pm-1', label: 'Step 1', title: '收集用户订阅参数' },
+                        { id: 'm-1', label: 'Step 1', title: '配置首次绑定参数' },
                         { id: 'm-2-component', label: 'Step 2', title: '加载前置组件' },
                         { id: 'm-2', label: 'Step 3', title: '首次绑定支付方式' },
                         { id: 'm-3', label: 'Step 4', title: '后续发起扣款' }
                     ];
                 } else {
                     return [
-                        { id: 'pm-1', label: 'Step 1', title: '收集用户订阅参数' },
+                        { id: 'm-1', label: 'Step 1', title: '配置首次绑定参数' },
                         { id: 'm-2', label: 'Step 2', title: '首次绑定支付方式' },
                         { id: 'm-3', label: 'Step 3', title: '后续发起扣款' }
                     ];
@@ -2658,6 +2815,25 @@
                     return;
                 }
                 
+                // 如果当前在商户自管模式的第二步，立即切换代码块显示
+                const steps = getStepsForMode(currentMode);
+                if (currentMode === 'merchant' && steps[currentStep]?.id === 'm-2') {
+                    const integration = getCurrentIntegration();
+                    const cashierBlock = document.querySelector('.m-bind-code-cashier');
+                    const apiBlock = document.querySelector('.m-bind-code-api');
+                    if (cashierBlock && apiBlock) {
+                        if (integration === 'api') {
+                            cashierBlock.style.display = 'none';
+                            apiBlock.style.display = 'block';
+                        } else {
+                            cashierBlock.style.display = 'block';
+                            apiBlock.style.display = 'none';
+                        }
+                    }
+                    // 不需要重置步骤，只是切换显示
+                    return;
+                }
+                
                 currentStep = 0;
                 
                 // 清理 PayerMax 模式组件
@@ -2781,6 +2957,19 @@
                     // 延迟执行，确保 DOM 已更新
                     setTimeout(() => {
                         switchMerchantBindTab(subtype, true);
+                        // 同时根据集成方式切换收银台/API代码块
+                        const integration = getCurrentIntegration();
+                        const cashierBlock = document.querySelector('.m-bind-code-cashier');
+                        const apiBlock = document.querySelector('.m-bind-code-api');
+                        if (cashierBlock && apiBlock) {
+                            if (integration === 'api') {
+                                cashierBlock.style.display = 'none';
+                                apiBlock.style.display = 'block';
+                            } else {
+                                cashierBlock.style.display = 'block';
+                                apiBlock.style.display = 'none';
+                            }
+                        }
                     }, 50);
                 }
             }
@@ -2936,6 +3125,31 @@
             }
         }
 
+        // ─── Update Merchant Bind Type ───
+        function updateMerchantBindType() {
+            const bindType = document.querySelector('input[name="m-bindtype"]:checked')?.value || 'zero';
+            const amountInput = document.getElementById('m-amount');
+            
+            if (bindType === 'zero') {
+                // 0元绑定：金额设为0，只读
+                amountInput.value = '0';
+                amountInput.placeholder = '0元绑定';
+                amountInput.readOnly = true;
+                amountInput.style.backgroundColor = '#F1F5F9';
+            } else {
+                // >0元绑定支付：金额可编辑，默认9.99
+                amountInput.value = '9.99';
+                amountInput.placeholder = '输入金额';
+                amountInput.readOnly = false;
+                amountInput.style.backgroundColor = '#FAFBFC';
+            }
+            
+            // 延迟触发动态更新，确保 DOM 已更新
+            setTimeout(() => {
+                updateDynamic();
+            }, 10);
+        }
+
         // ─── Switch Merchant Bind Tab ───
         function switchMerchantBindTab(type, autoSwitch = false) {
             // 更新 tab 激活状态
@@ -2986,6 +3200,16 @@
             const subtype = document.querySelector('input[name="subtype"]:checked')?.value || 'standard';
             const payment = getCurrentPayment(); // 获取当前支付方式
 
+            // 商户自管模式参数（从 m-1 面板读取）
+            const mAmountInput = document.getElementById('m-amount');
+            const mAmount = mAmountInput ? mAmountInput.value : '9.99';
+            const mCurrency = document.getElementById('m-currency')?.value || 'USD';
+            const mSubject = document.getElementById('m-subject')?.value || '代扣标题';
+            const mUserId = document.getElementById('m-userId')?.value || 'test1111111';
+            
+            // 调试：输出 mAmount 的值
+            console.log('updateDynamic - mAmount:', mAmount);
+
             // Show/hide conditional rows
             document.getElementById('trialDaysRow').style.display = subtype === 'trial' ? 'flex' : 'none';
             document.getElementById('discountParamsRow').style.display = subtype === 'discount' ? 'block' : 'none';
@@ -3033,22 +3257,50 @@
             setTxt('f-amount', `${currency} ${amount}`);
             setTxt('f-startDate', startDate ? startDate.replace('T', ' ') : '—');
 
-            // Merchant step 2 — bind orderAndPay
-            setTxt('m-amount', amount);
-            setTxt('m-currency', currency);
+            // Merchant step 2 — bind orderAndPay（使用 m-1 面板的参数）
+            // 收银台模式
+            setTxt('m-bind-amount', mAmount);
+            setTxt('m-bind-currency', mCurrency);
+            setTxt('m-bind-subject', mSubject);
+            setTxt('m-bind-userId', mUserId);
             setTxt('m-tradeNo', Date.now());
-            // 添加 subscriptionPlan 动态更新
-            setTxt('m-bindSubNo', Date.now());
-            setTxt('m-bindDeductNo', Date.now() + 1);
-            setTxt('m-bindTotalPeriods', totalPeriods);
+            // API 模式
+            setTxt('m-bind-amount-api', mAmount);
+            setTxt('m-bind-currency-api', mCurrency);
+            setTxt('m-bind-subject-api', mSubject);
+            setTxt('m-bind-userId-api', mUserId);
+            setTxt('m-tradeNo-api', Date.now());
+            // paymentMethodType 动态更新
+            setTxt('m-bind-paymentMethodType', merchantPaymentMethodType);
+            setTxt('m-bind-paymentMethodType-api', merchantPaymentMethodType);
 
-            // Merchant step 3 — deduct orderAndPay
-            setTxt('m-dedAmount', amount);
-            setTxt('m-dedCurrency', currency);
+            // 根据集成方式切换商户自管模式第二步的代码块显示
+            const integration = getCurrentIntegration();
+            if (currentMode === 'merchant' && steps[currentStep]?.id === 'm-2') {
+                const cashierBlock = document.querySelector('.m-bind-code-cashier');
+                const apiBlock = document.querySelector('.m-bind-code-api');
+                if (cashierBlock && apiBlock) {
+                    if (integration === 'api') {
+                        cashierBlock.style.display = 'none';
+                        apiBlock.style.display = 'block';
+                    } else {
+                        cashierBlock.style.display = 'block';
+                        apiBlock.style.display = 'none';
+                    }
+                }
+            }
+
+            // Merchant step 3 — deduct orderAndPay（使用 m-1 面板的参数）
+            setTxt('m-dedAmount', mAmount);
+            setTxt('m-dedCurrency', mCurrency);
             setTxt('m-dedTotalPeriods', totalPeriods);
             setTxt('m-dedTradeNo', Date.now());
-            setTxt('m-dedResAmt', amount);
-            setTxt('m-dedResCur', currency);
+            setTxt('m-dedSubNo', Date.now());
+            setTxt('m-dedDeductNo', Date.now() + 2);
+            setTxt('m-dedResAmt', mAmount);
+            setTxt('m-dedResCur', mCurrency);
+            // 添加 paymentMethodType 动态更新
+            setTxt('m-deduct-paymentMethodType', merchantPaymentMethodType);
 
             // Component session request — update componentList based on payment method
             let componentListText = '';
@@ -3066,9 +3318,9 @@
 
             // Merchant mode session request — update componentList
             setTxt('sm-componentList', componentListText);
-            // Merchant 模式的 session 金额也与激活金额保持一致
-            setTxt('sm-amount', activateAmount);
-            setTxt('sm-currency', currency);
+            // Merchant 模式的 session 金额使用 m-1 面板的参数
+            setTxt('sm-amount', mAmount);
+            setTxt('sm-currency', mCurrency);
 
             // Non-periodic mode — update parameters from np- fields
             const npAmount = document.getElementById('np-amount')?.value || '9.99';
