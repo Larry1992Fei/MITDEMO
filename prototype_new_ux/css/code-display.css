@@ -1,0 +1,90 @@
+/* Code Display Styles */
+
+.code-block {
+    background: var(--code-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #1E293B;
+}
+
+.code-block-header {
+    background: #1E293B;
+    padding: 0.625rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.code-block-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.code-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot-red {
+    background: #EF4444;
+}
+
+.dot-yellow {
+    background: #F59E0B;
+}
+
+.dot-green {
+    background: #10B981;
+}
+
+.copy-mini-btn {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    color: #94A3B8;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.copy-mini-btn:hover {
+    background: #334155;
+    color: #E2E8F0;
+}
+
+.code-body {
+    padding: 1.25rem 1.5rem;
+    font-family: 'Consolas', 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--code-text);
+    overflow-x: auto;
+}
+
+/* JSON Syntax Highlighting */
+.jk {
+    color: #7DD3FC; /* json key */
+}
+
+.js {
+    color: #86EFAC; /* json string */
+}
+
+.jn {
+    color: #FCD34D; /* json number */
+}
+
+.jc {
+    color: #475569; /* comment */
+    font-style: italic;
+}
+
+.jv {
+    color: #F9A8D4; /* variable/dynamic */
+}

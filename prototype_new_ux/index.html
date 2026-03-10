@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订阅代扣演示Demo - 模块化版本</title>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/code-display.css">
+</head>
+
+<body>
+    <!-- HTML content will be added here -->
+    <div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Inter,sans-serif;color:#64748B;">
+        <div style="text-align:center;">
+            <div style="font-size:2rem;margin-bottom:1rem;">⏳</div>
+            <div>正在加载完整内容...</div>
+            <div style="font-size:0.875rem;margin-top:0.5rem;">如果长时间未加载，请刷新页面</div>
+        </div>
+    </div>
+
+    <!-- Bundled JavaScript -->
+    <script src="js/app-bundle.js"></script>
+    
+    <script>
+        // Hide loading indicator
+        document.getElementById('loading').style.display = 'none';
+    </script>
+</body>
+
+</html>

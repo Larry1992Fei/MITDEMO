@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEP4 Code Block Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .code-block { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+        .controls { margin: 20px 0; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>STEP4 Code Block Test</h1>
+    
+    <div class="controls">
+        <h3>Payment Method:</h3>
+        <input type="radio" name="payment" id="pay-card" value="card" checked>
+        <label for="pay-card">CARD</label>
+        
+        <input type="radio" name="payment" id="pay-applepay" value="applepay">
+        <label for="pay-applepay">APPLEPAY</label>
+        
+        <input type="radio" name="payment" id="pay-googlepay" value="googlepay">
+        <label for="pay-googlepay">GOOGLEPAY</label>
+        
+        <br><br>
+        <button onclick="testSwitch()">Test Code Block Switch</button>
+    </div>
+    
+    <div class="code-blocks">
+        <div class="code-block" id="pm-component-card-request" style="display:block;">
+            <h4>CARD Code Block</h4>
+            <pre>This is the CARD payment code block</pre>
+        </div>
+        
+        <div class="code-block" id="pm-component-applepay-request" style="display:none;">
+            <h4>ApplePay Code Block</h4>
+            <pre>This is the APPLEPAY payment code block</pre>
+        </div>
+        
+        <div class="code-block" id="pm-component-googlepay-request" style="display:none;">
+            <h4>GooglePay Code Block</h4>
+            <pre>This is the GOOGLEPAY payment code block</pre>
+        </div>
+    </div>
+    
+    <script>
+        function getCurrentPayment() {
+            const radio = document.querySelector('input[name="payment"]:checked');
+            return radio ? radio.value : 'card';
+        }
+        
+        function switchPayerMaxComponentCodeBlocks() {
+            const payment = getCurrentPayment();
+            console.log('switchPayerMaxComponentCodeBlocks called, payment:', payment);
+            
+            const cardBlock = document.getElementById('pm-component-card-request');
+            const applePayBlock = document.getElementById('pm-component-applepay-request');
+            const googlePayBlock = document.getElementById('pm-component-googlepay-request');
+            
+            console.log('Blocks found:', {
+                cardBlock: !!cardBlock,
+                applePayBlock: !!applePayBlock,
+                googlePayBlock: !!googlePayBlock
+            });
+            
+            // Hide all blocks first
+            if (cardBlock) {
+                cardBlock.style.display = 'none';
+                console.log('Hidden CARD block');
+            }
+            if (applePayBlock) {
+                applePayBlock.style.display = 'none';
+                console.log('Hidden ApplePay block');
+            }
+            if (googlePayBlock) {
+                googlePayBlock.style.display = 'none';
+                console.log('Hidden GooglePay block');
+            }
+            
+            // Show the appropriate block based on payment method
+            if (payment === 'applepay' && applePayBlock) {
+                console.log('Showing ApplePay block');
+                applePayBlock.style.display = 'block';
+            } else if (payment === 'googlepay' && googlePayBlock) {
+                console.log('Showing GooglePay block');
+                googlePayBlock.style.display = 'block';
+            } else if (cardBlock) {
+                console.log('Showing CARD block (default)');
+                cardBlock.style.display = 'block';
+            } else {
+                console.error('No code block found to display!');
+            }
+        }
+        
+        function testSwitch() {
+            switchPayerMaxComponentCodeBlocks();
+        }
+        
+        // Add event listeners to radio buttons
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('change', switchPayerMaxComponentCodeBlocks);
+        });
+    </script>
+</body>
+</html>
