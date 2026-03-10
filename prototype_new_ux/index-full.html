@@ -1345,7 +1345,72 @@
                     </div>
                 </div>
 
-                <!-- STEP 5: PMX Auto Charge (Final) -->
+                <!-- STEP 4: PMX Auto Charge (Final) - Non-Component Mode -->
+                <div class="step-panel" id="panel-pm-4">
+                    <div class="step-card">
+                        <div class="completion-banner">
+                            <div class="check-big">✓</div>
+                            <div class="completion-title">订阅计划已成功激活！</div>
+                            <div class="completion-desc">
+                                后续扣款由 PayerMax 根据订阅计划自动发起，<br>
+                                每期扣款结果将通过 Webhook 回调通知您的服务器。
+                            </div>
+                            <div class="final-info-grid">
+                                <div class="final-info-item">
+                                    <div class="final-info-label">订阅计划号</div>
+                                    <div class="final-info-value">SUB2026XXXxxxxxx2112</div>
+                                </div>
+                                <div class="final-info-item">
+                                    <div class="final-info-label">扣款周期</div>
+                                    <div class="final-info-value" id="f-cycle">每 1 月 · 共 12 期</div>
+                                </div>
+                                <div class="final-info-item">
+                                    <div class="final-info-label">每期金额</div>
+                                    <div class="final-info-value" id="f-amount">USD 9.99</div>
+                                </div>
+                                <div class="final-info-item">
+                                    <div class="final-info-label">首期扣款时间</div>
+                                    <div class="final-info-value" id="f-startDate">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-card" style="margin-top:0; background:#FFFBEB; border-color:#FDE68A;">
+                            <div class="step-card-title" style="color:#92400E;">
+                                <div class="card-icon" style="background:#FEF3C7;">📬</div>
+                                后续扣款 Webhook 通知
+                            </div>
+                            <div class="code-block">
+                                <div class="code-block-header">
+                                    <div class="code-block-title">
+                                        <div class="code-dot dot-red"></div>
+                                        <div class="code-dot dot-yellow"></div>
+                                        <div class="code-dot dot-green"></div>
+                                        Webhook Notification (PMX Auto Charge)
+                                    </div>
+                                </div>
+                                <div class="code-body">
+                                    <pre>{
+  <span class="jk">"type"</span>: <span class="js">"SUBSCRIPTION_PAYMENT"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span>,
+    <span class="jk">"periodNo"</span>: <span class="jn">1</span>,     <span class="jc">// 第几期</span>
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_PMX_P1_20260410"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"chargeAmount"</span>: {
+      <span class="jk">"amount"</span>: <span class="jv" id="w-amount">9.99</span>,
+      <span class="jk">"currency"</span>: <span class="jv">"<span id="w-currency">USD</span>"</span>
+    },
+    <span class="jk">"chargeTime"</span>: <span class="js">"2026-04-10T10:00:00+08:00"</span>
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: PMX Auto Charge (Final) - Component Mode -->
                 <div class="step-panel" id="panel-pm-5">
                     <div class="step-card">
                         <div class="completion-banner">
@@ -2138,6 +2203,233 @@
                     </div>
                 </div>
 
+                <!-- NON-PERIODIC STEP 3: Backend Payment Binding (NonPeriodic + Component Integration) -->
+                <div class="step-panel" id="panel-np-3-bind">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🔗</div>
+                            后端支付方式绑定 — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code class="data-pill">sessionKey</code>，
+                            调用 <strong>orderAndPay</strong> API 完成后端支付方式绑定。
+                        </p>
+                        
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 (绑定支付)</div>
+                                </div>
+                                
+                                <!-- CARD + Component -->
+                                <div class="code-block" id="np-component-card-request" style="display:block;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Component + CARD
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-np-component-card')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-np-component-card">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2022-01-17T09:05:52.194+00:00"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"bbd8d2639a7c4dfd8df7d005294390df"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"020113838535952"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>, <span class="jc">// 商户下单唯一单号</span>
+    <span class="jk">"subject"</span>: <span class="js">"代扣标题"</span>, <span class="jc">// 标题</span>
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="np-comp-amount">10</span>, <span class="jc">// 代扣金额</span>
+    <span class="jk">"currency"</span>: <span class="js">"<span id="np-comp-currency">USD</span>"</span>, <span class="jc">// 代扣币种</span>
+    <span class="jk">"userId"</span>: <span class="js">"test1111"</span>, <span class="jc">// 用户号</span>
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test mit"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://[your domain name]/[your callback URL]"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://[your domain name]/[your notify URL]"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>, <span class="jc">// 固定值：Direct_Payment</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>, <span class="jc">// 终端类型，WEB、WAP or APP</span>
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>, <span class="jc">// 操作系统类型 ANDROID or IOS</span>
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentToken"</span>: <span class="js">"CPT4f200d278f3a454b9e91c81edc641e2b"</span>, <span class="jc">// 必传</span>
+      <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 必传</span>
+      <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 必传，MIT类型，非周期性代扣时为UNSCHEDULED</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传，值为true，生成paymentTokenID，用于后续代扣</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span>, <span class="jc">// 必传，false标识不是商户主动发起，有用户参与</span>
+      <span class="jk">"buyerInfo"</span>: {
+        <span class="jk">"firstName"</span>: <span class="js">"Deborah"</span>,
+        <span class="jk">"lastName"</span>: <span class="js">"Swinstead"</span>,
+        <span class="jk">"email"</span>: <span class="js">"your@gmail.com"</span>,
+        <span class="jk">"phoneNo"</span>: <span class="js">"0609 031 114"</span>,
+        <span class="jk">"address"</span>: <span class="js">"Test Address"</span>,
+        <span class="jk">"city"</span>: <span class="js">"Holden Hill"</span>,
+        <span class="jk">"region"</span>: <span class="js">"SA"</span>,
+        <span class="jk">"zipCode"</span>: <span class="js">"5088"</span>,
+        <span class="jk">"clientIp"</span>: <span class="js">"211.52.321.225"</span>,
+        <span class="jk">"userAgent"</span>: <span class="js">"Mozilla/5.0"</span>
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- ApplePay + Component -->
+                                <div class="code-block" id="np-component-applepay-request" style="display:none;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Component + APPLEPAY
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-np-component-applepay')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-np-component-applepay">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2022-01-17T09:05:52.194+00:00"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"bbd8d2639a7c4dfd8df7d005294390df"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"020113838535952"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>, <span class="jc">// 商户下单唯一单号</span>
+    <span class="jk">"subject"</span>: <span class="js">"代扣标题"</span>, <span class="jc">// 标题</span>
+    <span class="jk">"totalAmount"</span>: <span class="jv">10</span>, <span class="jc">// 代扣金额</span>
+    <span class="jk">"country"</span>: <span class="js">"US"</span>,
+    <span class="jk">"currency"</span>: <span class="js">"USD"</span>, <span class="jc">// 代扣币种</span>
+    <span class="jk">"userId"</span>: <span class="js">"test1111"</span>, <span class="jc">// 用户号</span>
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test mit"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://[your domain name]/[your callback URL]"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://[your domain name]/[your notify URL]"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>, <span class="jc">// 固定值：Direct_Payment</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>, <span class="jc">// 终端类型，WEB、WAP or APP</span>
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>, <span class="jc">// 操作系统类型 ANDROID or IOS</span>
+    <span class="jk">"mitManagementUrl"</span>: <span class="js">"https://[your domain name]/[your subscription management URL]"</span>, <span class="jc">// 非必填</span>
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentToken"</span>: <span class="js">"CPT4f200d278f3a454b9e91c81edc641e2b"</span>, <span class="jc">// 必传</span>
+      <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 必传</span>
+      <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 必传，MIT类型，非周期性代扣时为UNSCHEDULED</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传，值为true，生成paymentTokenID，用于后续代扣</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span>, <span class="jc">// 必传，false标识不是商户主动发起，有用户参与</span>
+      <span class="jk">"buyerInfo"</span>: {
+        <span class="jk">"firstName"</span>: <span class="js">"Deborah"</span>,
+        <span class="jk">"lastName"</span>: <span class="js">"Swinstead"</span>,
+        <span class="jk">"email"</span>: <span class="js">"your@gmail.com"</span>,
+        <span class="jk">"phoneNo"</span>: <span class="js">"0609 031 114"</span>,
+        <span class="jk">"address"</span>: <span class="js">"Test Address"</span>,
+        <span class="jk">"city"</span>: <span class="js">"Holden Hill"</span>,
+        <span class="jk">"region"</span>: <span class="js">"SA"</span>,
+        <span class="jk">"zipCode"</span>: <span class="js">"5088"</span>,
+        <span class="jk">"clientIp"</span>: <span class="js">"211.52.321.225"</span>,
+        <span class="jk">"userAgent"</span>: <span class="js">"Mozilla/5.0 (iPad; CPU OS 18_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) "</span>
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- GooglePay + Component -->
+                                <div class="code-block" id="np-component-googlepay-request" style="display:none;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Component + GOOGLEPAY
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-np-component-googlepay')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-np-component-googlepay">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2022-01-17T09:05:52.194+00:00"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"bbd8d2639a7c4dfd8df7d005294390df"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"020113838535952"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>, <span class="jc">// 商户下单唯一单号</span>
+    <span class="jk">"subject"</span>: <span class="js">"代扣标题"</span>, <span class="jc">// 标题</span>
+    <span class="jk">"totalAmount"</span>: <span class="jv">10</span>, <span class="jc">// 代扣金额</span>
+    <span class="jk">"country"</span>: <span class="js">"US"</span>,
+    <span class="jk">"currency"</span>: <span class="js">"USD"</span>, <span class="jc">// 代扣币种</span>
+    <span class="jk">"userId"</span>: <span class="js">"test1111"</span>, <span class="jc">// 用户号</span>
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"reference"</span>: <span class="js">"test mit"</span>,
+    <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://[your domain name]/[your callback URL]"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://[your domain name]/[your notify URL]"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>, <span class="jc">// 固定值：Direct_Payment</span>
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>, <span class="jc">// 终端类型，WEB、WAP or APP</span>
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>, <span class="jc">// 操作系统类型 ANDROID or IOS</span>
+    <span class="jk">"mitManagementUrl"</span>: <span class="js">"https://[your domain name]/[your subscription management URL]"</span>, <span class="jc">// 非必填</span>
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentToken"</span>: <span class="js">"CPT4f200d278f3a454b9e91c81edc641e2b"</span>, <span class="jc">// 必传</span>
+      <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 必传</span>
+      <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 必传，MIT类型，非周期性代扣时为UNSCHEDULED</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">true</span>, <span class="jc">// 必传，值为true，生成paymentTokenID，用于后续代扣</span>
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">false</span>, <span class="jc">// 必传，false标识不是商户主动发起，有用户参与</span>
+      <span class="jk">"buyerInfo"</span>: {
+        <span class="jk">"firstName"</span>: <span class="js">"Deborah"</span>,
+        <span class="jk">"lastName"</span>: <span class="js">"Swinstead"</span>,
+        <span class="jk">"email"</span>: <span class="js">"your@gmail.com"</span>,
+        <span class="jk">"phoneNo"</span>: <span class="js">"0609 031 114"</span>,
+        <span class="jk">"address"</span>: <span class="js">"Test Address"</span>,
+        <span class="jk">"city"</span>: <span class="js">"Holden Hill"</span>,
+        <span class="jk">"region"</span>: <span class="js">"SA"</span>,
+        <span class="jk">"zipCode"</span>: <span class="js">"5088"</span>,
+        <span class="jk">"clientIp"</span>: <span class="js">"211.52.321.225"</span>,
+        <span class="jk">"userAgent"</span>: <span class="js">"Mozilla/5.0 (iPad; CPU OS 18_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) "</span>
+      }
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 响应</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('res-np-component-bind')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="res-np-component-bind">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"msg"</span>: <span class="js">"success"</span>,
+  <span class="jk">"psn"</span>: <span class="js">"2022011709052194000000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"paymentTokenID"</span>: <span class="js">"PTI_<span id="np-w-tokenId">20260310_001</span>"</span>, <span class="jc">// 用于后续代扣的令牌ID</span>
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>,
+    <span class="jk">"tradeNo"</span>: <span class="js">"2022011709052194000000"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="np-w-amount">10</span>,
+    <span class="jk">"currency"</span>: <span class="js">"<span id="np-w-currency">USD</span>"</span>,
+    <span class="jk">"status"</span>: <span class="js">"TRADE_SUCCESS"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- NON-PERIODIC STEP 2/3: 首次创建绑定/支付订单 (panel-np-2) -->
             <div class="step-panel" id="panel-np-2">
                 <div class="step-card">
@@ -2239,8 +2531,108 @@
                 </div>
             </div>
 
-                <!-- NON-PERIODIC STEP 3: 后续发起扣款 (panel-np-3) -->
-            <div class="step-panel" id="panel-np-3">
+                <!-- NON-PERIODIC STEP 3: 后续发起扣款 (panel-np-3) - Non-Component Mode -->
+                <div class="step-panel" id="panel-np-3">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">💳</div>
+                            后续发起扣款（商户发起） — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            商户根据业务需求（如会员到期、消费达到阈值等），使用步骤二返回的
+                            <code class="data-pill">paymentTokenID</code> 主动调用 <strong>orderAndPay</strong> 发起后续扣款。
+                            <strong>无需传 subscriptionPlan</strong>，<code class="data-pill">merchantInitiated: true</code>
+                            表示商户主动发起。
+                        </p>
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 (后续扣款)</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Subsequent Deduct
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-np-deduct-noncomp')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-np-deduct-noncomp">
+                                        <pre>{
+  <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_<span id="np-ded-tradeNo-noncomp">1741490400000</span>"</span>,
+    <span class="jk">"subject"</span>: <span class="js">"<span id="np-ded-subject-noncomp">代扣标题</span>"</span>,
+    <span class="jk">"totalAmount"</span>: <span class="jv" id="np-ded-amount-noncomp">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"<span id="np-ded-currency-noncomp">USD</span>"</span>,
+    <span class="jk">"country"</span>: <span class="js">"UN"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"<span id="np-ded-userId-noncomp">test1111111</span>"</span>,
+    <span class="jk">"language"</span>: <span class="js">"en"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"integrate"</span>: <span class="js">"Direct_Payment"</span>,
+    <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
+    <span class="jk">"terminalType"</span>: <span class="js">"WEB"</span>,
+    <span class="jk">"osType"</span>: <span class="js">"ANDROID"</span>,
+    <span class="jc">// ⚠️ 非周期性代扣无需传 subscriptionPlan</span>
+    <span class="jk">"paymentDetail"</span>: {
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
+      <span class="jk">"mitType"</span>: <span class="js">"UNSCHEDULED"</span>, <span class="jc">// 固定值，非周期性</span>
+      <span class="jk">"tokenForFutureUse"</span>: <span class="jn">false</span>,
+      <span class="jk">"merchantInitiated"</span>: <span class="jn">true</span>, <span class="jc">// 商户主动发起 (MIT)</span>
+      <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN177XXXXX1000551"</span> <span class="jc">// Step2 Webhook返回的Token</span>
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 扣款结果</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response — Deduct Success
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('res-np-deduct-noncomp')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="res-np-deduct-noncomp">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"msg"</span>: <span class="js">"success"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"USD"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="result-card success" style="margin-top:0.75rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">扣款成功</div>
+                                        <div class="result-value">商户可根据业务需求重复调用此API进行后续扣款</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NON-PERIODIC STEP 4: 后续发起扣款 (panel-np-4) - Component Mode -->
+            <div class="step-panel" id="panel-np-4">
                 <div class="step-card">
                     <div class="step-card-title">
                         <div class="card-icon">💳</div>
