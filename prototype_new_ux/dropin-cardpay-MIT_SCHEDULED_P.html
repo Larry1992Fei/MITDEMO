@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayerMax Dropin - Demo MIT</title>
+  <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #F8FAFC;
+      --surface-color: #FFFFFF;
+      --primary-color: #2563EB;
+      --primary-hover: #1D4ED8;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --font-heading: 'Poppins', sans-serif;
+      --font-body: 'Open Sans', sans-serif;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h2 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      color: var(--text-main);
+      font-size: 24px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    /* 2-Column Grid Layout */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (min-width: 800px) {
+      .grid-layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface-color);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    @media (min-width: 1024px) {
+      .form-row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .form-label-col {
+        width: 45%;
+      }
+
+      .form-input-col {
+        width: 55%;
+      }
+    }
+
+    .form-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-main);
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn-primary {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 24px;
+      background-color: var(--primary-color);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      text-align: center;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-success {
+      background-color: #10B981;
+    }
+
+    .btn-success:hover {
+      background-color: #059669;
+    }
+
+    .token-display {
+      background-color: #F8FAFC;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      word-break: break-all;
+      margin-top: 20px;
+    }
+
+    .token-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .token-value {
+      font-family: monospace;
+      font-size: 14px;
+      color: var(--primary-color);
+      background: #EFF6FF;
+      padding: 12px;
+      border-radius: 6px;
+    }
+
+    .wallet-container {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-container">
+    <div class="header">
+      <h2>PayerMax Dropin</h2>
+      <p>Card Component · MIT Scheduled Payment</p>
+    </div>
+
+    <div class="grid-layout">
+      <!-- Left Column: Subscription Plan -->
+      <div class="left-col">
+        <div class="card">
+          <div class="card-title">订阅计划 (Subscription Plan)</div>
+
+          <div class="form-group form-row">
+            <div class="form-label-col">
+              <div class="form-label">总期数 (totalPeriods)</div>
+              <div class="form-hint">订阅总共的扣款期数</div>
+            </div>
+            <div class="form-input-col">
+              <input type="number" id="totalPeriodsInput" class="form-control" value="12" min="1">
+            </div>
+          </div>
+
+          <div class="form-group form-row">
+            <div class="form-label-col">
+              <div class="form-label">扣款周期 (periodUnit)</div>
+              <div class="form-hint">扣款的时间单位</div>
+            </div>
+            <div class="form-input-col">
+              <select id="periodUnitInput" class="form-control">
+                <option value="D">日 (D)</option>
+                <option value="W">周 (W)</option>
+                <option value="M" selected>月 (M)</option>
+                <option value="Y">年 (Y)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group form-row">
+            <div class="form-label-col">
+              <div class="form-label">扣款频率 (periodCount)</div>
+              <div class="form-hint">每个周期内的扣款频率</div>
+            </div>
+            <div class="form-input-col">
+              <input type="number" id="periodCountInput" class="form-control" value="1" min="1">
+            </div>
+          </div>
+
+          <div class="form-group form-row">
+            <div class="form-label-col">
+              <div class="form-label">扣款金额 (amount)</div>
+              <div class="form-hint">每次扣款的金额</div>
+            </div>
+            <div class="form-input-col">
+              <input type="number" id="amountInput" class="form-control" value="3" min="0" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-group form-row">
+            <div class="form-label-col">
+              <div class="form-label">扣款币种 (currency)</div>
+              <div class="form-hint">扣款使用的货币类型</div>
+            </div>
+            <div class="form-input-col">
+              <input type="text" id="currencyInput" class="form-control" value="USD" placeholder="例如: USD, EUR">
+            </div>
+          </div>
+
+          <div class="form-group form-row">
+            <div class="form-label-col">
+              <div class="form-label">首期扣款时间 (firstPeriodStartDate)</div>
+              <div class="form-hint">第一次扣款的开始时间</div>
+            </div>
+            <div class="form-input-col">
+              <input type="datetime-local" id="firstPeriodStartDateInput" class="form-control" value="2026-02-18T12:00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Config & Wallet Component -->
+      <div class="right-col">
+        <!-- 配置参数 -->
+        <div class="card">
+          <div class="card-title">配置参数 (Configuration)</div>
+
+          <div class="form-group">
+            <label class="form-label" style="display:block; margin-bottom:6px;">Client Key:</label>
+            <input type="text" id="clientKeyInput" class="form-control" value="67eff2f3b29a4ecf9576321185dbf658">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="display:block; margin-bottom:6px;">Session Key:</label>
+            <input type="text" id="sessionKeyInput" class="form-control" value="02d764a032804ee5b47013795e25f07d">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="display:block; margin-bottom:6px;">Environment:</label>
+            <select id="environmentInput" class="form-control">
+              <option value="true" selected>Sandbox (测试环境)</option>
+              <option value="false">Production (生产环境)</option>
+            </select>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <button id="initButton" class="btn-primary">初始化组件 (Init Component)</button>
+          </div>
+        </div>
+
+
+        <!-- PayerMax Card UI (Hidden until init) -->
+        <div class="card" id="cardContainer" style="padding: 10px;">
+          <div class="card-frame" style="min-height: 40px;"></div>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <button id="pay" class="btn-primary btn-success">确认支付信息并获取 Token (Pay)</button>
+        </div>
+
+
+        <div id="tokenDisplay" class="token-display" style="display: none;">
+          <div class="token-title">Payment Token:</div>
+          <div id="tokenValue" class="token-value"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    // 自动将首期扣款时间设置为当前时间往后 2 小时
+    window.addEventListener("DOMContentLoaded", function () {
+      var dateInput = document.getElementById('firstPeriodStartDateInput');
+      if (dateInput) {
+        var d = new Date();
+        d.setHours(d.getHours() + 2);
+        // 格式化为 datetime-local 支持的 YYYY-MM-DDThh:mm 格式（按本地时区）
+        var offsetMs = d.getTimezoneOffset() * 60 * 1000;
+        var localISOTime = (new Date(d.getTime() - offsetMs)).toISOString().slice(0, 16);
+        dateInput.value = localISOTime;
+      }
+    });
+
+    var card = null;
+
+    // 初始化组件函数
+    function initCard() {
+      var clientKey = document.getElementById('clientKeyInput').value;
+      var sessionKey = document.getElementById('sessionKeyInput').value;
+      var environment = document.getElementById('environmentInput').value;
+      var isSandbox = environment === 'true';
+
+      // 如果已经存在组件，先卸载
+      if (card) {
+        card.unmount();
+      }
+
+      // 初始化一个卡组件
+      card = PMdropin.create('card', {
+        // 填入你在服务端获取到的 clientKey
+        clientKey: clientKey,
+        // 填入你在服务端获取到的 sessionKey
+        sessionKey: sessionKey,
+        isRtl: true,
+        language: "zh",
+        customLocalization: {
+          // 添加中文示例
+          'zh': {
+            loading: '加载中',
+            loadingFailed: '加载失败',
+            refresh: '刷新',
+            confirm: '确定',
+            cancel: '取消',
+            removeCard: '移除卡',
+            removeCardTip: '确定移除当前选中卡吗?',
+            addNewCard: '使用新卡',
+            useSavedCard: '使用已存卡',
+            cardnum: '银行卡号',
+            cardnumHint: 'XXXX XXXX XXXX XXXX',
+            cardnumErrTip: '卡号不正确',
+            cardbinErrTip: {
+              // {cardOrg} 变量字段，无需翻译
+              CARD_NOT_SUPPORT: '不支持{cardOrg}，请检查卡号或者更换其他卡重试',
+              // {cardType} 变量字段，无需翻译
+              CARD_INVALID: '不支持{cardType}的卡类型',
+              CARD_NO_INVALID: '请确认卡号输入是否正确',
+            },
+            expdate: '过期日期',
+            expdateHint: '月/年',
+            expdateErrTip: '过期日期不正确',
+            cvv: 'CVV/CVC',
+            cvvHint: '123',
+            cvvErrTip: 'CVV/CVC 格式不正确',
+            name: '持卡人姓名',
+            nameHint: 'XX XX',
+            nameErrTip: '姓名格式不正确',
+            saveCardInfoTip: '为下次支付保存信息'
+          }
+        },
+        customTheme: [
+          {
+            name: 'red',
+            // 用于填充底色的样式【可选】
+            base: 'light',
+            style: `:root {
+              --bg-color-input:#33FF33;
+            }`
+          }
+        ],
+        // 开启沙盒模式联调
+        sandbox: isSandbox
+      });
+
+      // 将组件挂载到 dom 节点
+      card.mount('.card-frame');
+
+      // 4、监听表单填写状态，动态设置支付按钮（可选）
+      // 通过表单监听事件，可实时监控用户填写信息的合法性，以此动态设定支付按钮是否可点击
+      card.on('form-check', (res) => {
+        // res.isFormValid 为表单状态。取值是false/true
+        // true 表示表单校验通过，可支付；false 表示校验未通过，不可支付，无法点击支付按钮。
+        // 此时拿不到用户输入的信息，只做校验
+        console.log('[dropin][form-check]:', res);
+      });
+
+      // 组件加载完成时机
+      card.on('ready', () => {
+        console.log('组件初始化完成');
+      });
+
+      card.on('load', (res = {}) => {
+        const { code, msg } = res || {};
+        if (code === "SUCCESS") {
+          console.log('[merchant][load]success:', res);
+          alert('组件加载成功！环境: ' + (isSandbox ? '测试环境' : '生产环境'));
+        } else {
+          console.log('[merchant][load]fail:', res);
+          alert('组件加载失败！环境: ' + (isSandbox ? '测试环境' : '生产环境'));
+        }
+      });
+    }
+
+    // 初始化按钮点击事件
+    document.getElementById('initButton').addEventListener('click', initCard, false);
+
+    // 5、用户点击发起支付，检查是否可支付，并获取paymentToken
+    function goPay() {
+      // 将组件设置为不可编辑状态
+      card.emit('setDisabled', true);
+
+      // 获取订阅计划参数
+      var totalPeriods = parseInt(document.getElementById('totalPeriodsInput').value);
+      var periodUnit = document.getElementById('periodUnitInput').value;
+      var periodCount = parseInt(document.getElementById('periodCountInput').value);
+      var amount = parseFloat(document.getElementById('amountInput').value);
+      var currency = document.getElementById('currencyInput').value;
+      var firstPeriodStartDate = document.getElementById('firstPeriodStartDateInput').value + ':00+00:00';
+
+      // 发起组件校验，并返回卡标识
+      card.emit('canMakePayment', {
+        // subscriptionPlan 在周期性订阅的时候必传
+        subscriptionPlan: {
+          "subject": "subject",
+          "description": "PMMAX周期首期扣款。",
+          "totalPeriods": totalPeriods,
+          "periodRule": {
+            "periodUnit": periodUnit,//扣款周期
+            "periodCount": periodCount//扣款频率
+          },
+          "periodAmount": {
+            "amount": amount,//扣款金额
+            "currency": currency//扣款币种
+          },
+          "firstPeriodStartDate": firstPeriodStartDate
+          // "trialPeriodConfig": { // 优惠期规则
+          //   "trialPeriodCount": 1, // 优惠期数
+          //   "trialPeriodAmount": { // 优惠期扣款金额
+          //     "amount": 3,
+          //     "currency": "USD"
+          //   }
+          // }
+        },
+        mitManagementUrl: "http://www.xxx.com"
+      })
+        .then(function (response) {
+          // 解除不可编辑状态
+          card.emit('setDisabled', false);
+          console.log("resp:", response);
+
+          // 成功获取到 response
+          if (response.code === 'APPLY_SUCCESS') {
+            console.log(response); // 此时可以返回用户输入的卡信息
+
+            // 获取卡标识 paymentToken 
+            var paymentToken = response.data.paymentToken;
+            console.log('token:', paymentToken);
+
+            // 显示 token
+            document.getElementById('tokenValue').textContent = paymentToken;
+            document.getElementById('tokenDisplay').style.display = 'block';
+
+            // 调用PayerMax orderAndPay接口发起支付
+            // orderAndPay()
+            /**
+             * 这里需要自行请求服务端，实现服务端下单的操作
+             * 下单成功后，自行回调到前端，实现APPLY_SUCCESS后面的代码
+             * 服务端下单会返回redirectUrl，前端展示该redirectUrl，会引导用户做3ds校验并完成支付
+             */
+          } else {
+            console.log('error:', response.msg);
+            console.log('code:', response.code);
+          }
+        })
+        .catch(function (error) {
+          // 解除不可编辑状态
+          card.emit('setDisabled', false);
+          console.log("error:", error);
+        });
+    }
+
+    document.getElementById('pay').addEventListener('click', goPay, false);
+  </script>
+
+</body>
+
+</html>
