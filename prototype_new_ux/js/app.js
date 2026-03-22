@@ -57,6 +57,7 @@ class App {
         this.showPanel();
         this.renderActionBar();
         this.updateDynamic();
+        this.initializeAPMNotice();
     }
 
     setupEventListeners() {
@@ -134,9 +135,32 @@ class App {
             return;
         }
 
+        // Show/hide APM special notice
+        const apmNotice = document.getElementById('apm-special-notice');
+        if (apmNotice) {
+            if (payment === PAYMENT_METHODS.APM) {
+                apmNotice.style.display = 'block';
+            } else {
+                apmNotice.style.display = 'none';
+            }
+        }
+
         // Update merchant payment method type
         this.state.merchantPaymentMethodType = getPaymentMethodType(payment);
         this.updateDynamic();
+    }
+
+    initializeAPMNotice() {
+        // Initialize APM special notice visibility based on current payment method
+        const payment = this.state.getCurrentPayment();
+        const apmNotice = document.getElementById('apm-special-notice');
+        if (apmNotice) {
+            if (payment === PAYMENT_METHODS.APM) {
+                apmNotice.style.display = 'block';
+            } else {
+                apmNotice.style.display = 'none';
+            }
+        }
     }
 
     checkAPMComponentCompatibility() {
@@ -378,6 +402,46 @@ class App {
         setText('a-amount', activateAmount);
         setText('a-currency', currency);
         setText('a-paymentMethodType', getPaymentMethodType(payment));
+        
+        // Update PayerMax step 3 - 保持与STEP2一致的字段
+        setText('a-requestTime', formatDate(startDate)); // 请求时间，与STEP2保持一致
+        setText('a-keyVersion', '1'); // keyVersion，与STEP2保持一致
+        setText('a-subject', 'PayerMax订阅计划'); // 订阅计划标题
+        setText('a-userId', 'test10001'); // 用户ID，与STEP2保持一致
+        setText('a-notifyUrl', 'https://your.server/callback'); // 回调地址，与STEP2保持一致
+        
+        // Update PayerMax step 3 API模式 - 各支付方式的一致字段
+        setText('a-requestTime-api-card', formatDate(startDate));
+        setText('a-keyVersion-api-card', '1');
+        setText('a-subject-api-card', 'PayerMax订阅计划');
+        setText('a-amount-api-card', activateAmount);
+        setText('a-currency-api-card', currency);
+        setText('a-userId-api-card', 'test10001');
+        setText('a-notifyUrl-api-card', 'https://your.server/callback');
+        
+        setText('a-requestTime-api-applepay', formatDate(startDate));
+        setText('a-keyVersion-api-applepay', '1');
+        setText('a-subject-api-applepay', 'PayerMax订阅计划');
+        setText('a-amount-api-applepay', activateAmount);
+        setText('a-currency-api-applepay', currency);
+        setText('a-userId-api-applepay', 'test10001');
+        setText('a-notifyUrl-api-applepay', 'https://your.server/callback');
+        
+        setText('a-requestTime-api-googlepay', formatDate(startDate));
+        setText('a-keyVersion-api-googlepay', '1');
+        setText('a-subject-api-googlepay', 'PayerMax订阅计划');
+        setText('a-amount-api-googlepay', activateAmount);
+        setText('a-currency-api-googlepay', currency);
+        setText('a-userId-api-googlepay', 'test10001');
+        setText('a-notifyUrl-api-googlepay', 'https://your.server/callback');
+        
+        setText('a-requestTime-api-apm', formatDate(startDate));
+        setText('a-keyVersion-api-apm', '1');
+        setText('a-subject-api-apm', 'PayerMax订阅计划');
+        setText('a-amount-api-apm', activateAmount);
+        setText('a-currency-api-apm', currency);
+        setText('a-userId-api-apm', 'test10001');
+        setText('a-notifyUrl-api-apm', 'https://your.server/callback');
         
         // Update PayerMax step 4 - Webhook
         setText('w-amount', amount);

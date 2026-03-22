@@ -297,6 +297,7 @@ class App {
         this.updateDynamic();
         this.renderParamCards();
         this.highlightCodeParams();
+        this.initializeAPMNotice();
     }
 
     setupEventListeners() {
@@ -332,7 +333,7 @@ class App {
     handleModeChange(e) {
         const card = e.currentTarget;
         const modeCards = document.querySelectorAll('.mode-card');
-        
+
         // Find which mode was clicked
         let mode = MODES.PAYERMAX;
         modeCards.forEach((c, index) => {
@@ -342,18 +343,18 @@ class App {
                 else if (index === 2) mode = MODES.NONPERIODIC;
             }
         });
-        
+
         // Update UI
         modeCards.forEach(c => c.classList.remove('active'));
         card.classList.add('active');
-        
+
         // Update state
         this.state.currentMode = mode;
         this.state.currentStep = 0;
-        
+
         // Clean up components
         this.cleanupComponents();
-        
+
         // Re-render
         this.init();
     }
@@ -387,19 +388,42 @@ class App {
             return;
         }
 
+        // Show/hide APM special notice
+        const apmNotice = document.getElementById('apm-special-notice');
+        if (apmNotice) {
+            if (payment === PAYMENT_METHODS.APM) {
+                apmNotice.style.display = 'block';
+            } else {
+                apmNotice.style.display = 'none';
+            }
+        }
+
         // Update merchant payment method type
         this.state.merchantPaymentMethodType = getPaymentMethodType(payment);
         this.updateDynamic();
-        
+
         // Switch PayerMax component code blocks if on the right step
         const steps = this.state.getSteps();
         if (this.state.currentMode === MODES.PAYERMAX && steps[this.state.currentStep]?.id === 'pm-4-bind') {
             this.switchPayerMaxComponentCodeBlocks();
         }
-        
+
         // Switch NonPeriodic component code blocks if on the right step
         if (this.state.currentMode === MODES.NONPERIODIC && steps[this.state.currentStep]?.id === 'np-3-bind') {
             this.switchNonPeriodicComponentCodeBlocks();
+        }
+    }
+
+    initializeAPMNotice() {
+        // Initialize APM special notice visibility based on current payment method
+        const payment = this.state.getCurrentPayment();
+        const apmNotice = document.getElementById('apm-special-notice');
+        if (apmNotice) {
+            if (payment === PAYMENT_METHODS.APM) {
+                apmNotice.style.display = 'block';
+            } else {
+                apmNotice.style.display = 'none';
+            }
         }
     }
 
@@ -447,18 +471,18 @@ class App {
     renderProgress() {
         const steps = this.state.getSteps();
         const progressHeader = document.getElementById('progress-header');
-        
+
         console.log('Rendering progress:', { steps, currentStep: this.state.currentStep });
-        
+
         if (!progressHeader) {
             console.error('Progress header element not found!');
             return;
         }
-        
+
         let html = '';
         steps.forEach((step, index) => {
-            const status = index < this.state.currentStep ? 'completed' : 
-                          index === this.state.currentStep ? 'active' : '';
+            const status = index < this.state.currentStep ? 'completed' :
+                index === this.state.currentStep ? 'active' : '';
             html += `
                 <div class="prog-step ${status}">
                     <div class="prog-dot">${index + 1}</div>
@@ -469,7 +493,7 @@ class App {
                 </div>
             `;
         });
-        
+
         progressHeader.innerHTML = html;
         console.log('Progress rendered successfully');
     }
@@ -477,18 +501,18 @@ class App {
     showPanel() {
         const steps = this.state.getSteps();
         const currentPanelId = steps[this.state.currentStep]?.id;
-        
+
         // Hide all panels
         document.querySelectorAll('.step-panel').forEach(panel => {
             panel.classList.remove('active');
         });
-        
+
         // Show current panel
         const currentPanel = document.getElementById(`panel-${currentPanelId}`);
         if (currentPanel) {
             currentPanel.classList.add('active');
         }
-        
+
         // Handle special panel display logic
         if (currentPanelId === 'pm-4-bind') {
             // Ensure code blocks are properly displayed for PayerMax component step
@@ -502,15 +526,15 @@ class App {
         const steps = this.state.getSteps();
         const btnLabels = this.state.getBtnLabels();
         const hints = this.state.getHints();
-        
+
         const actionBar = document.querySelector('.action-bar');
         if (!actionBar) return;
-        
+
         const isLastStep = this.state.currentStep === steps.length - 1;
         const btnClass = isLastStep ? 'btn-success' : 'btn-primary';
         const btnLabel = btnLabels[this.state.currentStep] || '下一步';
         const hint = hints[this.state.currentStep] || '';
-        
+
         actionBar.innerHTML = `
             <div class="action-hint">
                 <span class="hint-icon">💡</span>
@@ -532,20 +556,20 @@ class App {
                 const paramName = currentStepData.output[0].key;
                 this.showStepConnector(this.state.currentStep, this.state.currentStep + 1, paramName);
             }
-            
+
             this.state.currentStep++;
             this.renderProgress();
             this.renderParamFlowBar();
             this.showPanel();
             this.renderActionBar();
             this.updateDynamic();
-            
+
             // 延迟渲染参数卡片和高亮，让步骤切换动画先完成
             setTimeout(() => {
                 this.renderParamCards();
                 this.highlightCodeParams();
             }, 100);
-            
+
             // Handle special cases for step transitions
             this.handleStepTransition();
         }
@@ -566,7 +590,7 @@ class App {
     handleStepTransition() {
         const steps = this.state.getSteps();
         const currentStepId = steps[this.state.currentStep]?.id;
-        
+
         // PayerMax mode - step 2 (create subscription)
         if (this.state.currentMode === MODES.PAYERMAX && currentStepId === 'pm-2') {
             const subtype = getRadioValue('subtype', 'standard');
@@ -574,21 +598,21 @@ class App {
                 this.switchCreateTab(subtype, true);
             }, 50);
         }
-        
+
         // Merchant mode - step 2 (bind payment)
         if (this.state.currentMode === MODES.MERCHANT && currentStepId === 'm-2') {
             setTimeout(() => {
                 this.switchMerchantCodeBlocks();
             }, 50);
         }
-        
+
         // PayerMax mode - step 4-bind (component activation)
         if (this.state.currentMode === MODES.PAYERMAX && currentStepId === 'pm-4-bind') {
             setTimeout(() => {
                 this.switchPayerMaxComponentCodeBlocks();
             }, 50);
         }
-        
+
         // NonPeriodic mode - step 3-bind (component activation)
         if (this.state.currentMode === MODES.NONPERIODIC && currentStepId === 'np-3-bind') {
             setTimeout(() => {
@@ -602,7 +626,7 @@ class App {
         document.querySelectorAll('.create-code-standard, .create-code-trial, .create-code-discount, .create-code-trial-discount').forEach(block => {
             block.style.display = 'none';
         });
-        
+
         // Show target code block
         const targetBlock = document.querySelector(`.create-code-${type}`);
         if (targetBlock) {
@@ -614,7 +638,7 @@ class App {
         const integration = this.state.getCurrentIntegration();
         const cashierBlock = document.querySelector('.m-bind-code-cashier');
         const apiBlock = document.querySelector('.m-bind-code-api');
-        
+
         if (cashierBlock && apiBlock) {
             if (integration === INTEGRATION_TYPES.API) {
                 cashierBlock.style.display = 'none';
@@ -629,17 +653,17 @@ class App {
     switchPayerMaxComponentCodeBlocks() {
         const payment = this.state.getCurrentPayment();
         console.log('switchPayerMaxComponentCodeBlocks called, payment:', payment);
-        
+
         const cardBlock = document.getElementById('pm-component-card-request');
         const applePayBlock = document.getElementById('pm-component-applepay-request');
         const googlePayBlock = document.getElementById('pm-component-googlepay-request');
-        
+
         console.log('Blocks found:', {
             cardBlock: !!cardBlock,
             applePayBlock: !!applePayBlock,
             googlePayBlock: !!googlePayBlock
         });
-        
+
         // Hide all blocks first
         if (cardBlock) {
             cardBlock.style.display = 'none';
@@ -653,7 +677,7 @@ class App {
             googlePayBlock.style.display = 'none';
             console.log('Hidden GooglePay block');
         }
-        
+
         // Show the appropriate block based on payment method
         if (payment === 'applepay' && applePayBlock) {
             console.log('Showing ApplePay block');
@@ -667,22 +691,30 @@ class App {
         } else {
             console.error('No code block found to display!');
         }
+
+        // Switch Activation Success response blocks
+        const respCard = document.getElementById('pm-comp-resp-card');
+        const respApplepay = document.getElementById('pm-comp-resp-applepay');
+        const respGooglepay = document.getElementById('pm-comp-resp-googlepay');
+        if (respCard) respCard.style.display = payment === 'applepay' || payment === 'googlepay' ? 'none' : 'block';
+        if (respApplepay) respApplepay.style.display = payment === 'applepay' ? 'block' : 'none';
+        if (respGooglepay) respGooglepay.style.display = payment === 'googlepay' ? 'block' : 'none';
     }
 
     switchNonPeriodicComponentCodeBlocks() {
         const payment = this.state.getCurrentPayment();
         console.log('switchNonPeriodicComponentCodeBlocks called, payment:', payment);
-        
+
         const cardBlock = document.getElementById('np-component-card-request');
         const applePayBlock = document.getElementById('np-component-applepay-request');
         const googlePayBlock = document.getElementById('np-component-googlepay-request');
-        
+
         console.log('NonPeriodic blocks found:', {
             cardBlock: !!cardBlock,
             applePayBlock: !!applePayBlock,
             googlePayBlock: !!googlePayBlock
         });
-        
+
         // Hide all blocks first
         if (cardBlock) {
             cardBlock.style.display = 'none';
@@ -696,7 +728,7 @@ class App {
             googlePayBlock.style.display = 'none';
             console.log('Hidden NonPeriodic GooglePay block');
         }
-        
+
         // Show the appropriate block based on payment method
         if (payment === 'applepay' && applePayBlock) {
             console.log('Showing NonPeriodic ApplePay block');
@@ -715,7 +747,7 @@ class App {
     updateMerchantBindType() {
         const bindType = getRadioValue('m-bindtype', 'zero');
         const amountInput = document.getElementById('m-amount');
-        
+
         if (amountInput) {
             if (bindType === 'zero') {
                 amountInput.value = '0';
@@ -727,7 +759,7 @@ class App {
                 amountInput.style.background = '#FAFBFC';
             }
         }
-        
+
         this.updateDynamic();
     }
 
@@ -741,7 +773,7 @@ class App {
         let startDate = getValue('p-startDate', '');
         const subtype = getRadioValue('subtype', 'standard');
         const payment = this.state.getCurrentPayment();
-        
+
         // Auto-calculate start date if empty
         if (!startDate) {
             const now = new Date();
@@ -753,7 +785,7 @@ class App {
                 // 其他模式（包括N天试用+前N期优惠）：当前时间 + 2小时
                 now.setHours(now.getHours() + 2);
             }
-            
+
             // Format to datetime-local format (YYYY-MM-DDTHH:MM)
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -761,29 +793,29 @@ class App {
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             startDate = `${year}-${month}-${day}T${hours}:${minutes}`;
-            
+
             // Update the input field
             const startDateInput = document.getElementById('p-startDate');
             if (startDateInput) {
                 startDateInput.value = startDate;
             }
         }
-        
+
         // Merchant mode parameters
         const mAmount = getValue('m-amount', '9.99');
         const mCurrency = getValue('m-currency', 'USD');
         const mSubject = getValue('m-subject', '代扣标题');
         const mUserId = getValue('m-userId', 'test1111111');
-        
+
         // Show/hide conditional rows
         const trialDaysRow = document.getElementById('trialDaysRow');
         const discountParamsRow = document.getElementById('discountParamsRow');
         const trialDiscountParamsRow = document.getElementById('trialDiscountParamsRow');
-        
+
         if (trialDaysRow) trialDaysRow.style.display = subtype === 'trial' ? 'flex' : 'none';
         if (discountParamsRow) discountParamsRow.style.display = subtype === 'discount' ? 'block' : 'none';
         if (trialDiscountParamsRow) trialDiscountParamsRow.style.display = subtype === 'trial-discount' ? 'block' : 'none';
-        
+
         // Update PayerMax step 2 - subscriptionCreate
         setText('c-totalPeriods', totalPeriods);
         setText('c-periodUnit', periodUnit);
@@ -791,50 +823,102 @@ class App {
         setText('c-amount', amount);
         setText('c-currency', currency);
         setText('c-startDate', formatDate(startDate));
-        
+        setText('c-requestTime', formatDate(startDate));
+        setText('c-requestTime-trial', formatDate(startDate));
+        setText('c-requestTime-discount', formatDate(startDate));
+        setText('c-requestTime-trial-discount', formatDate(startDate));
+
+        // Update subscriptionRequestId with random value
+        const reqId = getTimestamp();
+        setText('c-reqId', reqId);
+        setText('c-resp-reqId', reqId);
+
         // Update PayerMax step 3 - orderAndPay activate
         const trialAmountCombo = getValue('p-trialAmount-combo', '0.99');
         const activateAmount = calculateActivateAmount(subtype, amount, trialAmountCombo);
         setText('a-amount', activateAmount);
         setText('a-currency', currency);
         setText('a-paymentMethodType', getPaymentMethodType(payment));
-        
+
+        // Update PayerMax step 3 - 保持与STEP2一致的字段
+        setText('a-requestTime', formatDate(startDate)); // 请求时间，与STEP2保持一致
+        setText('a-keyVersion', '1'); // keyVersion，与STEP2保持一致
+        setText('a-subject', 'PayerMax订阅计划'); // 订阅计划标题
+        setText('a-userId', 'test10001'); // 用户ID，与STEP2保持一致
+        setText('a-notifyUrl', 'https://your.server/callback'); // 回调地址，与STEP2保持一致
+
+        // Update PayerMax step 3 API模式 - 各支付方式的一致字段
+        setText('a-requestTime-api-card', formatDate(startDate));
+        setText('a-keyVersion-api-card', '1');
+        setText('a-subject-api-card', 'PayerMax订阅计划');
+        setText('a-amount-api-card', activateAmount);
+        setText('a-currency-api-card', currency);
+        setText('a-userId-api-card', 'test10001');
+        setText('a-notifyUrl-api-card', 'https://your.server/callback');
+
+        setText('a-requestTime-api-applepay', formatDate(startDate));
+        setText('a-keyVersion-api-applepay', '1');
+        setText('a-subject-api-applepay', 'PayerMax订阅计划');
+        setText('a-amount-api-applepay', activateAmount);
+        setText('a-currency-api-applepay', currency);
+        setText('a-userId-api-applepay', 'test10001');
+        setText('a-notifyUrl-api-applepay', 'https://your.server/callback');
+
+        setText('a-requestTime-api-googlepay', formatDate(startDate));
+        setText('a-keyVersion-api-googlepay', '1');
+        setText('a-subject-api-googlepay', 'PayerMax订阅计划');
+        setText('a-amount-api-googlepay', activateAmount);
+        setText('a-currency-api-googlepay', currency);
+        setText('a-userId-api-googlepay', 'test10001');
+        setText('a-notifyUrl-api-googlepay', 'https://your.server/callback');
+
+        setText('a-requestTime-api-apm', formatDate(startDate));
+        setText('a-keyVersion-api-apm', '1');
+        setText('a-subject-api-apm', 'PayerMax订阅计划');
+        setText('a-amount-api-apm', activateAmount);
+        setText('a-currency-api-apm', currency);
+        setText('a-userId-api-apm', 'test10001');
+        setText('a-notifyUrl-api-apm', 'https://your.server/callback');
+
         // Update PayerMax step 4 - Component bind orderAndPay
         setText('pm-comp-amount', activateAmount);
         setText('pm-comp-currency', currency);
-        
+
         // Update PayerMax step 4 - Webhook
         setText('w-amount', amount);
         setText('w-currency', currency);
-        
+        setText('w-paymentMethodType', getPaymentMethodType(payment));
+        setText('w-pm4-paymentMethodType-noncomp', getPaymentMethodType(payment));
+        setText('w-pm4-paymentMethodType-comp', getPaymentMethodType(payment));
+
         // Update completion summary
         setText('f-cycle', `每 ${periodCount} ${getPeriodUnitText(periodUnit)} · 共 ${totalPeriods} 期`);
         setText('f-amount', `${currency} ${amount}`);
         setText('f-startDate', startDate ? startDate.replace('T', ' ') : '—');
-        
+
         // Update Merchant step 2 - bind orderAndPay
         setText('m-bind-amount', mAmount);
         setText('m-bind-currency', mCurrency);
         setText('m-bind-subject', mSubject);
         setText('m-bind-userId', mUserId);
         setText('m-tradeNo', getTimestamp());
-        
+
         setText('m-bind-amount-api', mAmount);
         setText('m-bind-currency-api', mCurrency);
         setText('m-bind-subject-api', mSubject);
         setText('m-bind-userId-api', mUserId);
         setText('m-tradeNo-api', getTimestamp());
-        
+
         setText('m-bind-paymentMethodType', this.state.merchantPaymentMethodType);
         setText('m-bind-paymentMethodType-api', this.state.merchantPaymentMethodType);
-        
+
         // Update Merchant step 3-bind - component bind orderAndPay
         setText('m-component-tradeNo', getTimestamp());
         setText('m-component-subject', mSubject);
         setText('m-component-amount', mAmount);
         setText('m-component-currency', mCurrency);
         setText('m-component-userId', mUserId);
-        
+
         // Update Merchant step 3 - deduct orderAndPay
         setText('m-dedAmount', mAmount);
         setText('m-dedCurrency', mCurrency);
@@ -845,64 +929,64 @@ class App {
         setText('m-dedResAmt', mAmount);
         setText('m-dedResCur', mCurrency);
         setText('m-deduct-paymentMethodType', this.state.merchantPaymentMethodType);
-        
+
         // Update component session request
         setText('s-componentList', getComponentList(payment));
         setText('s-amount', activateAmount);
         setText('s-currency', currency);
-        
+
         setText('sm-componentList', getComponentList(payment));
         setText('sm-amount', mAmount);
         setText('sm-currency', mCurrency);
-        
+
         // Non-periodic mode
         const npAmount = getValue('np-amount', '9.99');
         const npCurrency = getValue('np-currency', 'USD');
         setText('snp-componentList', getComponentList(payment));
         setText('snp-amount', npAmount);
         setText('snp-currency', npCurrency);
-        
+
         // Update NonPeriodic step 3-bind - component bind orderAndPay
         setText('np-comp-amount', npAmount);
         setText('np-comp-currency', npCurrency);
-        
+
         // Update NonPeriodic step 3-bind - Webhook
         setText('np-w-amount', npAmount);
         setText('np-w-currency', npCurrency);
         setText('np-w-tokenId', getTimestamp());
-        
+
         // Update NonPeriodic step 3 (non-component) - deduct parameters
         setText('np-ded-tradeNo-noncomp', getTimestamp());
         setText('np-ded-subject-noncomp', getValue('np-subject', '代扣标题'));
         setText('np-ded-amount-noncomp', npAmount);
         setText('np-ded-currency-noncomp', npCurrency);
         setText('np-ded-userId-noncomp', getValue('np-userId', 'test1111111'));
-        
+
         // Update NonPeriodic step 4 (component) - deduct parameters
         setText('np-ded-tradeNo', getTimestamp());
         setText('np-ded-subject', getValue('np-subject', '代扣标题'));
         setText('np-ded-amount', npAmount);
         setText('np-ded-currency', npCurrency);
         setText('np-ded-userId', getValue('np-userId', 'test1111111'));
-        
+
         // Auto-switch code blocks if needed
         const steps = this.state.getSteps();
         if (this.state.currentMode === MODES.PAYERMAX && steps[this.state.currentStep]?.id === 'pm-2') {
             this.switchCreateTab(subtype, true);
         }
-        
+
         if (this.state.currentMode === MODES.MERCHANT && steps[this.state.currentStep]?.id === 'm-2') {
             this.switchMerchantCodeBlocks();
         }
-        
+
         if (this.state.currentMode === MODES.PAYERMAX && steps[this.state.currentStep]?.id === 'pm-4-bind') {
             this.switchPayerMaxComponentCodeBlocks();
         }
-        
+
         if (this.state.currentMode === MODES.NONPERIODIC && steps[this.state.currentStep]?.id === 'np-3-bind') {
             this.switchNonPeriodicComponentCodeBlocks();
         }
-        
+
         // 更新参数卡片
         this.renderParamCards();
         this.highlightCodeParams();
@@ -915,21 +999,21 @@ class App {
     }
 
     // ==================== PARAMETER GUIDANCE METHODS ====================
-    
+
     renderParamFlowBar() {
         const steps = this.state.getSteps();
         const flowBar = document.getElementById('param-flow-bar');
-        
+
         if (!flowBar) return;
-        
+
         const paramFlowData = this.getParamFlowData();
-        
+
         let html = '<div class="param-flow-steps">';
         steps.forEach((step, index) => {
-            const status = index < this.state.currentStep ? 'completed' : 
-                          index === this.state.currentStep ? 'active' : '';
+            const status = index < this.state.currentStep ? 'completed' :
+                index === this.state.currentStep ? 'active' : '';
             const paramInfo = paramFlowData[index] || {};
-            
+
             html += `
                 <div class="param-flow-step ${status}">
                     <div class="param-flow-dot">${index + 1}</div>
@@ -941,14 +1025,14 @@ class App {
             `;
         });
         html += '</div>';
-        
+
         flowBar.innerHTML = html;
     }
-    
+
     getParamFlowData() {
         const mode = this.state.currentMode;
         const integration = this.state.getCurrentIntegration();
-        
+
         if (mode === MODES.PAYERMAX && integration === INTEGRATION_TYPES.COMPONENT) {
             return {
                 0: { output: '订阅参数' },
@@ -972,35 +1056,35 @@ class App {
                 3: { output: '扣款完成' }
             };
         }
-        
+
         return {};
     }
-    
+
     renderParamCards() {
         const container = document.getElementById('param-cards-container');
         if (!container) return;
-        
+
         const currentStepData = this.getCurrentStepParamData();
-        
+
         let html = '';
-        
+
         // 输入参数卡片
         if (currentStepData.input && currentStepData.input.length > 0) {
             html += this.createParamCard('input', '输入参数', '📥', currentStepData.input);
         }
-        
+
         // 输出参数卡片
         if (currentStepData.output && currentStepData.output.length > 0) {
             html += this.createParamCard('output', '输出参数', '📤', currentStepData.output);
         }
-        
+
         container.innerHTML = html;
     }
-    
+
     createParamCard(type, title, icon, params) {
         const statusClass = type === 'input' ? 'ready' : 'pending';
         const statusText = type === 'input' ? '✓' : '⏳';
-        
+
         let paramsHtml = '';
         params.forEach(param => {
             const value = this.getParamValue(param.key) || param.defaultValue || '—';
@@ -1011,7 +1095,7 @@ class App {
                 </div>
             `;
         });
-        
+
         return `
             <div class="param-card ${type}">
                 <div class="param-card-header">
@@ -1025,13 +1109,13 @@ class App {
             </div>
         `;
     }
-    
+
     getCurrentStepParamData() {
         const steps = this.state.getSteps();
         const currentStepId = steps[this.state.currentStep]?.id;
         const mode = this.state.currentMode;
         const integration = this.state.getCurrentIntegration();
-        
+
         // PayerMax + Component 模式
         if (mode === MODES.PAYERMAX && integration === INTEGRATION_TYPES.COMPONENT) {
             switch (currentStepId) {
@@ -1085,10 +1169,10 @@ class App {
                     };
             }
         }
-        
+
         return { input: [], output: [] };
     }
-    
+
     getParamValue(key) {
         switch (key) {
             case 'totalPeriods':
@@ -1103,35 +1187,35 @@ class App {
                 return null;
         }
     }
-    
+
     showStepConnector(fromStep, toStep, paramName) {
         const connector = document.getElementById('step-connector');
         const connectorLine = document.getElementById('connector-line');
         const connectorText = document.getElementById('connector-text');
-        
+
         if (!connector) return;
-        
+
         connector.style.display = 'flex';
         connectorLine.classList.add('active');
         connectorText.textContent = paramName;
-        
+
         // 3秒后隐藏
         setTimeout(() => {
             connector.style.display = 'none';
             connectorLine.classList.remove('active');
         }, 3000);
     }
-    
+
     highlightCodeParams() {
         // 在代码块中高亮显示来自上一步的参数
         const steps = this.state.getSteps();
         const currentStepId = steps[this.state.currentStep]?.id;
-        
+
         // 移除之前的高亮
         document.querySelectorAll('.param-highlight').forEach(el => {
             el.classList.remove('param-highlight', 'from-previous');
         });
-        
+
         // 根据当前步骤添加高亮
         if (currentStepId === 'pm-2') {
             this.highlightInCodeBlock(['totalPeriods', 'amount', 'currency', 'periodUnit']);
@@ -1139,7 +1223,7 @@ class App {
             this.highlightInCodeBlock(['paymentToken', 'sessionKey'], 'from-previous');
         }
     }
-    
+
     highlightInCodeBlock(paramNames, className = '') {
         paramNames.forEach(paramName => {
             // 查找代码块中的参数
@@ -1167,7 +1251,7 @@ function initializeApp() {
 }
 
 // Global test function for debugging
-window.testCodeBlockSwitch = function(paymentMethod) {
+window.testCodeBlockSwitch = function (paymentMethod) {
     console.log('Testing code block switch for:', paymentMethod);
     if (app && app.switchPayerMaxComponentCodeBlocks) {
         // Temporarily set payment method
@@ -1187,19 +1271,19 @@ window.testCodeBlockSwitch = function(paymentMethod) {
 };
 
 // Global function to navigate directly to STEP4 for testing
-window.goToStep4 = function() {
+window.goToStep4 = function () {
     console.log('Navigating to STEP4 for testing...');
     if (app) {
         // Set to PayerMax mode and component integration
         app.state.currentMode = 'payermax';
         document.querySelector('input[name="integration"][value="component"]').checked = true;
-        
+
         // Navigate to step 3 (which is step 4 in the 5-step flow)
         app.state.currentStep = 3;
         app.renderProgress();
         app.showPanel();
         app.renderActionBar();
-        
+
         console.log('Navigated to STEP4. Current step:', app.state.currentStep);
         console.log('Current panel should be: pm-4-bind');
     } else {
@@ -1243,18 +1327,18 @@ function initComponent() {
     if (mountContainer) {
         mountContainer.classList.remove('active');
     }
-    
+
     document.querySelectorAll('.component-mount').forEach(el => {
         el.classList.remove('active');
         el.style.display = 'none';
         el.innerHTML = '';
     });
-    
+
     const tokenDisplay = document.getElementById('token-display-area');
     if (tokenDisplay) {
         tokenDisplay.classList.remove('active');
     }
-    
+
     const cardPayBtn = document.getElementById('card-pay-btn');
     if (cardPayBtn) {
         cardPayBtn.style.display = 'none';
@@ -1281,7 +1365,7 @@ function initComponent() {
             componentType = 'applepay';
             mountId = '#applepay-mount-area';
             mountElement = document.getElementById('applepay-mount-area');
-            
+
             // 检查是否支持 ApplePay
             if (typeof PMdropin !== 'undefined' && !PMdropin.isSupportApplePay()) {
                 alert('当前设备或浏览器不支持 Apple Pay');
@@ -1392,7 +1476,7 @@ function handleAppleGooglePayment(pmComponent) {
 
     // 获取订阅类型
     const subtype = getRadioValue('subtype', 'standard');
-    
+
     // 获取参数
     const totalPeriods = parseInt(getValue('p-totalPeriods', '12')) || 12;
     const periodCount = parseInt(getValue('p-periodCount', '1')) || 1;
@@ -1505,18 +1589,18 @@ function initComponentMerchant() {
     if (mountContainer) {
         mountContainer.classList.remove('active');
     }
-    
+
     document.querySelectorAll('#card-mount-area-m, #applepay-mount-area-m, #googlepay-mount-area-m').forEach(el => {
         el.classList.remove('active');
         el.style.display = 'none';
         el.innerHTML = '';
     });
-    
+
     const tokenDisplay = document.getElementById('token-display-area-m');
     if (tokenDisplay) {
         tokenDisplay.classList.remove('active');
     }
-    
+
     const cardPayBtn = document.getElementById('card-pay-btn-m');
     if (cardPayBtn) {
         cardPayBtn.style.display = 'none';
@@ -1541,7 +1625,7 @@ function initComponentMerchant() {
             componentType = 'applepay';
             mountId = '#applepay-mount-area-m';
             mountElement = document.getElementById('applepay-mount-area-m');
-            
+
             if (typeof PMdropin !== 'undefined' && !PMdropin.isSupportApplePay()) {
                 alert('当前设备或浏览器不支持 Apple Pay');
                 return;
@@ -1750,18 +1834,18 @@ function initComponentNonPeriodic() {
     if (mountContainer) {
         mountContainer.classList.remove('active');
     }
-    
+
     document.querySelectorAll('#card-mount-area-np, #applepay-mount-area-np, #googlepay-mount-area-np').forEach(el => {
         el.classList.remove('active');
         el.style.display = 'none';
         el.innerHTML = '';
     });
-    
+
     const tokenDisplay = document.getElementById('token-display-area-np');
     if (tokenDisplay) {
         tokenDisplay.classList.remove('active');
     }
-    
+
     const cardPayBtn = document.getElementById('card-pay-btn-np');
     if (cardPayBtn) {
         cardPayBtn.style.display = 'none';
@@ -1786,7 +1870,7 @@ function initComponentNonPeriodic() {
             componentType = 'applepay';
             mountId = '#applepay-mount-area-np';
             mountElement = document.getElementById('applepay-mount-area-np');
-            
+
             if (typeof PMdropin !== 'undefined' && !PMdropin.isSupportApplePay()) {
                 alert('当前设备或浏览器不支持 Apple Pay');
                 return;
@@ -1925,50 +2009,50 @@ window.initComponentNonPeriodic = initComponentNonPeriodic;
 window.handleCardPaymentNonPeriodic = handleCardPaymentNonPeriodic;
 
 // Global wrapper functions for HTML onclick handlers
-window.switchMode = function(el, mode) {
+window.switchMode = function (el, mode) {
     if (window.app) {
         // Remove active class from all mode cards
         document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
-        
+
         // Map mode string to MODES constant
         const modeMap = {
             'payermax': MODES.PAYERMAX,
             'merchant': MODES.MERCHANT,
             'nonperiodic': MODES.NONPERIODIC
         };
-        
+
         // Update state
         window.app.state.currentMode = modeMap[mode] || MODES.PAYERMAX;
         window.app.state.currentStep = 0;
-        
+
         // Clean up components
         window.app.cleanupComponents();
-        
+
         // Re-render
         window.app.init();
     }
 };
 
-window.resetAll = function() {
+window.resetAll = function () {
     if (window.app) {
         window.app.resetAll();
     }
 };
 
-window.goNext = function() {
+window.goNext = function () {
     if (window.app) {
         window.app.goNext();
     }
 };
 
-window.goPrev = function() {
+window.goPrev = function () {
     if (window.app) {
         window.app.goPrev();
     }
 };
 
-window.switchCreateTab = function(type, autoSwitch = false) {
+window.switchCreateTab = function (type, autoSwitch = false) {
     // 更新 tab 激活状态
     const tabsContainer = document.querySelector('#panel-pm-2 .sub-tabs');
     if (tabsContainer) {
@@ -1976,7 +2060,7 @@ window.switchCreateTab = function(type, autoSwitch = false) {
         tabs.forEach(tab => {
             tab.classList.remove('active');
         });
-        
+
         // 如果是自动切换，根据 type 找到对应的 tab
         if (autoSwitch) {
             tabs.forEach(tab => {
@@ -2001,12 +2085,12 @@ window.switchCreateTab = function(type, autoSwitch = false) {
             });
         }
     }
-    
+
     // 隐藏所有代码块
     document.querySelectorAll('.create-code-standard, .create-code-trial, .create-code-discount, .create-code-trial-discount').forEach(block => {
         block.style.display = 'none';
     });
-    
+
     // 显示对应的代码块
     const targetBlock = document.querySelector(`.create-code-${type}`);
     if (targetBlock) {
@@ -2014,15 +2098,15 @@ window.switchCreateTab = function(type, autoSwitch = false) {
     }
 };
 
-window.copyCode = function(id) {
+window.copyCode = function (id) {
     const el = document.getElementById(id);
     if (!el) return;
     const raw = el.innerText || el.textContent;
     navigator.clipboard.writeText(raw).then(() => {
         const btn = el.closest('.code-block').querySelector('.copy-mini-btn');
-        if (btn) { 
-            btn.textContent = '✓ 已复制'; 
-            setTimeout(() => btn.textContent = '复制', 2000); 
+        if (btn) {
+            btn.textContent = '✓ 已复制';
+            setTimeout(() => btn.textContent = '复制', 2000);
         }
     }).catch(err => {
         console.error('Copy failed:', err);
@@ -2030,13 +2114,13 @@ window.copyCode = function(id) {
     });
 };
 
-window.updateDynamic = function() {
+window.updateDynamic = function () {
     if (window.app) {
         window.app.updateDynamic();
     }
 };
 
-window.updateMerchantBindType = function() {
+window.updateMerchantBindType = function () {
     if (window.app) {
         window.app.updateMerchantBindType();
     }
@@ -2056,13 +2140,13 @@ function initActivateModeSwitcher() {
     integrationRadios.forEach(radio => {
         radio.addEventListener('change', updateActivateCodeExample);
     });
-    
+
     // 监听支付方式变化
     const paymentRadios = document.querySelectorAll('input[name="payment"]');
     paymentRadios.forEach(radio => {
         radio.addEventListener('change', updateActivateCodeExample);
     });
-    
+
     // 初始化时执行一次
     updateActivateCodeExample();
 }
@@ -2073,21 +2157,21 @@ function initActivateModeSwitcher() {
 function updateActivateCodeExample() {
     const integration = document.querySelector('input[name="integration"]:checked')?.value;
     const payment = document.querySelector('input[name="payment"]:checked')?.value;
-    
+
     // 获取容器元素
     const cashierMode = document.getElementById('activate-cashier-mode');
     const apiMode = document.getElementById('activate-api-mode');
     const modeTitle = document.getElementById('integration-mode-title');
     const modeDesc = document.getElementById('integration-mode-desc');
-    
+
     if (!cashierMode || !apiMode) return;
-    
+
     // 根据集成方式显示对应的代码示例
     if (integration === 'cashier') {
         // 收银台模式
         cashierMode.style.display = 'grid';
         apiMode.style.display = 'none';
-        
+
         if (modeTitle) modeTitle.textContent = '收银台模式';
         if (modeDesc) {
             modeDesc.innerHTML = `
@@ -2100,7 +2184,7 @@ function updateActivateCodeExample() {
         // API 模式
         cashierMode.style.display = 'none';
         apiMode.style.display = 'grid';
-        
+
         if (modeTitle) modeTitle.textContent = 'API 模式';
         if (modeDesc) {
             modeDesc.innerHTML = `
@@ -2109,22 +2193,32 @@ function updateActivateCodeExample() {
                 • 不同支付方式需要传入对应的支付要素参数
             `;
         }
-        
+
         // 根据支付方式显示对应的 API 代码示例
         const apiCardRequest = document.getElementById('api-card-request');
         const apiApplepayRequest = document.getElementById('api-applepay-request');
         const apiGooglepayRequest = document.getElementById('api-googlepay-request');
         const apiApmRequest = document.getElementById('api-apm-request');
-        
+
         if (apiCardRequest) apiCardRequest.style.display = payment === 'card' ? 'block' : 'none';
         if (apiApplepayRequest) apiApplepayRequest.style.display = payment === 'applepay' ? 'block' : 'none';
         if (apiGooglepayRequest) apiGooglepayRequest.style.display = payment === 'googlepay' ? 'block' : 'none';
         if (apiApmRequest) apiApmRequest.style.display = payment === 'apm' ? 'block' : 'none';
+
+        // 同步切换响应示例代码块
+        const apiRespCard = document.getElementById('api-resp-card');
+        const apiRespApplepay = document.getElementById('api-resp-applepay');
+        const apiRespGooglepay = document.getElementById('api-resp-googlepay');
+        const apiRespApm = document.getElementById('api-resp-apm');
+        if (apiRespCard) apiRespCard.style.display = payment === 'card' ? 'block' : 'none';
+        if (apiRespApplepay) apiRespApplepay.style.display = payment === 'applepay' ? 'block' : 'none';
+        if (apiRespGooglepay) apiRespGooglepay.style.display = payment === 'googlepay' ? 'block' : 'none';
+        if (apiRespApm) apiRespApm.style.display = payment === 'apm' ? 'block' : 'none';
     } else if (integration === 'component') {
         // 前置组件模式 - 隐藏所有激活代码示例（前置组件有自己的 Step）
         cashierMode.style.display = 'none';
         apiMode.style.display = 'none';
-        
+
         if (modeTitle) modeTitle.textContent = '前置组件模式';
         if (modeDesc) {
             modeDesc.innerHTML = `
@@ -2149,7 +2243,7 @@ if (document.readyState === 'loading') {
 function recalculateStartDate() {
     const subtype = getRadioValue('subtype', 'standard');
     const now = new Date();
-    
+
     if (subtype === 'trial') {
         // N天试用：当前时间 + 试用天数
         const trialDays = parseInt(getValue('p-trialDays', '7'));
@@ -2158,7 +2252,7 @@ function recalculateStartDate() {
         // 其他模式（包括N天试用+前N期优惠）：当前时间 + 2小时
         now.setHours(now.getHours() + 2);
     }
-    
+
     // Format to datetime-local format (YYYY-MM-DDTHH:MM)
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -2166,13 +2260,13 @@ function recalculateStartDate() {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const startDate = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
+
     // Update the input field
     const startDateInput = document.getElementById('p-startDate');
     if (startDateInput) {
         startDateInput.value = startDate;
     }
-    
+
     // Trigger updateDynamic to refresh all displays
     if (window.updateDynamic) {
         window.updateDynamic();
@@ -2186,7 +2280,7 @@ function initStartDateAutoCalculation() {
     subtypeRadios.forEach(radio => {
         radio.addEventListener('change', recalculateStartDate);
     });
-    
+
     // 监听试用天数变化（仅对N天试用模式有效）
     const trialDaysInput = document.getElementById('p-trialDays');
     if (trialDaysInput) {
@@ -2210,7 +2304,7 @@ function updateComponentStartDate() {
         // 转换为 ISO 8601 格式 (YYYY-MM-DDTHH:MM:SS+00:00)
         const date = new Date(startDate);
         const isoString = date.toISOString().replace('Z', '+00:00');
-        
+
         // 更新前置组件代码示例中的 firstPeriodStartDate
         const startDateElement = document.getElementById('s-startDate');
         if (startDateElement) {
@@ -2221,12 +2315,12 @@ function updateComponentStartDate() {
 
 // 扩展现有的 updateDynamic 函数，添加前置组件首期扣款时间更新
 const originalUpdateDynamic = window.updateDynamic;
-window.updateDynamic = function() {
+window.updateDynamic = function () {
     // 调用原始函数
     if (originalUpdateDynamic) {
         originalUpdateDynamic();
     }
-    
+
     // 更新前置组件首期扣款时间
     updateComponentStartDate();
 };

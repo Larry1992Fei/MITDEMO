@@ -5,21 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>订阅代扣演示Demo - 模块化版本</title>
-    
+
     <!-- External Dependencies -->
     <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Modular CSS -->
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/code-display.css">
 </head>
+
 <body>
 
     <div class="app-layout">
@@ -27,7 +30,6 @@
         <header class="topbar">
             <div class="topbar-logo">PayerMax</div>
             <span class="topbar-badge">订阅代扣演示 Demo</span>
-            <span style="font-size:0.75rem;color:var(--text-muted);margin-left:auto;">🎨 原型稿 — 仅供设计审阅</span>
         </header>
 
         <!-- LEFT: Config -->
@@ -82,6 +84,22 @@
                             value="googlepay"><label for="pay-googlepay">GOOGLEPAY</label></div>
                     <div class="radio-item"><input type="radio" name="payment" id="pay-apm" value="apm"><label
                             for="pay-apm">APM</label></div>
+                </div>
+
+                <!-- APM 特殊说明模块 - 只在选择APM时显示 -->
+                <div id="apm-special-notice" class="step-card"
+                    style="background:#FEF3C7;border-color:#FDE68A;margin-top:1rem;display:none;">
+                    <div class="step-card-title" style="color:#92400E;font-size:.85rem;">
+                        <div class="card-icon" style="background:#FEF9C3;">💡</div>
+                        APM 支付方式特殊说明
+                    </div>
+                    <div style="font-size:0.8rem;color:#92400E;line-height:1.8;">
+                        • <strong>paymentMethodType</strong>：APM 指定支付方式时传 <code
+                            style="background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">ONE_TOUCH</code>，全量收银台时可不传<br>
+                        • <strong>country</strong>：APM 激活时必传（如 KR、MY、BR）<br>
+                        • <strong>targetOrg</strong>：可选，用于指定具体钱包（如 NAVERPAY、KAKAOPAY 等）<br>
+                        • <strong>前置组件</strong>：APM 不支持前置组件集成方式，仅支持收银台和 API 模式
+                    </div>
                 </div>
             </div>
 
@@ -148,7 +166,7 @@
                             • <strong>普通订阅</strong>：直接按周期扣款，无优惠<br>
                             • <strong>N天试用</strong>：试用期结束后按周期扣款<br>
                             • <strong>前N期优惠</strong>：前几期优惠价，之后恢复原价<br>
-                            • <strong>试用+优惠</strong>：试用期 → 优惠期 → 正式期（三阶段组合）
+                            • <strong>试用+优惠</strong>：amount=0表示免费试用，amount>0表示低价试用
                         </div>
                     </div>
 
@@ -213,45 +231,52 @@
                             </div>
                             <!-- 组合优惠参数配置区域 -->
                             <div id="trialDiscountParamsRow" style="display:none;">
-                                <div class="step-card" style="background:#FEF3C7;border-color:#FDE68A;padding:1rem;margin-top:0.5rem;">
-                                    <div class="step-card-title" style="color:#92400E;font-size:.85rem;margin-bottom:0.75rem;">
+                                <div class="step-card"
+                                    style="background:#FEF3C7;border-color:#FDE68A;padding:1rem;margin-top:0.5rem;">
+                                    <div class="step-card-title"
+                                        style="color:#92400E;font-size:.85rem;margin-bottom:0.75rem;">
                                         <div class="card-icon" style="background:#FEF9C3;">🎁</div>
                                         组合优惠参数配置
                                     </div>
                                     <div class="param-form">
-                                        <div style="font-size:0.75rem;font-weight:600;color:#92400E;margin-bottom:0.5rem;">
+                                        <div
+                                            style="font-size:0.75rem;font-weight:600;color:#92400E;margin-bottom:0.5rem;">
                                             📅 试用期参数
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label class="form-label">试用天数</label>
-                                                <input type="number" id="p-trialDays-combo" class="form-input" value="7" min="1" 
-                                                    title="试用天数" oninput="updateDynamic()">
+                                                <input type="number" id="p-trialDays-combo" class="form-input" value="7"
+                                                    min="1" title="试用天数" oninput="updateDynamic()">
                                             </div>
                                             <div class="form-group">
                                                 <label class="form-label">试用期金额</label>
-                                                <input type="number" id="p-trialAmount-combo" class="form-input" value="0.99" 
-                                                    step="0.01" min="0" title="试用期金额" oninput="updateDynamic()">
+                                                <input type="number" id="p-trialAmount-combo" class="form-input"
+                                                    value="0.99" step="0.01" min="0" title="试用期金额"
+                                                    oninput="updateDynamic()">
                                             </div>
                                         </div>
-                                        
-                                        <div style="font-size:0.75rem;font-weight:600;color:#92400E;margin:0.75rem 0 0.5rem;">
+
+                                        <div
+                                            style="font-size:0.75rem;font-weight:600;color:#92400E;margin:0.75rem 0 0.5rem;">
                                             💰 优惠期参数
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label class="form-label">优惠期数</label>
-                                                <input type="number" id="p-trialPeriodCount-combo" class="form-input" value="2" 
-                                                    min="1" title="优惠期数" oninput="updateDynamic()">
+                                                <input type="number" id="p-trialPeriodCount-combo" class="form-input"
+                                                    value="2" min="1" title="优惠期数" oninput="updateDynamic()">
                                             </div>
                                             <div class="form-group">
                                                 <label class="form-label">优惠期金额</label>
-                                                <input type="number" id="p-trialPeriodAmount-combo" class="form-input" value="3.00" 
-                                                    step="0.01" min="0" title="优惠期金额" oninput="updateDynamic()">
+                                                <input type="number" id="p-trialPeriodAmount-combo" class="form-input"
+                                                    value="3.00" step="0.01" min="0" title="优惠期金额"
+                                                    oninput="updateDynamic()">
                                             </div>
                                         </div>
-                                        
-                                        <div style="font-size:0.7rem;color:#92400E;margin-top:0.75rem;padding:0.5rem;background:rgba(254,243,199,0.5);border-radius:6px;">
+
+                                        <div
+                                            style="font-size:0.7rem;color:#92400E;margin-top:0.75rem;padding:0.5rem;background:rgba(254,243,199,0.5);border-radius:6px;">
                                             💡 示例：0.99USD试用7天 → 前2期每期3USD → 剩余期数每期正常金额
                                         </div>
                                     </div>
@@ -312,8 +337,8 @@
                             <div class="form-row" id="m-amount-row">
                                 <div class="form-group">
                                     <label class="form-label" for="m-amount">首次订单金额</label>
-                                    <input type="number" id="m-amount" class="form-input" value="0" step="0.01"
-                                        min="0" title="首次订单金额" placeholder="0元绑定" oninput="updateDynamic()" readonly>
+                                    <input type="number" id="m-amount" class="form-input" value="0" step="0.01" min="0"
+                                        title="首次订单金额" placeholder="0元绑定" oninput="updateDynamic()" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" for="m-currency">币种</label>
@@ -345,9 +370,9 @@
                         </div>
                         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
                             使用第一步填写的参数，调用 <strong>subscriptionCreate</strong> API 创建订阅计划，获取 <code
-                                class="data-pill">subscriptionNo</code> 用于后续激活。支持4种订阅类型，点击下方标签查看不同类型的请求示例。
+                                class="data-pill">subscriptionNo</code> 用于后续激活。
                         </p>
-                        
+
                         <!-- 订阅类型切换 tabs -->
                         <div class="sub-tabs" style="margin-bottom:1rem;">
                             <div class="sub-tab active" onclick="switchCreateTab('standard')">普通订阅</div>
@@ -355,13 +380,13 @@
                             <div class="sub-tab" onclick="switchCreateTab('discount')">前N期优惠</div>
                             <div class="sub-tab" onclick="switchCreateTab('trial-discount')">试用+优惠</div>
                         </div>
-                        
+
                         <div class="dual-view">
                             <div>
                                 <div class="sub-tabs">
                                     <div class="sub-tab active">📤 请求</div>
                                 </div>
-                                
+
                                 <!-- 普通订阅请求 -->
                                 <div class="code-block create-code-standard">
                                     <div class="code-block-header">
@@ -371,15 +396,18 @@
                                             <div class="code-dot dot-green"></div>
                                             subscriptionCreate Request - 普通订阅
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-create-standard')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-create-standard')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-create-standard">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"<span id="c-requestTime">{{requestTime}}</span>"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_<span id="c-reqId">req_1741490400000</span>"</span>,
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_req_<span id="c-reqId">1741490400000</span>"</span>,
     <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
     <span class="jk">"callbackUrl"</span>: <span class="js">"https://your.server/callback"</span>,
     <span class="jk">"subscriptionPlan"</span>: {
@@ -398,7 +426,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- N天试用请求 -->
                                 <div class="code-block create-code-trial" style="display:none;">
                                     <div class="code-block-header">
@@ -413,6 +441,8 @@
                                     <div class="code-body" id="req-create-trial">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"<span id="c-requestTime-trial">{{requestTime}}</span>"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -442,7 +472,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- 前N期优惠请求 -->
                                 <div class="code-block create-code-discount" style="display:none;">
                                     <div class="code-block-header">
@@ -452,11 +482,14 @@
                                             <div class="code-dot dot-green"></div>
                                             subscriptionCreate Request - 前N期优惠
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-create-discount')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-create-discount')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-create-discount">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"<span id="c-requestTime-discount">{{requestTime}}</span>"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -486,7 +519,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- 试用+优惠请求 -->
                                 <div class="code-block create-code-trial-discount" style="display:none;">
                                     <div class="code-block-header">
@@ -496,11 +529,14 @@
                                             <div class="code-dot dot-green"></div>
                                             subscriptionCreate Request - 试用+优惠
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-create-trial-discount')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-create-trial-discount')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-create-trial-discount">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"<span id="c-requestTime-trial-discount">{{requestTime}}</span>"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -553,14 +589,14 @@
                                     </div>
                                     <div class="code-body">
                                         <pre>{
-  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
-  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+  <span class="jk">"msg"</span>: <span class="js">""</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"subscriptionNo"</span>:
-      <span class="js">"SUB2026XXXxxxxxx2112"</span>,
-    <span class="jk">"subscriptionRequestId"</span>:
-      <span class="js">"sub_req_17414904..."</span>,
-    <span class="jk">"status"</span>: <span class="js">"CREATED"</span>
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"sub_req_<span id="c-resp-reqId">1741490400000</span>"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subscriptionStatus"</span>: <span class="js">"INACTIVE"</span>,
+      <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB260318XXXXXXX9847003"</span>
+    }
   }
 }</pre>
                                     </div>
@@ -619,11 +655,7 @@
     <span class="jk">"currency"</span>: <span class="jv">"<span id="s-currency">USD</span>"</span>,
     <span class="jk">"mitType"</span>: <span class="js">"SCHEDULED"</span>, <span class="jc">// 周期性订阅固定值</span>
     <span class="jk">"userId"</span>: <span class="js">"test10001"</span>,
-    <span class="jk">"componentList"</span>: [<span class="js" id="s-componentList">"CARD", "APPLEPAY", "GOOGLEPAY"</span>], <span class="jc">// 根据支付方式选择</span>
-    <span class="jk">"subscriptionPlan"</span>: {
-      <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span>, <span class="jc">// 订阅计划号</span>
-      <span class="jk">"firstPeriodStartDate"</span>: <span class="jv">"<span id="s-startDate">2026-03-10T12:00:00+00:00</span>"</span> <span class="jc">// 首期扣款时间</span>
-    }
+    <span class="jk">"componentList"</span>: [<span class="js" id="s-componentList">"CARD", "APPLEPAY", "GOOGLEPAY"</span>] <span class="jc">// 根据支付方式选择</span>
   }
 }</pre>
                                     </div>
@@ -650,15 +682,14 @@
                                     <div class="component-form">
                                         <div class="form-group">
                                             <label class="component-input-label" for="comp-clientKey">Client Key</label>
-                                            <input type="text" id="comp-clientKey" class="form-input" 
-                                                value="67eff2f3b29a4ecf9576321185dbf658" 
-                                                placeholder="输入 Client Key">
+                                            <input type="text" id="comp-clientKey" class="form-input"
+                                                value="67eff2f3b29a4ecf9576321185dbf658" placeholder="输入 Client Key">
                                         </div>
                                         <div class="form-group">
-                                            <label class="component-input-label" for="comp-sessionKey">Session Key</label>
-                                            <input type="text" id="comp-sessionKey" class="form-input" 
-                                                value="02d764a032804ee5b47013795e25f07d" 
-                                                placeholder="输入 Session Key">
+                                            <label class="component-input-label" for="comp-sessionKey">Session
+                                                Key</label>
+                                            <input type="text" id="comp-sessionKey" class="form-input"
+                                                value="02d764a032804ee5b47013795e25f07d" placeholder="输入 Session Key">
                                         </div>
                                         <div class="form-group">
                                             <label class="component-input-label" for="comp-environment">环境</label>
@@ -680,7 +711,8 @@
                                     </div>
 
                                     <!-- Confirm Payment Button (for CARD) -->
-                                    <button class="btn-component" id="card-pay-btn" style="display:none;" onclick="handleCardPayment()">
+                                    <button class="btn-component" id="card-pay-btn" style="display:none;"
+                                        onclick="handleCardPayment()">
                                         确认支付并获取 Token
                                     </button>
 
@@ -704,9 +736,10 @@
                         </div>
                         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
                             使用第二步返回的 <code class="data-pill">subscriptionNo</code> 发起 <strong>orderAndPay</strong>
-                            请求，引导用户完成首次支付并绑定支付方式，激活订阅计划。<span id="activate-mode-hint" style="color:var(--primary);font-weight:600;"></span>
+                            请求，引导用户完成首次支付并绑定支付方式，激活订阅计划。<span id="activate-mode-hint"
+                                style="color:var(--primary);font-weight:600;"></span>
                         </p>
-                        
+
                         <!-- 集成方式说明卡片 -->
                         <div class="step-card" style="background:#E0F2FE;border-color:#BAE6FD;margin-bottom:1rem;">
                             <div class="step-card-title" style="color:#075985;font-size:.85rem;">
@@ -714,7 +747,8 @@
                                 <span id="integration-mode-title">收银台模式</span>
                             </div>
                             <div style="font-size:0.8rem;color:#075985;line-height:1.8;" id="integration-mode-desc">
-                                • <strong>integrate</strong>：固定值 <code style="background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">Hosted_Checkout</code><br>
+                                • <strong>integrate</strong>：固定值 <code
+                                    style="background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">Hosted_Checkout</code><br>
                                 • 用户将跳转到 PayerMax 收银台完成支付<br>
                                 • 支持 CARD、ApplePay、GooglePay、APM 等多种支付方式
                             </div>
@@ -733,24 +767,27 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request - 收银台模式
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-activate-cashier')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-activate-cashier')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-activate-cashier">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
     <span class="jk">"outTradeNo"</span>: <span class="js">"ORD_20260310_001"</span>,
-    <span class="jk">"subject"</span>: <span class="js">"订阅计划标题"</span>, <span class="jc">// 保持和订阅计划的subject一致</span>
+    <span class="jk">"subject"</span>: <span class="js">"<span id="a-subject">订阅计划标题</span>"</span>, <span class="jc">// 保持和订阅计划的subject一致</span>
     <span class="jk">"totalAmount"</span>: <span class="jv" id="a-amount">9.99</span>, <span class="jc">// 激活金额：trial时为0，trial-discount时为试用期金额</span>
     <span class="jk">"currency"</span>: <span class="jv">"<span id="a-currency">USD</span>"</span>, <span class="jc">// 保持和订阅币种一致</span>
     <span class="jk">"country"</span>: <span class="js">"US"</span>,
-    <span class="jk">"userId"</span>: <span class="js">"test10001"</span>, <span class="jc">// 保持和订阅计划的用户号一致</span>
+    <span class="jk">"userId"</span>: <span class="js">"<span id="a-userId">test10001</span>"</span>, <span class="jc">// 保持和订阅计划的用户号一致</span>
     <span class="jk">"language"</span>: <span class="js">"en"</span>,
     <span class="jk">"reference"</span>: <span class="js">"test subscription"</span>,
     <span class="jk">"frontCallbackUrl"</span>: <span class="js">"https://your.app/return"</span>,
-    <span class="jk">"notifyUrl"</span>: <span class="js">"https://your.server/callback"</span>,
+    <span class="jk">"notifyUrl"</span>: <span class="js">"<span id="a-notifyUrl">https://your.server/callback</span>"</span>, <span class="jc">// 保持和订阅计划的回调地址一致</span>
     <span class="jk">"integrate"</span>: <span class="js">"Hosted_Checkout"</span>, <span class="jc">// 收银台模式固定值</span>
     <span class="jk">"expireTime"</span>: <span class="js">"1800"</span>,
     <span class="jk">"subscriptionPlan"</span>: {
@@ -783,11 +820,12 @@
                                     </div>
                                     <div class="code-body">
                                         <pre>{
-  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
-  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
-    <span class="jk">"cashierUrl"</span>: <span class="js">"https://checkout..."</span>,
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"UATTest1774168793846"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2026032208377782045789"</span>,
     <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
   }
 }</pre>
@@ -802,14 +840,14 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- API 模式代码示例 -->
                         <div class="dual-view" id="activate-api-mode" style="display:none;">
                             <div>
                                 <div class="sub-tabs">
                                     <div class="sub-tab active">📤 请求</div>
                                 </div>
-                                
+
                                 <!-- API + CARD -->
                                 <div class="code-block" id="api-card-request">
                                     <div class="code-block-header">
@@ -819,11 +857,14 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request - API + CARD
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-activate-api-card')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-activate-api-card')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-activate-api-card">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -872,7 +913,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- API + ApplePay -->
                                 <div class="code-block" id="api-applepay-request" style="display:none;">
                                     <div class="code-block-header">
@@ -882,11 +923,14 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request - API + ApplePay
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-activate-api-applepay')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-activate-api-applepay')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-activate-api-applepay">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -935,7 +979,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- API + GooglePay -->
                                 <div class="code-block" id="api-googlepay-request" style="display:none;">
                                     <div class="code-block-header">
@@ -945,11 +989,14 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request - API + GooglePay
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-activate-api-googlepay')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-activate-api-googlepay')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-activate-api-googlepay">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -1003,7 +1050,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- API + APM -->
                                 <div class="code-block" id="api-apm-request" style="display:none;">
                                     <div class="code-block-header">
@@ -1013,11 +1060,14 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request - API + APM
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-activate-api-apm')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-activate-api-apm')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-activate-api-apm">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -1064,15 +1114,71 @@
                                         </div>
                                     </div>
                                     <div class="code-body">
-                                        <pre>{
-  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
-  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+                                        <!-- API Response - CARD -->
+                                        <div id="api-resp-card" style="display:block;">
+                                            <span class="jc">// CARD响应参数（需进行3DS验证时）</span>
+                                            <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
-    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>, <span class="jc">// API模式直接返回支付结果</span>
-    <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN20260310XXX"</span> <span class="jc">// 用于后续代扣的Token</span>
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>, <span class="jc">// 3ds挑战页地址</span>
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2025042306527802000033"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
   }
 }</pre>
+                                        </div>
+                                        <!-- API Response - APPLEPAY -->
+                                        <div id="api-resp-applepay" style="display:none;">
+                                            <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2025042306527802000033"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>
+  }
+}</pre>
+                                        </div>
+                                        <!-- API Response - GOOGLEPAY -->
+                                        <div id="api-resp-googlepay" style="display:none;">
+                                            <span class="jc">//
+                                                当paymentDetail.googlePayDetails.authMethod=PAN_ONLY时，响应参数redirecUrl将返回3ds验证地址；当paymentDetail.googlePayDetails.authMethod=CRYPTOGRAM_3DS时，响应参数中不会返回redirecUrl。</span>
+                                            <pre><span class="jc">// CRYPTOGRAM_3DS响应参数</span>
+{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2025042306527802000033"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>
+  }
+}
+<span class="jc">// PAN_ONLY响应参数</span>
+{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>, <span class="jc">// 3ds地址</span>
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2025042306527802000033"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>
+  }
+}</pre>
+                                        </div>
+                                        <!-- API Response - APM -->
+                                        <div id="api-resp-apm" style="display:none;">
+                                            <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>, <span class="jc">// 跳转地址</span>
+    <span class="jk">"outTradeNo"</span>: <span class="js">"APIFOXDEV1745388079422"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2025042306527802000033"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
+  }
+}</pre>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="result-card success" style="margin-top:0.75rem;">
@@ -1084,20 +1190,7 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- APM 特殊说明 -->
-                        <div class="step-card" style="background:#FEF3C7;border-color:#FDE68A;margin-top:1rem;">
-                            <div class="step-card-title" style="color:#92400E;font-size:.85rem;">
-                                <div class="card-icon" style="background:#FEF9C3;">💡</div>
-                                APM 支付方式特殊说明
-                            </div>
-                            <div style="font-size:0.8rem;color:#92400E;line-height:1.8;">
-                                • <strong>paymentMethodType</strong>：APM 指定支付方式时传 <code style="background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">ONE_TOUCH</code>，全量收银台时可不传<br>
-                                • <strong>country</strong>：APM 激活时必传（如 KR、MY、BR）<br>
-                                • <strong>targetOrg</strong>：可选，用于指定具体钱包（如 NAVERPAY、KAKAOPAY 等）<br>
-                                • <strong>前置组件</strong>：APM 不支持前置组件集成方式，仅支持收银台和 API 模式
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
@@ -1110,16 +1203,17 @@
                                 style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
                         </div>
                         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
-                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code class="data-pill">sessionKey</code>，
+                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code
+                                class="data-pill">sessionKey</code>，
                             调用 <strong>orderAndPay</strong> API 完成后端支付方式绑定并激活订阅计划。
                         </p>
-                        
+
                         <div class="dual-view">
                             <div>
                                 <div class="sub-tabs">
                                     <div class="sub-tab active">📤 请求 (激活订阅)</div>
                                 </div>
-                                
+
                                 <!-- CARD + Component -->
                                 <div class="code-block" id="pm-component-card-request" style="display:block;">
                                     <div class="code-block-header">
@@ -1129,7 +1223,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Component + CARD
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-pm-component-card')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-pm-component-card')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-pm-component-card">
                                         <pre>{
@@ -1180,7 +1275,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- ApplePay + Component -->
                                 <div class="code-block" id="pm-component-applepay-request" style="display:none;">
                                     <div class="code-block-header">
@@ -1190,7 +1285,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Component + APPLEPAY
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-pm-component-applepay')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-pm-component-applepay')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-pm-component-applepay">
                                         <pre>{
@@ -1241,7 +1337,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- GooglePay + Component -->
                                 <div class="code-block" id="pm-component-googlepay-request" style="display:none;">
                                     <div class="code-block-header">
@@ -1251,7 +1347,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Component + GOOGLEPAY
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-pm-component-googlepay')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-pm-component-googlepay')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-pm-component-googlepay">
                                         <pre>{
@@ -1317,16 +1414,43 @@
                                         </div>
                                     </div>
                                     <div class="code-body">
-                                        <pre>{
-  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
-  <span class="jk">"message"</span>: <span class="js">"success"</span>,
+                                        <!-- Activation Success Response - CARD -->
+                                        <div id="pm-comp-resp-card" style="display:block;">
+                                            <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
-    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
-    <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span>, <span class="jc">// 激活成功的订阅计划号</span>
-    <span class="jk">"paymentTokenID"</span>: <span class="js">"PMTOKEN20260310XXX"</span> <span class="jc">// 用于后续代扣的Token</span>
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"UATTest1774167584460"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2026032208327882045715"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
   }
 }</pre>
+                                        </div>
+                                        <!-- Activation Success Response - APPLEPAY -->
+                                        <div id="pm-comp-resp-applepay" style="display:none;">
+                                            <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"UATTest1774167584460"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2026032208327882045715"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
+  }
+}</pre>
+                                        </div>
+                                        <!-- Activation Success Response - GOOGLEPAY -->
+                                        <div id="pm-comp-resp-googlepay" style="display:none;">
+                                            <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"outTradeNo"</span>: <span class="js">"UATTest1774167584460"</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2026032208327882045715"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
+  }
+}</pre>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="result-card success" style="margin-top:0.75rem;">
@@ -1336,7 +1460,8 @@
                                         <div class="result-value">
                                             <strong>subscriptionNo</strong>: SUB2026XXXxxxxxx2112<br>
                                             <strong>paymentTokenID</strong>: PMTOKEN20260310XXX<br>
-                                            <span style="color:var(--text-muted);font-size:.75rem">后续扣款由PayerMax自动管理</span>
+                                            <span
+                                                style="color:var(--text-muted);font-size:.75rem">后续扣款由PayerMax自动管理</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1391,19 +1516,40 @@
                                 </div>
                                 <div class="code-body">
                                     <pre>{
-  <span class="jk">"type"</span>: <span class="js">"SUBSCRIPTION_PAYMENT"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"P01000116980333"</span>,
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"notifyTime"</span>: <span class="js">"2023-04-24T09:44:40.761Z"</span>,
+  <span class="jk">"notifyType"</span>: <span class="js">"SUBSCRIPTION_PAYMENT"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"6c556bcd56c84652176b3c5abc389296"</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span>,
-    <span class="jk">"periodNo"</span>: <span class="jn">1</span>,     <span class="jc">// 第几期</span>
-    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_PMX_P1_20260410"</span>,
-    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
-    <span class="jk">"chargeAmount"</span>: {
-      <span class="jk">"amount"</span>: <span class="jv" id="w-amount">9.99</span>,
-      <span class="jk">"currency"</span>: <span class="jv">"<span id="w-currency">USD</span>"</span>
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"requestMWRkgX5iHaTmf45ePdEP"</span>,
+    <span class="jk">"merchantNo"</span>: <span class="js">"P01010113865434"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"10003"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB20221212174716894496912"</span>
     },
-    <span class="jk">"chargeTime"</span>: <span class="js">"2026-04-10T10:00:00+08:00"</span>
+    <span class="jk">"subscriptionPaymentDetail"</span>: {
+      <span class="jk">"subscriptionIndex"</span>: <span class="jv">1</span>, <span class="jc">// 扣款期数</span>
+      <span class="jk">"paymentStatus"</span>: <span class="js">"SUCCESS"</span>, <span class="jc">// 本期订单状态</span>
+      <span class="jk">"periodStartTime"</span>: <span class="js">"2025-10-13T15:59:59+0000"</span>, <span class="jc">// 本期开始时间</span>
+      <span class="jk">"periodEndTime"</span>: <span class="js">"2025-12-13T15:59:59+0000"</span>, <span class="jc">// 本期结束时间</span>
+      <span class="jk">"payAmount"</span>: { <span class="jc">// 扣款金额</span>
+        <span class="jk">"amount"</span>: <span class="jv">10</span>,
+        <span class="jk">"currency"</span>: <span class="js">"USD"</span>
+      },
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="w-pm4-paymentMethodType-noncomp">CARD</span>"</span>,
+      <span class="jk">"cardOrg"</span>: <span class="js">"VISA"</span>,
+      <span class="jk">"lastPaymentInfo"</span>: {
+        <span class="jk">"tradeToken"</span>: <span class="js">"T20221212174800970116912"</span>, <span class="jc">// 支付单号 tradeToken可用于发起退款</span>
+        <span class="jk">"lastPaymentStatus"</span>: <span class="js">"SUCCESS"</span>, <span class="jc">// 最新扣款结果</span>
+        <span class="jk">"payTime"</span>: <span class="js">"2025-02-13T15:59:59+0000"</span> <span class="jc">// 支付时间</span>
+      }
+    }
   }
 }</pre>
+
                                 </div>
                             </div>
                         </div>
@@ -1456,18 +1602,40 @@
                                 </div>
                                 <div class="code-body">
                                     <pre>{
-  <span class="jk">"type"</span>: <span class="js">"SUBSCRIPTION_PAYMENT"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"merchantNo"</span>: <span class="js">"P01000116980333"</span>,
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"notifyTime"</span>: <span class="js">"2023-04-24T09:44:40.761Z"</span>,
+  <span class="jk">"notifyType"</span>: <span class="js">"SUBSCRIPTION_PAYMENT"</span>,
+  <span class="jk">"appId"</span>: <span class="js">"6c556bcd56c84652176b3c5abc389296"</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
   <span class="jk">"data"</span>: {
-    <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB2026XXXxxxxxx2112"</span>,
-    <span class="jk">"periodNo"</span>: <span class="jn">1</span>,     <span class="jc">// 第几期</span>
-    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_PMX_P1_20260410"</span>,
-    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
-    <span class="jk">"chargeAmount"</span>: {
-      <span class="jk">"amount"</span>: <span class="jv" id="w-amount">9.99</span>,
-      <span class="jk">"currency"</span>: <span class="jv">"<span id="w-currency">USD</span>"</span>
+    <span class="jk">"subscriptionRequestId"</span>: <span class="js">"requestMWRkgX5iHaTmf45ePdEP"</span>,
+    <span class="jk">"merchantNo"</span>: <span class="js">"P01010113865434"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"10003"</span>,
+    <span class="jk">"subscriptionPlan"</span>: {
+      <span class="jk">"subscriptionNo"</span>: <span class="js">"SUB20221212174716894496912"</span>
+    },
+    <span class="jk">"subscriptionPaymentDetail"</span>: {
+      <span class="jk">"subscriptionIndex"</span>: <span class="jv">1</span>, <span class="jc">// 扣款期数</span>
+      <span class="jk">"paymentStatus"</span>: <span class="js">"SUCCESS"</span>, <span class="jc">// 本期订单状态</span>
+      <span class="jk">"periodStartTime"</span>: <span class="js">"2025-10-13T15:59:59+0000"</span>, <span class="jc">// 本期开始时间</span>
+      <span class="jk">"periodEndTime"</span>: <span class="js">"2025-12-13T15:59:59+0000"</span>, <span class="jc">// 本期结束时间</span>
+      <span class="jk">"payAmount"</span>: { <span class="jc">// 扣款金额</span>
+        <span class="jk">"amount"</span>: <span class="jv">10</span>,
+        <span class="jk">"currency"</span>: <span class="js">"USD"</span>
+      },
+      <span class="jk">"paymentMethodType"</span>: <span class="js">"<span id="w-pm4-paymentMethodType-comp">CARD</span>"</span>,
+      <span class="jk">"cardOrg"</span>: <span class="js">"VISA"</span>,
+      <span class="jk">"lastPaymentInfo"</span>: {
+        <span class="jk">"tradeToken"</span>: <span class="js">"T20221212174800970116912"</span>, <span class="jc">// 支付单号 tradeToken可用于发起退款</span>
+        <span class="jk">"lastPaymentStatus"</span>: <span class="js">"SUCCESS"</span>, <span class="jc">// 最新扣款结果</span>
+        <span class="jk">"payTime"</span>: <span class="js">"2025-02-13T15:59:59+0000"</span> <span class="jc">// 支付时间</span>
+      }
     }
   }
 }</pre>
+
                                 </div>
                             </div>
                         </div>
@@ -1541,16 +1709,16 @@
                                 <div class="component-area" style="margin-top:0;">
                                     <div class="component-form">
                                         <div class="form-group">
-                                            <label class="component-input-label" for="comp-clientKey-m">Client Key</label>
-                                            <input type="text" id="comp-clientKey-m" class="form-input" 
-                                                value="67eff2f3b29a4ecf9576321185dbf658" 
-                                                placeholder="输入 Client Key">
+                                            <label class="component-input-label" for="comp-clientKey-m">Client
+                                                Key</label>
+                                            <input type="text" id="comp-clientKey-m" class="form-input"
+                                                value="67eff2f3b29a4ecf9576321185dbf658" placeholder="输入 Client Key">
                                         </div>
                                         <div class="form-group">
-                                            <label class="component-input-label" for="comp-sessionKey-m">Session Key</label>
-                                            <input type="text" id="comp-sessionKey-m" class="form-input" 
-                                                value="02d764a032804ee5b47013795e25f07d" 
-                                                placeholder="输入 Session Key">
+                                            <label class="component-input-label" for="comp-sessionKey-m">Session
+                                                Key</label>
+                                            <input type="text" id="comp-sessionKey-m" class="form-input"
+                                                value="02d764a032804ee5b47013795e25f07d" placeholder="输入 Session Key">
                                         </div>
                                         <div class="form-group">
                                             <label class="component-input-label" for="comp-environment-m">环境</label>
@@ -1559,7 +1727,8 @@
                                                 <option value="false">Production (生产)</option>
                                             </select>
                                         </div>
-                                        <button class="btn-component" id="init-component-btn-m" onclick="initComponentMerchant()">
+                                        <button class="btn-component" id="init-component-btn-m"
+                                            onclick="initComponentMerchant()">
                                             初始化并加载组件
                                         </button>
                                     </div>
@@ -1572,7 +1741,8 @@
                                     </div>
 
                                     <!-- Confirm Payment Button (for CARD) -->
-                                    <button class="btn-component" id="card-pay-btn-m" style="display:none;" onclick="handleCardPaymentMerchant()">
+                                    <button class="btn-component" id="card-pay-btn-m" style="display:none;"
+                                        onclick="handleCardPaymentMerchant()">
                                         确认支付并获取 Token
                                     </button>
 
@@ -1586,7 +1756,7 @@
                     </div>
                 </div>
 
-                                <!-- MERCHANT STEP 2/3: 首次绑定支付方式 (panel-m-2) -->
+                <!-- MERCHANT STEP 2/3: 首次绑定支付方式 (panel-m-2) -->
                 <div class="step-panel" id="panel-m-2">
                     <div class="step-card">
                         <div class="step-card-title">
@@ -1599,13 +1769,13 @@
                             引导用户首次支付并绑定支付方式，
                             绑定成功后通过异步 Webhook 回调获取 <code class="data-pill">paymentTokenID</code>，用于后续商户主动发起扣款。
                         </p>
-                        
+
                         <div class="dual-view">
                             <div>
                                 <div class="sub-tabs">
                                     <div class="sub-tab active">📤 请求 (绑定)</div>
                                 </div>
-                                
+
                                 <!-- 收银台模式：首次绑定请求 -->
                                 <div class="code-block m-bind-code-cashier">
                                     <div class="code-block-header">
@@ -1615,11 +1785,14 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Bind (收银台模式)
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-m-bind-cashier')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-m-bind-cashier')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-m-bind-cashier">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -1660,7 +1833,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- API模式：首次绑定请求 -->
                                 <div class="code-block m-bind-code-api" style="display:none;">
                                     <div class="code-block-header">
@@ -1675,6 +1848,8 @@
                                     <div class="code-body" id="req-m-bind-api">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -1743,13 +1918,35 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                             </div>
                             <div>
                                 <div class="sub-tabs">
-                                    <div class="sub-tab active">📥 Webhook 异步回调</div>
+                                    <div class="sub-tab active">📥 返回示例</div>
                                 </div>
                                 <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response — Bind
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>, <span class="jc">// 跳转收银台地址</span>
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_1741..."</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2026032208327882045715"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="code-block" style="margin-top:0.75rem;">
                                     <div class="code-block-header">
                                         <div class="code-block-title">
                                             <div class="code-dot dot-red"></div>
@@ -1796,10 +1993,12 @@
                                 style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
                         </div>
                         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
-                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code class="data-pill">sessionKey</code>，
-                            调用 <strong>orderAndPay</strong> API 完成后端支付方式绑定，获取 <code class="data-pill">paymentTokenID</code> 用于后续扣款。
+                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code
+                                class="data-pill">sessionKey</code>，
+                            调用 <strong>orderAndPay</strong> API 完成后端支付方式绑定，获取 <code
+                                class="data-pill">paymentTokenID</code> 用于后续扣款。
                         </p>
-                        
+
                         <div class="dual-view">
                             <div>
                                 <div class="sub-tabs">
@@ -1813,7 +2012,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request - 前置组件绑定
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-m-component-bind')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-m-component-bind')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-m-component-bind">
                                         <pre>{
@@ -1899,13 +2099,36 @@
 }</pre>
                                     </div>
                                 </div>
+                                <div class="code-block" style="margin-top:0.75rem;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Bind Success
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentTokenID"</span>:
+      <span class="js">"PMTOKEN177XXXXX1000551"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test1111111"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
                                 <div class="result-card success" style="margin-top:0.75rem;">
                                     <div class="result-icon">✓</div>
                                     <div>
                                         <div class="result-label">绑定成功 — 获取 paymentTokenID</div>
                                         <div class="result-value">
                                             <strong>paymentTokenID</strong>: PMTOKEN20260310XXX<br>
-                                            <span style="color:var(--text-muted);font-size:.75rem">保存此token，用于后续商户主动发起扣款</span>
+                                            <span
+                                                style="color:var(--text-muted);font-size:.75rem">保存此token，用于后续商户主动发起扣款</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1946,6 +2169,8 @@
                                     <div class="code-body" id="req-m-deduct">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -2021,9 +2246,34 @@
 }</pre>
                                     </div>
                                 </div>
+
+                                <div class="code-block" style="margin-top:0.75rem;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Deduct Notification
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_MCH_P2_2026"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
+    <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"USD"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
                                 <div class="completion-banner" style="margin-top:0.75rem;padding:1.25rem;">
                                     <div class="check-big"
-                                        style="width:40px;height:40px;font-size:1.1rem;margin-bottom:.75rem;">✓</div>
+                                        style="width:40px;height:40px;font-size:1.1rem;margin-bottom:.75rem;">✓
+                                    </div>
                                     <div class="completion-title" style="font-size:1rem;">扣款成功！</div>
                                     <div class="completion-desc" style="font-size:0.78rem;">
                                         商户自主管理扣款周期，<br>每次扣款均使用相同 paymentTokenID 发起
@@ -2046,7 +2296,7 @@
                             首先收集本次绑定/支付的订单参数，用于向 PayerMax 发起首次绑定支付。
                         </p>
                     </div>
-                    
+
                     <div class="step-card" style="background:#F0FDF4;border-color:#6EE7B7;">
                         <div class="step-card-title" style="color:#065F46;font-size:.85rem;">
                             <div class="card-icon" style="background:#D1FAE5;">ℹ️</div>
@@ -2068,8 +2318,8 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label" for="np-amount">订单金额</label>
-                                    <input type="number" id="np-amount" class="form-input" value="9.99" step="0.01" min="0"
-                                        title="订单金额" placeholder="输入金额" oninput="updateDynamic()">
+                                    <input type="number" id="np-amount" class="form-input" value="9.99" step="0.01"
+                                        min="0" title="订单金额" placeholder="输入金额" oninput="updateDynamic()">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" for="np-currency">币种</label>
@@ -2158,16 +2408,16 @@
                                 <div class="component-area" style="margin-top:0;">
                                     <div class="component-form">
                                         <div class="form-group">
-                                            <label class="component-input-label" for="comp-clientKey-np">Client Key</label>
-                                            <input type="text" id="comp-clientKey-np" class="form-input" 
-                                                value="67eff2f3b29a4ecf9576321185dbf658" 
-                                                placeholder="输入 Client Key">
+                                            <label class="component-input-label" for="comp-clientKey-np">Client
+                                                Key</label>
+                                            <input type="text" id="comp-clientKey-np" class="form-input"
+                                                value="67eff2f3b29a4ecf9576321185dbf658" placeholder="输入 Client Key">
                                         </div>
                                         <div class="form-group">
-                                            <label class="component-input-label" for="comp-sessionKey-np">Session Key</label>
-                                            <input type="text" id="comp-sessionKey-np" class="form-input" 
-                                                value="02d764a032804ee5b47013795e25f07d" 
-                                                placeholder="输入 Session Key">
+                                            <label class="component-input-label" for="comp-sessionKey-np">Session
+                                                Key</label>
+                                            <input type="text" id="comp-sessionKey-np" class="form-input"
+                                                value="02d764a032804ee5b47013795e25f07d" placeholder="输入 Session Key">
                                         </div>
                                         <div class="form-group">
                                             <label class="component-input-label" for="comp-environment-np">环境</label>
@@ -2176,7 +2426,8 @@
                                                 <option value="false">Production (生产)</option>
                                             </select>
                                         </div>
-                                        <button class="btn-component" id="init-component-btn-np" onclick="initComponentNonPeriodic()">
+                                        <button class="btn-component" id="init-component-btn-np"
+                                            onclick="initComponentNonPeriodic()">
                                             初始化并加载组件
                                         </button>
                                     </div>
@@ -2189,7 +2440,8 @@
                                     </div>
 
                                     <!-- Confirm Payment Button (for CARD) -->
-                                    <button class="btn-component" id="card-pay-btn-np" style="display:none;" onclick="handleCardPaymentNonPeriodic()">
+                                    <button class="btn-component" id="card-pay-btn-np" style="display:none;"
+                                        onclick="handleCardPaymentNonPeriodic()">
                                         确认支付并获取 Token
                                     </button>
 
@@ -2212,16 +2464,17 @@
                                 style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
                         </div>
                         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
-                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code class="data-pill">sessionKey</code>，
+                            使用前置组件获取的 <code class="data-pill">paymentToken</code> 和 <code
+                                class="data-pill">sessionKey</code>，
                             调用 <strong>orderAndPay</strong> API 完成后端支付方式绑定。
                         </p>
-                        
+
                         <div class="dual-view">
                             <div>
                                 <div class="sub-tabs">
                                     <div class="sub-tab active">📤 请求 (绑定支付)</div>
                                 </div>
-                                
+
                                 <!-- CARD + Component -->
                                 <div class="code-block" id="np-component-card-request" style="display:block;">
                                     <div class="code-block-header">
@@ -2231,7 +2484,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Component + CARD
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-np-component-card')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-np-component-card')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-np-component-card">
                                         <pre>{
@@ -2277,7 +2531,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- ApplePay + Component -->
                                 <div class="code-block" id="np-component-applepay-request" style="display:none;">
                                     <div class="code-block-header">
@@ -2287,7 +2541,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Component + APPLEPAY
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-np-component-applepay')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-np-component-applepay')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-np-component-applepay">
                                         <pre>{
@@ -2335,7 +2590,7 @@
 }</pre>
                                     </div>
                                 </div>
-                                
+
                                 <!-- GooglePay + Component -->
                                 <div class="code-block" id="np-component-googlepay-request" style="display:none;">
                                     <div class="code-block-header">
@@ -2345,7 +2600,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Component + GOOGLEPAY
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-np-component-googlepay')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-np-component-googlepay')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-np-component-googlepay">
                                         <pre>{
@@ -2394,7 +2650,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <div class="sub-tabs">
                                     <div class="sub-tab active">📥 响应</div>
@@ -2407,7 +2663,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Response
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('res-np-component-bind')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('res-np-component-bind')">复制</button>
                                     </div>
                                     <div class="code-body" id="res-np-component-bind">
                                         <pre>{
@@ -2425,42 +2682,80 @@
 }</pre>
                                     </div>
                                 </div>
+                                <div class="code-block" style="margin-top:0.75rem;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Bind/Pay Success
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentTokenID"</span>:
+      <span class="js">"PMTOKEN177XXXXX1000551"</span>,
+    <span class="jk">"userId"</span>: <span class="js">"test1111111"</span>,
+    <span class="jk">"amount"</span>: <span class="jv" id="np-c-resp-amount">10</span>,
+    <span class="jk">"currency"</span>: <span class="jv">"<span id="np-c-resp-currency">USD</span>"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="result-card success" style="margin-top:0.75rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">绑定/支付成功 — 获取 paymentTokenID</div>
+                                        <div class="result-value"><strong>paymentTokenID</strong>:
+                                            PMTOKEN177XXXXX1000551<br>
+                                            <span
+                                                style="color:var(--text-muted);font-size:.75rem">保存此token，商户可随时按业务需求发起后续扣款</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- NON-PERIODIC STEP 2/3: 首次创建绑定/支付订单 (panel-np-2) -->
-            <div class="step-panel" id="panel-np-2">
-                <div class="step-card">
-                    <div class="step-card-title">
-                        <div class="card-icon">🔗</div>
-                        首次创建绑定/支付订单 — <code
-                            style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
-                    </div>
-                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
-                        调用 <strong>orderAndPay</strong> 引导用户首次支付并绑定支付方式，
-                        <code class="data-pill">mitType: UNSCHEDULED</code> 表示非周期性代扣。
-                        绑定/支付成功后通过 Webhook 异步回调返回 <code class="data-pill">paymentTokenID</code>，用于后续商户按需发起扣款。
-                    </p>
-                    <div class="dual-view">
-                        <div>
-                            <div class="sub-tabs">
-                                <div class="sub-tab active">📤 请求 (绑定/支付)</div>
-                            </div>
-                            <div class="code-block">
-                                <div class="code-block-header">
-                                    <div class="code-block-title">
-                                        <div class="code-dot dot-red"></div>
-                                        <div class="code-dot dot-yellow"></div>
-                                        <div class="code-dot dot-green"></div>
-                                        orderAndPay Request — Non-periodic Bind
-                                    </div>
-                                    <button class="copy-mini-btn" onclick="copyCode('req-np-bind')">复制</button>
+                <div class="step-panel" id="panel-np-2">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">🔗</div>
+                            首次创建绑定/支付订单 — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            调用 <strong>orderAndPay</strong> 引导用户首次支付并绑定支付方式，
+                            <code class="data-pill">mitType: UNSCHEDULED</code> 表示非周期性代扣。
+                            绑定/支付成功后通过 Webhook 异步回调返回 <code class="data-pill">paymentTokenID</code>，用于后续商户按需发起扣款。
+                        </p>
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 (绑定/支付)</div>
                                 </div>
-                                <div class="code-body" id="req-np-bind">
-                                    <pre>{
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Non-periodic Bind
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-np-bind')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-np-bind">
+                                        <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -2483,24 +2778,46 @@
     }
   }
 }</pre>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="sub-tabs">
-                                <div class="sub-tab active">📥 Webhook 异步回调</div>
-                            </div>
-                            <div class="code-block">
-                                <div class="code-block-header">
-                                    <div class="code-block-title">
-                                        <div class="code-dot dot-red"></div>
-                                        <div class="code-dot dot-yellow"></div>
-                                        <div class="code-dot dot-green"></div>
-                                        Webhook — Bind/Pay Success
                                     </div>
                                 </div>
-                                <div class="code-body">
-                                    <pre>{
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 返回示例</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response — Bind
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"msg"</span>: <span class="js">"Success."</span>,
+  <span class="jk">"code"</span>: <span class="js">"APPLY_SUCCESS"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"redirectUrl"</span>: <span class="js">"https://cashier..."</span>, <span class="jc">// 跳转收银台地址</span>
+    <span class="jk">"outTradeNo"</span>: <span class="js">"bind_1741..."</span>,
+    <span class="jk">"tradeToken"</span>: <span class="js">"T2026032208327882045715"</span>,
+    <span class="jk">"status"</span>: <span class="js">"PENDING"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="code-block" style="margin-top:0.75rem;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Bind/Pay Success
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
   <span class="jk">"code"</span>: <span class="js">"0000"</span>,
   <span class="jk">"data"</span>: {
     <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
@@ -2513,23 +2830,23 @@
     <span class="jk">"currency"</span>: <span class="jv">"<span id="np-resp-currency">USD</span>"</span>
   }
 }</pre>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="result-card success" style="margin-top:0.75rem;">
-                                <div class="result-icon">✓</div>
-                                <div>
-                                    <div class="result-label">绑定/支付成功 — 获取 paymentTokenID</div>
-                                    <div class="result-value"><strong>paymentTokenID</strong>:
-                                        PMTOKEN177XXXXX1000551<br>
-                                        <span
-                                            style="color:var(--text-muted);font-size:.75rem">保存此token，商户可随时按业务需求发起后续扣款</span>
+                                <div class="result-card success" style="margin-top:0.75rem;">
+                                    <div class="result-icon">✓</div>
+                                    <div>
+                                        <div class="result-label">绑定/支付成功 — 获取 paymentTokenID</div>
+                                        <div class="result-value"><strong>paymentTokenID</strong>:
+                                            PMTOKEN177XXXXX1000551<br>
+                                            <span
+                                                style="color:var(--text-muted);font-size:.75rem">保存此token，商户可随时按业务需求发起后续扣款</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
                 <!-- NON-PERIODIC STEP 3: 后续发起扣款 (panel-np-3) - Non-Component Mode -->
                 <div class="step-panel" id="panel-np-3">
@@ -2558,11 +2875,14 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Request — Subsequent Deduct
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('req-np-deduct-noncomp')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('req-np-deduct-noncomp')">复制</button>
                                     </div>
                                     <div class="code-body" id="req-np-deduct-noncomp">
                                         <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -2603,7 +2923,8 @@
                                             <div class="code-dot dot-green"></div>
                                             orderAndPay Response — Deduct Success
                                         </div>
-                                        <button class="copy-mini-btn" onclick="copyCode('res-np-deduct-noncomp')">复制</button>
+                                        <button class="copy-mini-btn"
+                                            onclick="copyCode('res-np-deduct-noncomp')">复制</button>
                                     </div>
                                     <div class="code-body" id="res-np-deduct-noncomp">
                                         <pre>{
@@ -2613,6 +2934,30 @@
     <span class="jk">"tradeNo"</span>: <span class="js">"TRD20260310XXX"</span>,
     <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_1741..."</span>,
     <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"USD"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block" style="margin-top:0.75rem;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Deduct Notification
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_MCH_P2_2026"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
     <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
     <span class="jk">"currency"</span>: <span class="js">"USD"</span>
   }
@@ -2632,37 +2977,39 @@
                 </div>
 
                 <!-- NON-PERIODIC STEP 4: 后续发起扣款 (panel-np-4) - Component Mode -->
-            <div class="step-panel" id="panel-np-4">
-                <div class="step-card">
-                    <div class="step-card-title">
-                        <div class="card-icon">💳</div>
-                        后续发起扣款（商户发起） — <code
-                            style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
-                    </div>
-                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
-                        商户根据业务需求（如会员到期、消费达到阈值等），使用步骤二返回的
-                        <code class="data-pill">paymentTokenID</code> 主动调用 <strong>orderAndPay</strong> 发起后续扣款。
-                        <strong>无需传 subscriptionPlan</strong>，<code class="data-pill">merchantInitiated: true</code>
-                        表示商户主动发起。
-                    </p>
-                    <div class="dual-view">
-                        <div>
-                            <div class="sub-tabs">
-                                <div class="sub-tab active">📤 请求 (后续扣款)</div>
-                            </div>
-                            <div class="code-block">
-                                <div class="code-block-header">
-                                    <div class="code-block-title">
-                                        <div class="code-dot dot-red"></div>
-                                        <div class="code-dot dot-yellow"></div>
-                                        <div class="code-dot dot-green"></div>
-                                        orderAndPay Request — Subsequent Deduct
-                                    </div>
-                                    <button class="copy-mini-btn" onclick="copyCode('req-np-deduct')">复制</button>
+                <div class="step-panel" id="panel-np-4">
+                    <div class="step-card">
+                        <div class="step-card-title">
+                            <div class="card-icon">💳</div>
+                            后续发起扣款（商户发起） — <code
+                                style="font-size:.8rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;font-weight:400">orderAndPay</code>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                            商户根据业务需求（如会员到期、消费达到阈值等），使用步骤二返回的
+                            <code class="data-pill">paymentTokenID</code> 主动调用 <strong>orderAndPay</strong> 发起后续扣款。
+                            <strong>无需传 subscriptionPlan</strong>，<code class="data-pill">merchantInitiated: true</code>
+                            表示商户主动发起。
+                        </p>
+                        <div class="dual-view">
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📤 请求 (后续扣款)</div>
                                 </div>
-                                <div class="code-body" id="req-np-deduct">
-                                    <pre>{
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Request — Subsequent Deduct
+                                        </div>
+                                        <button class="copy-mini-btn" onclick="copyCode('req-np-deduct')">复制</button>
+                                    </div>
+                                    <div class="code-body" id="req-np-deduct">
+                                        <pre>{
   <span class="jk">"version"</span>: <span class="js">"1.5"</span>,
+  <span class="jk">"keyVersion"</span>: <span class="js">"1"</span>,
+  <span class="jk">"requestTime"</span>: <span class="js">"2026-03-18T18:17:00.000+08:00"</span>,
   <span class="jk">"appId"</span>: <span class="js">"67eff2f3b29a4ecf...f658"</span>,
   <span class="jk">"merchantNo"</span>: <span class="js">"SDP0XXXXX93"</span>,
   <span class="jk">"data"</span>: {
@@ -2688,24 +3035,24 @@
     }
   }
 }</pre>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="sub-tabs">
-                                <div class="sub-tab active">📥 扣款结果</div>
-                            </div>
-                            <div class="code-block">
-                                <div class="code-block-header">
-                                    <div class="code-block-title">
-                                        <div class="code-dot dot-red"></div>
-                                        <div class="code-dot dot-yellow"></div>
-                                        <div class="code-dot dot-green"></div>
-                                        orderAndPay Response — Deduct
                                     </div>
                                 </div>
-                                <div class="code-body">
-                                    <pre>{
+                            </div>
+                            <div>
+                                <div class="sub-tabs">
+                                    <div class="sub-tab active">📥 扣款结果</div>
+                                </div>
+                                <div class="code-block">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            orderAndPay Response — Deduct
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
   <span class="jk">"code"</span>: <span class="js">"0000"</span>,
   <span class="jk">"message"</span>: <span class="js">"success"</span>,
   <span class="jk">"data"</span>: {
@@ -2718,24 +3065,48 @@
     }
   }
 }</pre>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="completion-banner" style="margin-top:0.75rem;padding:1.5rem;">
-                                <div class="check-big"
-                                    style="width:48px;height:48px;font-size:1.2rem;margin-bottom:.75rem;">✓</div>
-                                <div class="completion-title" style="font-size:1rem;">扣款成功！</div>
-                                <div class="completion-desc" style="font-size:0.8rem;">
-                                    非周期性代扣完成，<br>
-                                    商户可随时根据业务需求再次使用<br>
-                                    <code
-                                        style="background:rgba(255,255,255,.7);padding:2px 6px;border-radius:4px;font-size:.75rem;">paymentTokenID</code>
-                                    发起新的扣款
+                                <div class="code-block" style="margin-top:0.75rem;">
+                                    <div class="code-block-header">
+                                        <div class="code-block-title">
+                                            <div class="code-dot dot-red"></div>
+                                            <div class="code-dot dot-yellow"></div>
+                                            <div class="code-dot dot-green"></div>
+                                            Webhook — Deduct Notification
+                                        </div>
+                                    </div>
+                                    <div class="code-body">
+                                        <pre>{
+  <span class="jk">"code"</span>: <span class="js">"0000"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"tradeNo"</span>: <span class="js">"TRD_MCH_P2_2026"</span>,
+    <span class="jk">"outTradeNo"</span>: <span class="js">"deduct_1741..."</span>,
+    <span class="jk">"status"</span>: <span class="js">"SUCCESS"</span>,
+    <span class="jk">"paymentMethodType"</span>: <span class="js">"CARD"</span>,
+    <span class="jk">"amount"</span>: <span class="jv">9.99</span>,
+    <span class="jk">"currency"</span>: <span class="js">"USD"</span>
+  }
+}</pre>
+                                    </div>
+                                </div>
+                                <div class="completion-banner" style="margin-top:0.75rem;padding:1.5rem;">
+                                    <div class="check-big"
+                                        style="width:48px;height:48px;font-size:1.2rem;margin-bottom:.75rem;">✓
+                                    </div>
+                                    <div class="completion-title" style="font-size:1rem;">扣款成功！</div>
+                                    <div class="completion-desc" style="font-size:0.8rem;">
+                                        非周期性代扣完成，<br>
+                                        商户可随时根据业务需求再次使用<br>
+                                        <code
+                                            style="background:rgba(255,255,255,.7);padding:2px 6px;border-radius:4px;font-size:.75rem;">paymentTokenID</code>
+                                        发起新的扣款
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
             </div><!-- /step-content-area -->
 
@@ -2743,7 +3114,8 @@
             <div class="action-bar">
                 <div class="action-hint" id="action-hint"></div>
                 <div style="display:flex;gap:.75rem;align-items:center;">
-                    <button class="btn btn-ghost" id="btn-back" onclick="goPrev()" style="display:none;">← 上一步</button>
+                    <button class="btn btn-ghost" id="btn-back" onclick="goPrev()" style="display:none;">←
+                        上一步</button>
                     <button class="btn btn-primary" id="btn-next" onclick="goNext()">确认参数，下一步 →</button>
                 </div>
             </div>
@@ -2751,8 +3123,9 @@
         </div><!-- /right-panel -->
     </div><!-- /app-layout -->
 
-    
+
     <!-- Bundled JavaScript -->
     <script src="js/app-bundle.js"></script>
 </body>
+
 </html>
