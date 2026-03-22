@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 keyVersion 和 requestTime 字段修复</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .code-block { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <h1>keyVersion 和 requestTime 字段修复测试</h1>
+    
+    <div class="test-section">
+        <h2>测试场景：PayerMax托管模式 - 收银台绑定/激活</h2>
+        <p>测试 STEP3 激活订阅中的 keyVersion 和 requestTime 字段是否能正确动态更新</p>
+        
+        <h3>收银台模式代码块：</h3>
+        <div class="code-block">
+            <pre>
+"keyVersion": "<span id="a-keyVersion">1</span>",
+"requestTime": "<span id="a-requestTime">2026-03-18T18:17:00.000+08:00</span>",
+            </pre>
+        </div>
+        
+        <h3>API + CARD 模式代码块：</h3>
+        <div class="code-block">
+            <pre>
+"keyVersion": "<span id="a-keyVersion-api-card">1</span>",
+"requestTime": "<span id="a-requestTime-api-card">2026-03-18T18:17:00.000+08:00</span>",
+            </pre>
+        </div>
+        
+        <h3>API + ApplePay 模式代码块：</h3>
+        <div class="code-block">
+            <pre>
+"keyVersion": "<span id="a-keyVersion-api-applepay">1</span>",
+"requestTime": "<span id="a-requestTime-api-applepay">2026-03-18T18:17:00.000+08:00</span>",
+            </pre>
+        </div>
+        
+        <h3>API + GooglePay 模式代码块：</h3>
+        <div class="code-block">
+            <pre>
+"keyVersion": "<span id="a-keyVersion-api-googlepay">1</span>",
+"requestTime": "<span id="a-requestTime-api-googlepay">2026-03-18T18:17:00.000+08:00</span>",
+            </pre>
+        </div>
+        
+        <h3>API + APM 模式代码块：</h3>
+        <div class="code-block">
+            <pre>
+"keyVersion": "<span id="a-keyVersion-api-apm">1</span>",
+"requestTime": "<span id="a-requestTime-api-apm">2026-03-18T18:17:00.000+08:00</span>",
+            </pre>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>动态更新测试</h2>
+        <button onclick="testUpdate()">测试动态更新字段</button>
+        <button onclick="resetFields()">重置字段</button>
+        
+        <div id="test-results"></div>
+    </div>
+    
+    <script>
+        // 模拟 setText 函数
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+                return true;
+            }
+            return false;
+        }
+        
+        // 模拟 formatDate 函数
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            try {
+                return new Date(dateStr).toISOString().replace('Z', '+08:00');
+            } catch (e) {
+                return '—';
+            }
+        }
+        
+        function testUpdate() {
+            const results = document.getElementById('test-results');
+            const currentTime = new Date().toISOString().replace('Z', '+08:00');
+            const newKeyVersion = '2';
+            
+            let testResults = '<h3>测试结果：</h3>';
+            
+            // 测试所有字段
+            const fields = [
+                'a-keyVersion',
+                'a-requestTime', 
+                'a-keyVersion-api-card',
+                'a-requestTime-api-card',
+                'a-keyVersion-api-applepay',
+                'a-requestTime-api-applepay',
+                'a-keyVersion-api-googlepay',
+                'a-requestTime-api-googlepay',
+                'a-keyVersion-api-apm',
+                'a-requestTime-api-apm'
+            ];
+            
+            fields.forEach(fieldId => {
+                const isKeyVersion = fieldId.includes('keyVersion');
+                const newValue = isKeyVersion ? newKeyVersion : currentTime;
+                const success = setText(fieldId, newValue);
+                
+                testResults += `<p class="${success ? 'success' : 'error'}">
+                    ${fieldId}: ${success ? '✓ 更新成功' : '✗ 更新失败'} - ${newValue}
+                </p>`;
+            });
+            
+            results.innerHTML = testResults;
+        }
+        
+        function resetFields() {
+            const fields = [
+                { id: 'a-keyVersion', value: '1' },
+                { id: 'a-requestTime', value: '2026-03-18T18:17:00.000+08:00' },
+                { id: 'a-keyVersion-api-card', value: '1' },
+                { id: 'a-requestTime-api-card', value: '2026-03-18T18:17:00.000+08:00' },
+                { id: 'a-keyVersion-api-applepay', value: '1' },
+                { id: 'a-requestTime-api-applepay', value: '2026-03-18T18:17:00.000+08:00' },
+                { id: 'a-keyVersion-api-googlepay', value: '1' },
+                { id: 'a-requestTime-api-googlepay', value: '2026-03-18T18:17:00.000+08:00' },
+                { id: 'a-keyVersion-api-apm', value: '1' },
+                { id: 'a-requestTime-api-apm', value: '2026-03-18T18:17:00.000+08:00' }
+            ];
+            
+            fields.forEach(field => {
+                setText(field.id, field.value);
+            });
+            
+            document.getElementById('test-results').innerHTML = '<p class="success">所有字段已重置为默认值</p>';
+        }
+    </script>
+</body>
+</html>

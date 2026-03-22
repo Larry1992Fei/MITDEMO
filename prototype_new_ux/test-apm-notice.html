@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APM Notice Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .radio-list { margin: 10px 0; }
+        .radio-item { margin: 5px 0; }
+        .step-card { 
+            background: #FEF3C7; 
+            border: 1px solid #FDE68A; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px;
+        }
+        .step-card-title { 
+            color: #92400E; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            margin-bottom: 10px;
+        }
+        .card-icon { 
+            background: #FEF9C3; 
+            display: inline-block; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>APM Special Notice Test</h1>
+    
+    <div class="test-section">
+        <h3>Payment Method Selection</h3>
+        <div class="radio-list">
+            <div class="radio-item">
+                <input type="radio" name="payment" id="pay-card" value="card" checked>
+                <label for="pay-card">CARD</label>
+            </div>
+            <div class="radio-item">
+                <input type="radio" name="payment" id="pay-applepay" value="applepay">
+                <label for="pay-applepay">APPLEPAY</label>
+            </div>
+            <div class="radio-item">
+                <input type="radio" name="payment" id="pay-googlepay" value="googlepay">
+                <label for="pay-googlepay">GOOGLEPAY</label>
+            </div>
+            <div class="radio-item">
+                <input type="radio" name="payment" id="pay-apm" value="apm">
+                <label for="pay-apm">APM</label>
+            </div>
+        </div>
+        
+        <!-- APM Special Notice -->
+        <div id="apm-special-notice" class="step-card" style="display:none;">
+            <div class="step-card-title">
+                <div class="card-icon">💡</div>
+                APM 支付方式特殊说明
+            </div>
+            <div style="font-size:0.8rem;color:#92400E;line-height:1.8;">
+                • <strong>paymentMethodType</strong>：APM 指定支付方式时传 <code style="background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">ONE_TOUCH</code>，全量收银台时可不传<br>
+                • <strong>country</strong>：APM 激活时必传（如 KR、MY、BR）<br>
+                • <strong>targetOrg</strong>：可选，用于指定具体钱包（如 NAVERPAY、KAKAOPAY 等）<br>
+                • <strong>前置组件</strong>：APM 不支持前置组件集成方式，仅支持收银台和 API 模式
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test the APM notice functionality
+        const PAYMENT_METHODS = {
+            CARD: 'card',
+            APPLEPAY: 'applepay',
+            GOOGLEPAY: 'googlepay',
+            APM: 'apm'
+        };
+
+        function getCurrentPayment() {
+            const radio = document.querySelector('input[name="payment"]:checked');
+            return radio ? radio.value : PAYMENT_METHODS.CARD;
+        }
+
+        function handlePaymentChange() {
+            const payment = getCurrentPayment();
+            const apmNotice = document.getElementById('apm-special-notice');
+            
+            console.log('Payment changed to:', payment);
+            
+            if (apmNotice) {
+                if (payment === PAYMENT_METHODS.APM) {
+                    apmNotice.style.display = 'block';
+                    console.log('APM notice shown');
+                } else {
+                    apmNotice.style.display = 'none';
+                    console.log('APM notice hidden');
+                }
+            }
+        }
+
+        // Setup event listeners
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('change', handlePaymentChange);
+        });
+
+        // Initialize
+        handlePaymentChange();
+    </script>
+</body>
+</html>

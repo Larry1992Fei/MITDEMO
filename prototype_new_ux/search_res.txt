@@ -1,0 +1,32 @@
+400: <span class="jk">"subscriptionPlan"</span>: {
+439: <span class="jk">"subscriptionPlan"</span>: {
+485: <span class="jk">"subscriptionPlan"</span>: {
+531: <span class="jk">"subscriptionPlan"</span>: {
+581: <span class="jk">"subscriptionPlan"</span>: {
+610: 使用 <strong>applyDropinSession</strong> 接口获取 Session Key，然后初始化前端组件完成支付绑定。
+626: applyDropinSession Request
+775: <span class="jk">"subscriptionPlan"</span>: {
+862: <span class="jk">"subscriptionPlan"</span>: {
+928: <span class="jk">"subscriptionPlan"</span>: {
+993: <span class="jk">"subscriptionPlan"</span>: {
+1063: <span class="jk">"subscriptionPlan"</span>: {
+1168: <span class="jk">"subscriptionPlan"</span>: { <span class="jc">// 订阅信息</span>
+1176: <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 激活时必传，从 applyDropinSession 获取</span>
+1229: <span class="jk">"subscriptionPlan"</span>: { <span class="jc">// 订阅信息</span>
+1237: <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 激活时必传，从 applyDropinSession 获取</span>
+1290: <span class="jk">"subscriptionPlan"</span>: { <span class="jc">// 订阅信息</span>
+1298: <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 激活时必传，从 applyDropinSession 获取</span>
+1499: 使用 <strong>applyDropinSession</strong> 接口获取 Session Key，然后初始化前端组件完成支付绑定。
+1515: applyDropinSession Request
+1654: <span class="jk">"subscriptionPlan"</span>: { <span class="jc">// 必填，订阅信息</span>
+1713: <span class="jk">"subscriptionPlan"</span>: { <span class="jc">// 非必填，订阅信息</span>
+1857: <span class="jk">"subscriptionPlan"</span>: { <span class="jc">// 非必填，订阅信息</span>
+1873: <span class="jk">"sessionKey"</span>: <span class="js">"bdsf8982348974hhf82934bf8239424"</span>, <span class="jc">// 必传，从 applyDropinSession 获取</span>
+1984: <span class="jk">"subscriptionPlan"</span>: {
+2077: • <strong>无 subscriptionPlan</strong>：不传订阅计划，商户自行管理业务逻辑<br>
+2122: 使用 <strong>applyDropinSession</strong> 接口获取 Session Key，然后初始化前端组件完成支付绑定。
+2138: applyDropinSession Request
+2567: <strong>无需传 subscriptionPlan</strong>，<code class="data-pill">merchantInitiated: true</code>
+2605: <span class="jc">// ⚠️ 非周期性代扣无需传 subscriptionPlan</span>
+2669: <strong>无需传 subscriptionPlan</strong>，<code class="data-pill">merchantInitiated: true</code>
+2707: <span class="jc">// ⚠️ 非周期性代扣无需传 subscriptionPlan</span>

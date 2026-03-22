@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeyVersion字段一致性测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .test-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .test-section {
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+        .test-item.missing {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .test-label {
+            font-weight: 500;
+            color: #374151;
+        }
+        .test-status {
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .status-pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .summary {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .summary-title {
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-title">🔍 STEP2与STEP3字段一致性测试</div>
+        
+        <div class="test-section">
+            <div class="section-title">STEP2 - subscriptionCreate API</div>
+            <div id="step2-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-title">STEP3 - orderAndPay API (收银台模式)</div>
+            <div id="step3-cashier-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-title">STEP3 - orderAndPay API (requestTime字段)</div>
+            <div id="step3-requesttime-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-title">STEP3 - orderAndPay API (keyVersion字段)</div>
+            <div id="step3-keyversion-results"></div>
+        </div>
+        
+        <div class="summary" id="test-summary"></div>
+    </div>
+
+    <script>
+        // 测试结果
+        const testResults = {
+            step2: [],
+            step3Cashier: [],
+            step3RequestTime: [],
+            step3KeyVersion: []
+        };
+
+        // 检查requestTime字段是否存在
+        function checkRequestTimeField(containerId, description) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                return { name: description, status: 'fail', reason: '代码块不存在' };
+            }
+            
+            const content = container.textContent || container.innerText;
+            const hasRequestTime = content.includes('"requestTime"') && content.includes('2026-03-18T18:17:00.000+08:00');
+            
+            return {
+                name: description,
+                status: hasRequestTime ? 'pass' : 'fail',
+                reason: hasRequestTime ? '✓ requestTime字段存在且格式正确' : '✗ requestTime字段缺失或格式不正确'
+            };
+        }
+
+        // 检查keyVersion字段是否存在
+        function checkKeyVersionField(containerId, description) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                return { name: description, status: 'fail', reason: '代码块不存在' };
+            }
+            
+            const content = container.textContent || container.innerText;
+            const hasKeyVersion = content.includes('"keyVersion"') && content.includes('"1"');
+            
+            return {
+                name: description,
+                status: hasKeyVersion ? 'pass' : 'fail',
+                reason: hasKeyVersion ? '✓ keyVersion字段存在' : '✗ keyVersion字段缺失'
+            };
+        }
+
+        // 执行测试
+        function runTests() {
+            // 等待页面加载完成
+            setTimeout(() => {
+                // 测试STEP2的所有订阅类型
+                testResults.step2 = [
+                    checkKeyVersionField('create-code-standard', 'STEP2 - 标准订阅'),
+                    checkKeyVersionField('create-code-trial', 'STEP2 - N天试用'),
+                    checkKeyVersionField('create-code-discount', 'STEP2 - 前N期优惠'),
+                    checkKeyVersionField('create-code-trial-discount', 'STEP2 - 试用+优惠')
+                ];
+
+                // 测试STEP3收银台模式
+                testResults.step3Cashier = [
+                    checkKeyVersionField('req-activate-cashier', 'STEP3 - 收银台模式 keyVersion'),
+                    checkRequestTimeField('req-activate-cashier', 'STEP3 - 收银台模式 requestTime')
+                ];
+
+                // 测试STEP3 API模式 - requestTime字段
+                testResults.step3RequestTime = [
+                    checkRequestTimeField('req-activate-api-card', 'STEP3 - API + CARD requestTime'),
+                    checkRequestTimeField('req-activate-api-applepay', 'STEP3 - API + ApplePay requestTime'),
+                    checkRequestTimeField('req-activate-api-googlepay', 'STEP3 - API + GooglePay requestTime'),
+                    checkRequestTimeField('req-activate-api-apm', 'STEP3 - API + APM requestTime')
+                ];
+
+                // 测试STEP3 API模式 - keyVersion字段
+                testResults.step3KeyVersion = [
+                    checkKeyVersionField('req-activate-api-card', 'STEP3 - API + CARD keyVersion'),
+                    checkKeyVersionField('req-activate-api-applepay', 'STEP3 - API + ApplePay keyVersion'),
+                    checkKeyVersionField('req-activate-api-googlepay', 'STEP3 - API + GooglePay keyVersion'),
+                    checkKeyVersionField('req-activate-api-apm', 'STEP3 - API + APM keyVersion')
+                ];
+
+                // 渲染测试结果
+                renderResults();
+            }, 1000);
+        }
+
+        // 渲染测试结果
+        function renderResults() {
+            renderSection('step2-results', testResults.step2);
+            renderSection('step3-cashier-results', testResults.step3Cashier);
+            renderSection('step3-requesttime-results', testResults.step3RequestTime);
+            renderSection('step3-keyversion-results', testResults.step3KeyVersion);
+            renderSummary();
+        }
+
+        // 渲染单个测试部分
+        function renderSection(containerId, results) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = results.map(result => `
+                <div class="test-item ${result.status === 'fail' ? 'missing' : ''}">
+                    <span class="test-label">${result.name}</span>
+                    <span class="test-status status-${result.status}">${result.reason}</span>
+                </div>
+            `).join('');
+        }
+
+        // 渲染测试总结
+        function renderSummary() {
+            const allResults = [...testResults.step2, ...testResults.step3Cashier, ...testResults.step3RequestTime, ...testResults.step3KeyVersion];
+            const totalTests = allResults.length;
+            const passedTests = allResults.filter(r => r.status === 'pass').length;
+            const failedTests = totalTests - passedTests;
+
+            const summaryContainer = document.getElementById('test-summary');
+            summaryContainer.innerHTML = `
+                <div class="summary-title">📊 测试总结</div>
+                <div>
+                    <strong>总测试数:</strong> ${totalTests} |
+                    <strong style="color: #065f46;">通过:</strong> ${passedTests} |
+                    <strong style="color: #991b1b;">失败:</strong> ${failedTests}
+                </div>
+                <div style="margin-top: 8px;">
+                    <strong>测试状态:</strong> 
+                    <span style="color: ${failedTests === 0 ? '#065f46' : '#991b1b'}; font-weight: 600;">
+                        ${failedTests === 0 ? '✅ 所有字段一致性检查通过' : '❌ 存在字段缺失'}
+                    </span>
+                </div>
+            `;
+        }
+
+        // 页面加载完成后运行测试
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runTests);
+        } else {
+            runTests();
+        }
+    </script>
+</body>
+</html>

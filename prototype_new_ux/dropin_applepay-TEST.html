@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>PayerMax Dropin - Apple Pay</title>
+  <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
+</head>
+
+<body>
+  <div style="margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; max-width: 500px;">
+    <h3 style="text-align: center;">配置参数</h3>
+    <div style="margin-bottom: 15px;">
+      <label for="clientKeyInput" style="display: block; margin-bottom: 5px;">Client Key:</label>
+      <input type="text" id="clientKeyInput" value="b72db973842848b39ea0661ccbf3fe1d"
+        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label for="sessionKeyInput" style="display: block; margin-bottom: 5px;">Session Key:</label>
+      <input type="text" id="sessionKeyInput" value="26be8c1ae660456a90f0c89293dd8ff5"
+        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label for="environmentInput" style="display: block; margin-bottom: 5px;">Environment:</label>
+      <select id="environmentInput" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <option value="true" selected>Sandbox (测试环境)</option>
+        <option value="false">Production (生产环境)</option>
+      </select>
+    </div>
+    <div style="text-align: center;">
+      <button id="initButton"
+        style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        初始化组件
+      </button>
+    </div>
+  </div>
+
+  <div id="applepay" style="margin: 20px auto; text-align: center; --padding-frame: 0;">
+    <!-- Apple Pay button will be added here -->
+  </div>
+
+  <div style="text-align: center;">
+    <div id="tokenDisplay"
+      style="margin: 20px auto; padding: 15px; max-width: 600px; background-color: #f5f5f5; border-radius: 5px; word-break: break-all; display: none;">
+      <strong>Payment Token:</strong>
+      <div id="tokenValue" style="margin-top: 10px; font-family: monospace; color: #333;"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var applepay = null;
+
+    // 初始化组件函数
+    function initApplePay() {
+      var clientKey = document.getElementById('clientKeyInput').value;
+      var sessionKey = document.getElementById('sessionKeyInput').value;
+      var environment = document.getElementById('environmentInput').value;
+      var isSandbox = environment === 'true';
+
+      // 检查是否支持 Apple Pay
+      if (!PMdropin.isSupportApplePay()) {
+        alert('当前设备或浏览器不支持 Apple Pay');
+        document.querySelector('#applepay').style.display = 'none';
+        return;
+      }
+
+      // 如果已经存在组件，先卸载
+      if (applepay) {
+        applepay.unmount();
+      }
+
+      // 初始化 Apple Pay 组件
+      applepay = PMdropin.create('applepay', {
+        clientKey: clientKey,
+        sessionKey: sessionKey,
+        theme: 'light',
+        payButtonStyle: 'width:20rem;height:4rem;border-radius: 4rem;padding:1rem 4rem;',
+        sandbox: isSandbox
+      });
+
+      // 将组件挂载到 dom 节点
+      applepay.mount('#applepay');
+
+      // Apple Pay 事件监听
+      applepay.on('ready', (res) => {
+        console.log('[merchant][ready]:', res);
+      });
+
+      applepay.on('load', (res = {}) => {
+        const { code, msg } = res || {};
+        if (code === "SUCCESS") {
+          console.log('[merchant][load]success:', res);
+          alert('组件加载成功！环境: ' + (isSandbox ? '测试环境' : '生产环境'));
+        } else {
+          console.log('[merchant][load]fail:', res);
+          alert('组件加载失败！环境: ' + (isSandbox ? '测试环境' : '生产环境'));
+        }
+      });
+      applepay.on('payButtonClick', (res) => {
+        // 将组件设置为不可编辑状态
+        applepay.emit('setDisabled', true);
+
+        // 发起组件校验，并返回卡标识
+        applepay.emit('canMakePayment')
+          .then(function (response) {
+            // 成功获取到 response
+            if (response.code === 'APPLY_SUCCESS') {
+              // 获取卡标识 paymentToken 
+              var paymentToken = response.data.paymentToken;
+              console.log("paymentToken:" + paymentToken);
+
+              //applepay.emit('paySuccess')，ApplePay弹窗会消失，并提示支付成功
+              applepay.emit('paySuccess');
+              // 显示 token
+              document.getElementById('tokenValue').textContent = paymentToken;
+              document.getElementById('tokenDisplay').style.display = 'block';
+
+              // 调用PayerMax orderAndPay接口发起支付
+              // orderAndPay()
+
+              // 解除不可编辑状态
+              applepay.emit('setDisabled', false);
+            } else {
+              console.log('error: ' + response.msg);
+              console.log('code:' + response.code);
+              applepay.emit('setDisabled', false);
+              applepay.emit('payFail');
+            }
+          })
+          .catch(function (error) {
+            console.error('支付能力检测失败:', error);
+            // 解除不可编辑状态
+            applepay.emit('setDisabled', false);
+          });
+      });
+    }
+
+    // 初始化按钮点击事件
+    document.getElementById('initButton').addEventListener('click', initApplePay, false);
+  </script>
+</body>
+
+</html>

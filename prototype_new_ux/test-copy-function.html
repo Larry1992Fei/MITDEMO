@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试复制功能</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .code-block { background: #f5f5f5; padding: 15px; margin: 10px 0; border: 1px solid #ddd; }
+        .copy-btn { padding: 5px 10px; margin: 10px 0; }
+        .result { background: #e8f5e8; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>测试 STEP3 代码复制功能</h1>
+    
+    <h2>模拟收银台模式代码块</h2>
+    <div class="code-block" id="test-cashier-code">
+        <pre>{
+  "version": "1.5",
+  "keyVersion": "<span id="test-keyVersion">1</span>",
+  "requestTime": "<span id="test-requestTime">2026-03-18T18:17:00.000+08:00</span>",
+  "appId": "67eff2f3b29a4ecf...f658",
+  "merchantNo": "SDP0XXXXX93",
+  "data": {
+    "outTradeNo": "ORD_20260310_001",
+    "subject": "PayerMax订阅计划",
+    "totalAmount": 9.99,
+    "currency": "USD",
+    "country": "US",
+    "userId": "test10001",
+    "language": "en",
+    "reference": "test subscription",
+    "frontCallbackUrl": "https://your.app/return",
+    "notifyUrl": "https://your.server/callback",
+    "integrate": "Hosted_Checkout",
+    "expireTime": "1800",
+    "subscriptionPlan": {
+      "subscriptionNo": "SUB2026XXXxxxxxx2112"
+    },
+    "mitManagementUrl": "https://your.domain/subscription-management",
+    "paymentDetail": {
+      "paymentMethodType": "CARD",
+      "mitType": "SCHEDULED",
+      "tokenForFutureUse": true,
+      "merchantInitiated": false
+    }
+  }
+}</pre>
+    </div>
+    
+    <button class="copy-btn" onclick="copyTestCode('test-cashier-code')">复制测试代码</button>
+    <button class="copy-btn" onclick="updateTestFields()">更新字段值</button>
+    
+    <div class="result" id="copy-result">
+        点击复制按钮后，结果会显示在这里
+    </div>
+    
+    <h2>检查原始HTML文件中的字段</h2>
+    <button class="copy-btn" onclick="checkOriginalFields()">检查原始字段</button>
+    <div class="result" id="check-result">
+        检查结果会显示在这里
+    </div>
+    
+    <script>
+        function copyTestCode(id) {
+            const el = document.getElementById(id);
+            if (!el) {
+                document.getElementById('copy-result').innerHTML = '❌ 找不到元素: ' + id;
+                return;
+            }
+            
+            const raw = el.innerText || el.textContent;
+            
+            // 显示复制的内容
+            document.getElementById('copy-result').innerHTML = 
+                '<h3>复制的内容：</h3><pre>' + raw + '</pre>';
+            
+            // 尝试复制到剪贴板
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(raw).then(() => {
+                    document.getElementById('copy-result').innerHTML += 
+                        '<p style="color: green;">✅ 已复制到剪贴板</p>';
+                }).catch(err => {
+                    document.getElementById('copy-result').innerHTML += 
+                        '<p style="color: red;">❌ 复制失败: ' + err + '</p>';
+                });
+            }
+        }
+        
+        function updateTestFields() {
+            const currentTime = new Date().toISOString().replace('Z', '+08:00');
+            
+            const keyVersionEl = document.getElementById('test-keyVersion');
+            const requestTimeEl = document.getElementById('test-requestTime');
+            
+            if (keyVersionEl) keyVersionEl.textContent = '2';
+            if (requestTimeEl) requestTimeEl.textContent = currentTime;
+            
+            document.getElementById('copy-result').innerHTML = 
+                '<p style="color: blue;">✅ 字段已更新，现在再次复制试试</p>';
+        }
+        
+        function checkOriginalFields() {
+            // 检查是否能找到原始HTML中的字段
+            const fields = [
+                'a-keyVersion',
+                'a-requestTime',
+                'a-keyVersion-api-card',
+                'a-requestTime-api-card'
+            ];
+            
+            let result = '<h3>原始字段检查结果：</h3>';
+            
+            fields.forEach(fieldId => {
+                const el = document.getElementById(fieldId);
+                if (el) {
+                    result += `<p style="color: green;">✅ ${fieldId}: "${el.textContent}"</p>`;
+                } else {
+                    result += `<p style="color: red;">❌ ${fieldId}: 不存在</p>`;
+                }
+            });
+            
+            document.getElementById('check-result').innerHTML = result;
+        }
+        
+        // 页面加载后自动检查
+        window.onload = function() {
+            checkOriginalFields();
+        };
+    </script>
+</body>
+</html>

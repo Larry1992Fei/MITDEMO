@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字段存在性测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>STEP3字段存在性测试</h1>
+    <div id="results"></div>
+
+    <script>
+        function testFieldExistence() {
+            const results = [];
+            
+            // 测试收银台模式
+            const cashierBlock = document.getElementById('req-activate-cashier');
+            if (cashierBlock) {
+                const content = cashierBlock.textContent || cashierBlock.innerText;
+                results.push({
+                    name: 'STEP3 收银台模式 - keyVersion字段',
+                    pass: content.includes('"keyVersion"') && content.includes('"1"')
+                });
+                results.push({
+                    name: 'STEP3 收银台模式 - requestTime字段',
+                    pass: content.includes('"requestTime"') && content.includes('2026-03-18T18:17:00.000+08:00')
+                });
+            } else {
+                results.push({
+                    name: 'STEP3 收银台模式代码块',
+                    pass: false,
+                    error: '代码块不存在'
+                });
+            }
+            
+            // 测试API模式
+            const apiCardBlock = document.getElementById('req-activate-api-card');
+            if (apiCardBlock) {
+                const content = apiCardBlock.textContent || apiCardBlock.innerText;
+                results.push({
+                    name: 'STEP3 API CARD模式 - keyVersion字段',
+                    pass: content.includes('"keyVersion"') && content.includes('"1"')
+                });
+                results.push({
+                    name: 'STEP3 API CARD模式 - requestTime字段',
+                    pass: content.includes('"requestTime"') && content.includes('2026-03-18T18:17:00.000+08:00')
+                });
+            } else {
+                results.push({
+                    name: 'STEP3 API CARD模式代码块',
+                    pass: false,
+                    error: '代码块不存在'
+                });
+            }
+            
+            // 显示结果
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = results.map(result => `
+                <div class="test-result ${result.pass ? 'pass' : 'fail'}">
+                    ${result.name}: ${result.pass ? '✅ 通过' : '❌ 失败'}
+                    ${result.error ? ` (${result.error})` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 等待页面加载完成后执行测试
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', testFieldExistence);
+        } else {
+            testFieldExistence();
+        }
+    </script>
+
+    <!-- 嵌入主页面的代码块用于测试 -->
+    <iframe src="index-full.html" style="display:none;" onload="setTimeout(testFieldExistence, 1000)"></iframe>
+</body>
+</html>

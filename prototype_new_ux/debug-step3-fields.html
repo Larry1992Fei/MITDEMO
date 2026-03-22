@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试 STEP3 字段显示</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .field-check { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .found { color: green; }
+        .not-found { color: red; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <h1>STEP3 字段显示调试</h1>
+    
+    <div class="debug-section">
+        <h2>检查字段是否存在</h2>
+        <button onclick="checkFields()">检查所有字段</button>
+        <div id="field-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>模拟字段更新</h2>
+        <button onclick="simulateUpdate()">模拟 updateDynamic 更新</button>
+        <div id="update-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>检查面板显示状态</h2>
+        <button onclick="checkPanelVisibility()">检查面板可见性</button>
+        <div id="panel-results"></div>
+    </div>
+    
+    <script>
+        function checkFields() {
+            const fields = [
+                'a-keyVersion',
+                'a-requestTime',
+                'a-keyVersion-api-card',
+                'a-requestTime-api-card',
+                'a-keyVersion-api-applepay',
+                'a-requestTime-api-applepay',
+                'a-keyVersion-api-googlepay',
+                'a-requestTime-api-googlepay',
+                'a-keyVersion-api-apm',
+                'a-requestTime-api-apm'
+            ];
+            
+            let results = '<h3>字段存在性检查：</h3>';
+            
+            fields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                const exists = element !== null;
+                const currentValue = exists ? element.textContent : 'N/A';
+                
+                results += `<div class="field-check ${exists ? 'found' : 'not-found'}">
+                    ${fieldId}: ${exists ? '✓ 存在' : '✗ 不存在'} - 当前值: "${currentValue}"
+                </div>`;
+            });
+            
+            document.getElementById('field-results').innerHTML = results;
+        }
+        
+        function simulateUpdate() {
+            const currentTime = new Date().toISOString().replace('Z', '+08:00');
+            
+            function setText(id, value) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                    return true;
+                }
+                return false;
+            }
+            
+            const updates = [
+                { id: 'a-keyVersion', value: '1' },
+                { id: 'a-requestTime', value: currentTime },
+                { id: 'a-keyVersion-api-card', value: '1' },
+                { id: 'a-requestTime-api-card', value: currentTime },
+                { id: 'a-keyVersion-api-applepay', value: '1' },
+                { id: 'a-requestTime-api-applepay', value: currentTime },
+                { id: 'a-keyVersion-api-googlepay', value: '1' },
+                { id: 'a-requestTime-api-googlepay', value: currentTime },
+                { id: 'a-keyVersion-api-apm', value: '1' },
+                { id: 'a-requestTime-api-apm', value: currentTime }
+            ];
+            
+            let results = '<h3>更新结果：</h3>';
+            
+            updates.forEach(update => {
+                const success = setText(update.id, update.value);
+                results += `<div class="field-check ${success ? 'found' : 'not-found'}">
+                    ${update.id}: ${success ? '✓ 更新成功' : '✗ 更新失败'} - 新值: "${update.value}"
+                </div>`;
+            });
+            
+            document.getElementById('update-results').innerHTML = results;
+        }
+        
+        function checkPanelVisibility() {
+            const panels = [
+                'panel-pm-3',
+                'activate-cashier-mode',
+                'activate-api-mode'
+            ];
+            
+            let results = '<h3>面板可见性检查：</h3>';
+            
+            panels.forEach(panelId => {
+                const panel = document.getElementById(panelId);
+                if (panel) {
+                    const isVisible = panel.style.display !== 'none' && 
+                                    getComputedStyle(panel).display !== 'none';
+                    const hasActiveClass = panel.classList.contains('active');
+                    
+                    results += `<div class="field-check ${isVisible ? 'found' : 'not-found'}">
+                        ${panelId}: ${isVisible ? '✓ 可见' : '✗ 隐藏'} - 
+                        display: ${panel.style.display || 'default'} - 
+                        active: ${hasActiveClass ? 'yes' : 'no'}
+                    </div>`;
+                } else {
+                    results += `<div class="field-check not-found">
+                        ${panelId}: ✗ 元素不存在
+                    </div>`;
+                }
+            });
+            
+            document.getElementById('panel-results').innerHTML = results;
+        }
+        
+        // 页面加载后自动检查
+        window.onload = function() {
+            checkFields();
+            checkPanelVisibility();
+        };
+    </script>
+</body>
+</html>

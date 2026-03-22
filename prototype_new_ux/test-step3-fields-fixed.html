@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEP3字段修复验证测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333; text-align: center; }
+        .test-section { margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #2563eb; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .pass { background: #dcfce7; border: 1px solid #16a34a; color: #15803d; }
+        .fail { background: #fef2f2; border: 1px solid #dc2626; color: #dc2626; }
+        .summary { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 6px; }
+        .code-snippet { background: #f1f5f9; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-title">🔧 STEP3字段修复验证测试</div>
+        
+        <div class="test-section">
+            <div class="section-title">测试说明</div>
+            <p>此测试验证STEP3中的keyVersion和requestTime字段是否已正确添加动态ID并能被JavaScript更新。</p>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-title">STEP3 - 收银台模式字段测试</div>
+            <div id="cashier-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-title">STEP3 - API模式字段测试</div>
+            <div id="api-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-title">JavaScript更新功能测试</div>
+            <div id="js-update-results"></div>
+            <button onclick="testJSUpdate()" style="margin-top: 10px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">测试JavaScript更新</button>
+        </div>
+        
+        <div class="summary" id="test-summary"></div>
+    </div>
+
+    <script>
+        const testResults = {
+            cashier: [],
+            api: [],
+            jsUpdate: []
+        };
+
+        // 检查字段是否存在的函数
+        function checkFieldExists(elementId, fieldName, description) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const content = element.textContent || element.innerText;
+                const hasKeyVersion = content.includes('"keyVersion"');
+                const hasRequestTime = content.includes('"requestTime"');
+                
+                return {
+                    status: hasKeyVersion && hasRequestTime ? 'pass' : 'fail',
+                    message: `${description}: keyVersion=${hasKeyVersion ? '✓' : '✗'}, requestTime=${hasRequestTime ? '✓' : '✗'}`,
+                    details: hasKeyVersion && hasRequestTime ? '字段存在' : '字段缺失'
+                };
+            } else {
+                return {
+                    status: 'fail',
+                    message: `${description}: 元素未找到`,
+                    details: `ID: ${elementId}`
+                };
+            }
+        }
+
+        // 检查动态ID是否存在的函数
+        function checkDynamicId(idName, description) {
+            const element = document.getElementById(idName);
+            return {
+                status: element ? 'pass' : 'fail',
+                message: `${description}: ${element ? '✓ 存在' : '✗ 不存在'}`,
+                details: element ? `值: ${element.textContent}` : `ID: ${idName}`
+            };
+        }
+
+        // 运行测试
+        function runTests() {
+            // 测试收银台模式
+            testResults.cashier = [
+                checkFieldExists('req-activate-cashier', 'keyVersion & requestTime', '收银台模式字段'),
+                checkDynamicId('a-keyVersion', '收银台模式 keyVersion 动态ID'),
+                checkDynamicId('a-requestTime', '收银台模式 requestTime 动态ID')
+            ];
+
+            // 测试API模式
+            testResults.api = [
+                checkDynamicId('a-keyVersion-api-card', 'API CARD keyVersion 动态ID'),
+                checkDynamicId('a-requestTime-api-card', 'API CARD requestTime 动态ID'),
+                checkDynamicId('a-keyVersion-api-applepay', 'API ApplePay keyVersion 动态ID'),
+                checkDynamicId('a-requestTime-api-applepay', 'API ApplePay requestTime 动态ID'),
+                checkDynamicId('a-keyVersion-api-googlepay', 'API GooglePay keyVersion 动态ID'),
+                checkDynamicId('a-requestTime-api-googlepay', 'API GooglePay requestTime 动态ID'),
+                checkDynamicId('a-keyVersion-api-apm', 'API APM keyVersion 动态ID'),
+                checkDynamicId('a-requestTime-api-apm', 'API APM requestTime 动态ID')
+            ];
+
+            renderResults();
+        }
+
+        // 测试JavaScript更新功能
+        function testJSUpdate() {
+            const testTime = new Date().toISOString();
+            const testKeyVersion = '2'; // 测试值
+            
+            // 尝试更新字段
+            const updates = [
+                { id: 'a-keyVersion', value: testKeyVersion, name: '收银台 keyVersion' },
+                { id: 'a-requestTime', value: testTime, name: '收银台 requestTime' },
+                { id: 'a-keyVersion-api-card', value: testKeyVersion, name: 'API CARD keyVersion' },
+                { id: 'a-requestTime-api-card', value: testTime, name: 'API CARD requestTime' }
+            ];
+            
+            testResults.jsUpdate = [];
+            
+            updates.forEach(update => {
+                const element = document.getElementById(update.id);
+                if (element) {
+                    const oldValue = element.textContent;
+                    element.textContent = update.value;
+                    const newValue = element.textContent;
+                    
+                    testResults.jsUpdate.push({
+                        status: newValue === update.value ? 'pass' : 'fail',
+                        message: `${update.name}: ${newValue === update.value ? '✓ 更新成功' : '✗ 更新失败'}`,
+                        details: `旧值: ${oldValue} → 新值: ${newValue}`
+                    });
+                } else {
+                    testResults.jsUpdate.push({
+                        status: 'fail',
+                        message: `${update.name}: ✗ 元素不存在`,
+                        details: `ID: ${update.id}`
+                    });
+                }
+            });
+            
+            renderResults();
+        }
+
+        // 渲染测试结果
+        function renderResults() {
+            renderSection('cashier-results', testResults.cashier);
+            renderSection('api-results', testResults.api);
+            renderSection('js-update-results', testResults.jsUpdate);
+            renderSummary();
+        }
+
+        function renderSection(containerId, results) {
+            const container = document.getElementById(containerId);
+            if (!container || !results.length) return;
+            
+            let html = '';
+            results.forEach(result => {
+                html += `
+                    <div class="test-result ${result.status}">
+                        <strong>${result.message}</strong>
+                        <div class="code-snippet">${result.details}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 渲染测试总结
+        function renderSummary() {
+            const allResults = [...testResults.cashier, ...testResults.api, ...testResults.jsUpdate];
+            const totalTests = allResults.length;
+            const passedTests = allResults.filter(r => r.status === 'pass').length;
+            const failedTests = totalTests - passedTests;
+            
+            const summaryContainer = document.getElementById('test-summary');
+            summaryContainer.innerHTML = `
+                <h3>测试总结</h3>
+                <p><strong>总测试数:</strong> ${totalTests}</p>
+                <p><strong>通过:</strong> <span style="color: #16a34a;">${passedTests}</span></p>
+                <p><strong>失败:</strong> <span style="color: #dc2626;">${failedTests}</span></p>
+                <p><strong>成功率:</strong> ${totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0}%</p>
+                ${failedTests === 0 ? '<p style="color: #16a34a; font-weight: bold;">🎉 所有测试通过！STEP3字段修复成功！</p>' : '<p style="color: #dc2626; font-weight: bold;">⚠️ 部分测试失败，需要进一步检查。</p>'}
+            `;
+        }
+
+        // 页面加载时运行测试
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500); // 延迟500ms确保页面完全加载
+        });
+    </script>
+</body>
+</html>

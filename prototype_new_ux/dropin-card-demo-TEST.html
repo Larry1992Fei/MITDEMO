@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <!-- 1、引入 CDN 包 -->
+  <title>PayerMax Dropin</title>
+  <script src="https://cdn.payermax.com/dropin/js/pmdropin.min.js"></script>
+</head>
+
+
+<!-- 布局，可忽略 -->
+<body>
+  <div style="margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; max-width: 500px;">
+    <h3 style="text-align: center;">配置参数</h3>
+    <div style="margin-bottom: 15px;">
+      <label for="clientKeyInput" style="display: block; margin-bottom: 5px;">Client Key:</label>
+      <input type="text" id="clientKeyInput" value="67eff2f3b29a4ecf9576321185dbf658" 
+             style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label for="sessionKeyInput" style="display: block; margin-bottom: 5px;">Session Key:</label>
+      <input type="text" id="sessionKeyInput" value="02d764a032804ee5b47013795e25f07d" 
+             style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label for="environmentInput" style="display: block; margin-bottom: 5px;">Environment:</label>
+      <select id="environmentInput" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <option value="true" selected>Sandbox (测试环境)</option>
+        <option value="false">Production (生产环境)</option>
+      </select>
+    </div>
+    <div style="text-align: center;">
+      <button id="initButton" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">输入CK和SK完成初始化组件</button>
+    </div>
+  </div>
+  <!-- 2、页面嵌入一个iframes -->
+  <div class="card-frame" style="margin: 20px;">
+  </div>
+
+  <div style="text-align: center;">
+    <button id="pay" style="margin: 20px; border: 2px solid #4CAF50; border-radius: 10px; padding: 10px 20px;">初始化组件后输入卡号等信息，点击获取token</button>
+    <div id="tokenDisplay" style="margin: 20px auto; padding: 15px; max-width: 600px; background-color: #f5f5f5; border-radius: 5px; word-break: break-all; display: none;">
+      <strong>Payment Token:</strong>
+      <div id="tokenValue" style="margin-top: 10px; font-family: monospace; color: #333;"></div>
+    </div>
+  </div>
+
+  <!-- 3、初始化 PayerMax Frames -->
+  <script type="text/javascript">
+    var card = null;
+
+    // 初始化组件函数
+    function initCard() {
+      var clientKey = document.getElementById('clientKeyInput').value;
+      var sessionKey = document.getElementById('sessionKeyInput').value;
+      var environment = document.getElementById('environmentInput').value;
+      var isSandbox = environment === 'true';
+
+      // 如果已经存在组件，先卸载
+      if (card) {
+        card.unmount();
+      }
+
+      //初始化一个卡组件
+      card = PMdropin.create('card', {
+        // 填入你在服务端获取到的 clientKey
+        clientKey: clientKey,
+        // 填入你在服务端获取到的 sessionKey
+        sessionKey: sessionKey,
+        isRtl: true,
+        language: "zh",
+        customLocalization: {
+          // 添加中文示例
+          'zh': {
+            loading: '加载中',
+            loadingFailed: '加载失败',
+            refresh: '刷新',
+            confirm: '确定',
+            cancel: '取消',
+            removeCard: '移除卡',
+            removeCardTip: '确定移除当前选中卡吗?',
+            addNewCard: '使用新卡',
+            useSavedCard: '使用已存卡',
+            cardnum: '银行卡号',
+            cardnumHint: 'XXXX XXXX XXXX XXXX',
+            cardnumErrTip: '卡号不正确',
+            cardbinErrTip: {
+              // {cardOrg} 变量字段，无需翻译
+              CARD_NOT_SUPPORT: '不支持{cardOrg}，请检查卡号或者更换其他卡重试',
+              // {cardType} 变量字段，无需翻译
+              CARD_INVALID: '不支持{cardType}的卡类型',
+              CARD_NO_INVALID: '请确认卡号输入是否正确',
+            },
+            expdate: '过期日期',
+            expdateHint: '月/年',
+            expdateErrTip: '过期日期不正确',
+            cvv: 'CVV/CVC',
+            cvvHint: '123',
+            cvvErrTip: 'CVV/CVC 格式不正确',
+            name: '持卡人姓名',
+            nameHint: 'XX XX',
+            nameErrTip: '姓名格式不正确',
+            saveCardInfoTip: '为下次支付保存信息'
+          },
+
+        },
+        //theme:'red',
+        customTheme: [
+          {
+            name: 'red',
+            // 用于填充底色的样式【可选】
+            base: 'light',
+            style: `:root {
+            --bg-color-input:#33FF33;
+            }`
+          }],
+        // 开启沙盒模式联调
+        sandbox: isSandbox
+      });
+
+      // 将组件挂载到 dom 节点
+      card.mount('.card-frame');
+	  
+	  <!-- 4、监听表单填写状态，动态设置支付按钮（可选）。通过表单监听事件，可实时监控用户填写信息的合法性，以此动态设定 支付 按钮是否可点击 -->
+      card.on('form-check', (res) => {
+		// res.isFormValid 为表单状态。取值是false/true
+		// true 表示表单校验通过，可支付；false 表示校验未通过，不可支付，无法点击支付按钮。
+		// 此时拿不到用户输入的信息，只做校验
+		console.log('[dropin][form-check]:', res)
+		});
+		
+	  //组件加载完成时机
+	  card.on('ready', () => {
+		console.log('组件初始化完成');
+		});
+		
+	  card.on('load', (res = {}) => {
+        const { code, msg } = res || {};
+        if (code === "SUCCESS") {
+          console.log('[merchant][load]success:', res);
+		  alert('组件加载成功！环境: ' + (isSandbox ? '测试环境' : '生产环境'));
+        } else {
+          console.log('[merchant][load]fail:', res);
+		  alert('组件加载失败！环境: ' + (isSandbox ? '测试环境' : '生产环境'));
+        }
+      });
+    }
+
+    // 页面加载时自动初始化
+    //window.addEventListener('load', initCard);
+
+    // 初始化按钮点击事件
+    document.getElementById('initButton').addEventListener('click', initCard, false);
+
+
+    <!-- 5、用户点击发起支付，检查是否可支付，并获取paymentToken -->
+    function goPay() {
+      // 将组件设置为不可编辑状态
+      card.emit('setDisabled', true);
+      // card.emit('addTheme',[{
+      //   name:'red'
+      // }])
+      // 发起组件校验，并返回卡标识
+      card.emit('canMakePayment')
+        .then(function (response) {
+          // 解除不可编辑状态
+          card.emit('setDisabled', false);
+          console.log("resp:" + response)
+          // 成功获取到 response
+          if (response.code === 'APPLY_SUCCESS') {
+			console.log(response);//此时可以返回用户输入的卡信息
+			
+            // 获取卡标识 paymentToken 
+            var paymentToken = response.data.paymentToken;
+            console.log('token:' + paymentToken);
+			
+            // 显示 token
+            document.getElementById('tokenValue').textContent = paymentToken;
+            document.getElementById('tokenDisplay').style.display = 'block';
+            
+           // 调用PayerMax orderAndPay接口发起支付
+           // orderAndPay()
+            /**
+             * 这里需要自行请求服务端，实现服务端下单的操作
+             * 下单成功后，自行回调到前端，实现APPLY_SUCCESS后面的代码
+             * 服务端下单会返回redirectUrl，前端展示该redirectUrl，会引导用户做3ds校验并完成支付
+             * **/
+          } else {
+            console.log('error: ' + response.msg)
+            console.log('code:' + response.code)
+          }
+        }).catch(function (error) {
+          // 解除不可编辑状态
+          card.emit('setDisabled', false);
+          console.log("error:" + error);
+        });
+    }
+
+    document.getElementById('pay').addEventListener('click', goPay, false);
+  </script>
+</body>
+</html>

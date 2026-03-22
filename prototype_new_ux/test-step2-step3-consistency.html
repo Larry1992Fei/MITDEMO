@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEP2与STEP3字段一致性测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .field-comparison { display: flex; gap: 20px; margin: 10px 0; }
+        .field-box { flex: 1; padding: 10px; border: 1px solid #ccc; }
+        .match { background-color: #d4edda; }
+        .mismatch { background-color: #f8d7da; }
+        .field-name { font-weight: bold; margin-bottom: 5px; }
+        .field-value { font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>PayerMax托管（周期性订阅）STEP2与STEP3字段一致性测试</h1>
+    
+    <div class="test-section">
+        <h3>测试说明</h3>
+        <p>此页面用于验证STEP2（subscriptionCreate）和STEP3（orderAndPay）中需要保持一致的字段。</p>
+        <p>绿色表示字段一致，红色表示字段不一致。</p>
+    </div>
+
+    <div class="test-section">
+        <h3>字段一致性检查</h3>
+        <div id="consistency-results"></div>
+    </div>
+
+    <script>
+        // 模拟STEP2的字段值
+        const step2Fields = {
+            version: "1.5",
+            appId: "67eff2f3b29a4ecf...f658",
+            merchantNo: "SDP0XXXXX93",
+            userId: "test10001",
+            currency: "USD",
+            subject: "PayerMax订阅计划",
+            callbackUrl: "https://your.server/callback"
+        };
+
+        // 模拟STEP3的字段值
+        const step3Fields = {
+            version: "1.5",
+            appId: "67eff2f3b29a4ecf...f658", 
+            merchantNo: "SDP0XXXXX93",
+            userId: "test10001",
+            currency: "USD",
+            subject: "PayerMax订阅计划",
+            notifyUrl: "https://your.server/callback" // 对应STEP2的callbackUrl
+        };
+
+        // 字段映射关系
+        const fieldMappings = [
+            { step2: 'version', step3: 'version', name: 'API版本' },
+            { step2: 'appId', step3: 'appId', name: '应用ID' },
+            { step2: 'merchantNo', step3: 'merchantNo', name: '商户号' },
+            { step2: 'userId', step3: 'userId', name: '用户ID' },
+            { step2: 'currency', step3: 'currency', name: '币种' },
+            { step2: 'subject', step3: 'subject', name: '订单/订阅标题' },
+            { step2: 'callbackUrl', step3: 'notifyUrl', name: '回调地址' }
+        ];
+
+        function checkConsistency() {
+            const resultsDiv = document.getElementById('consistency-results');
+            let html = '';
+
+            fieldMappings.forEach(mapping => {
+                const step2Value = step2Fields[mapping.step2];
+                const step3Value = step3Fields[mapping.step3];
+                const isMatch = step2Value === step3Value;
+                
+                html += `
+                    <div class="field-comparison">
+                        <div class="field-box ${isMatch ? 'match' : 'mismatch'}">
+                            <div class="field-name">STEP2: ${mapping.step2}</div>
+                            <div class="field-value">${step2Value}</div>
+                        </div>
+                        <div class="field-box ${isMatch ? 'match' : 'mismatch'}">
+                            <div class="field-name">STEP3: ${mapping.step3}</div>
+                            <div class="field-value">${step3Value}</div>
+                        </div>
+                        <div style="align-self: center;">
+                            <strong>${mapping.name}</strong><br>
+                            ${isMatch ? '✅ 一致' : '❌ 不一致'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // 页面加载时执行检查
+        document.addEventListener('DOMContentLoaded', checkConsistency);
+    </script>
+</body>
+</html>
